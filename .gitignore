@@ -7,6 +7,9 @@ log/*
 *.log
 area/rot
 \.*
+!.github/
+!.github/workflows/
+!.github/workflows/*.yml
 \#*\#
 *.are
 area/*

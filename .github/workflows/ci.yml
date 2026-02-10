@@ -1,0 +1,27 @@
+name: C CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    name: Build and test (${{ matrix.compiler }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set compiler
+        run: echo "CC=${{ matrix.compiler }}" >> "$GITHUB_ENV"
+
+      - name: Compile project
+        run: make -C src clean all
+
+      - name: Run make test target
+        run: make -C src test
