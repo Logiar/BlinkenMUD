@@ -7,7 +7,7 @@ L_FLAGS =  $(PROF)
 LDLIBS  = -lcrypt
 
 # Prefer the newest GNU C standard supported by the current compiler.
-C_STD := $(shell if $(CC) -std=gnu23 -x c -c /dev/null -o /dev/null >/dev/null 2>&1; then echo gnu23; else echo gnu2x; fi)
+C_STD := $(shell if $(CC) -std=gnu23 -x c -c /dev/null -o /dev/null >/dev/null 2>&1; then echo gnu23; elif $(CC) -std=gnu2x -x c -c /dev/null -o /dev/null >/dev/null 2>&1; then echo gnu2x; else echo gnu99; fi)
 C_FLAGS := $(filter-out -std=gnu99,$(C_FLAGS)) -std=$(C_STD)
 
 BMUD_FILES = act_comm.o act_enter.o act_info.o act_move.o act_obj.o act_wiz.o \
