@@ -54,7 +54,7 @@ DECLARE_DO_FUN (do_announce);
 static bool
 is_color_marker_local (char c)
 {
-  return c == '{' || c == '`';
+  return c == '`';
 }
 
 /* RT code to delete yourself */
@@ -909,7 +909,6 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 		}
 	      break;
 
-	    case '{':
 	    case '`':
 	      fColour = FALSE;
 	      {
@@ -917,7 +916,7 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 		++str;
 		if (*str == marker)
 		  {
-		    i = (marker == '{') ? "{" : "`";
+		    i = "`";
 		    break;
 		  }
 		i = NULL;

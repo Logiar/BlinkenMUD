@@ -95,7 +95,7 @@ struct colour_map
 };
 
 struct colour_map mapping[] = {
-  {'z', BLINK}, {'{', "{"}, {'`', "`"},
+  {'z', BLINK}, {'`', "`"},
   {'r', C_RED}, {'1', C_RED}, {'T', C_RED},
   {'g', C_GREEN}, {'2', C_GREEN}, {'Q', C_GREEN},
   {'y', C_YELLOW}, {'3', C_YELLOW}, {'J', C_YELLOW},
@@ -117,7 +117,7 @@ struct colour_map mapping[] = {
 static bool
 is_color_marker (char c)
 {
-  return c == '{' || c == '`';
+  return c == '`';
 }
 
 /* command procedures needed */
@@ -2954,7 +2954,6 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		}
 	      break;
 
-	    case '{':
 	    case '`':
 	      fColour = FALSE;
 	      {
@@ -2962,7 +2961,7 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		++str;
 		if (*str == marker)
 		  {
-		    i = (marker == '{') ? "{" : "`";
+		    i = "`";
 		    break;
 		  }
 		i = NULL;
