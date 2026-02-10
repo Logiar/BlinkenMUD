@@ -183,7 +183,8 @@ fwrite_char (CHAR_DATA * ch, FILE * fp)
     fprintf (fp, "LnD  %s~\n", ch->long_descr);
   if (ch->description[0] != '\0')
     fprintf (fp, "Desc %s~\n", ch->description);
-  if (ch->prompt != NULL || !str_cmp (ch->prompt, "<%`Rhhp `M%mm `G%vmv`x>"))
+  if (ch->prompt != NULL
+      && str_cmp (ch->prompt, "<`R%hhp `M%mm `G%vmv`x>"))
     fprintf (fp, "Prom %s~\n", ch->prompt);
   fprintf (fp, "Race %s~\n", pc_race_table[ch->race].name);
   if (ch->clan)
@@ -650,6 +651,121 @@ fwrite_obj (CHAR_DATA * ch, OBJ_DATA * obj, FILE * fp, int iNest)
 
 
 
+
+static bool
+is_legacy_colour_code (char c)
+{
+  switch (c)
+    {
+    case 'z':
+    case 'r':
+    case '1':
+    case 'T':
+    case 'g':
+    case '2':
+    case 'Q':
+    case 'y':
+    case '3':
+    case 'J':
+    case 'b':
+    case '4':
+    case 'm':
+    case '5':
+    case 'S':
+    case 'a':
+    case 'c':
+    case '6':
+    case 'U':
+    case 'i':
+    case 'K':
+    case 'w':
+    case '7':
+    case 'V':
+    case 'D':
+    case '8':
+    case '*':
+    case 'B':
+    case '$':
+    case 'e':
+    case 'h':
+    case 'H':
+    case 'C':
+    case '^':
+    case 'N':
+    case 'l':
+    case 'G':
+    case '@':
+    case 'A':
+    case 'M':
+    case '%':
+    case 'F':
+    case 'R':
+    case '!':
+    case 'E':
+    case 'f':
+    case 'W':
+    case '&':
+    case 'L':
+    case 'Y':
+    case '#':
+    case 'P':
+    case 'j':
+    case 'x':
+    case 'X':
+    case '0':
+    case '{':
+      return TRUE;
+    default:
+      return FALSE;
+    }
+}
+
+static void
+migrate_legacy_colour_markers (char **field)
+{
+  char *src;
+  char *dst;
+  char *buf;
+  size_t i;
+  size_t len;
+
+  if (field == NULL || *field == NULL)
+    return;
+
+  src = *field;
+  len = strlen (src);
+  buf = alloc_mem (len + 1);
+  dst = buf;
+
+  for (i = 0; i < len; i++)
+    {
+      if (src[i] == '{' && i + 1 < len && is_legacy_colour_code (src[i + 1]))
+	{
+	  if (src[i + 1] == '{')
+	    {
+	      *dst++ = '{';
+	      i++;
+	      continue;
+	    }
+
+	  *dst++ = COLOUR_MARKER;
+	  continue;
+	}
+
+      *dst++ = src[i];
+    }
+
+  *dst = '\0';
+
+  if (strcmp (buf, src))
+    {
+      free_string (*field);
+      *field = str_dup (buf);
+    }
+
+  free_mem (buf, len + 1);
+}
+
 /*
  * Load a char and inventory into a new ch structure.
  */
@@ -827,6 +943,16 @@ load_char_obj (DESCRIPTOR_DATA * d, char *name)
 	  ch->trust = 51;
 	  break;		/* hero -> hero */
 	}
+    }
+
+
+  if (found)
+    {
+      migrate_legacy_colour_markers (&ch->prompt);
+      migrate_legacy_colour_markers (&ch->pcdata->title);
+      migrate_legacy_colour_markers (&ch->pcdata->who_descr);
+      migrate_legacy_colour_markers (&ch->pcdata->bamfin);
+      migrate_legacy_colour_markers (&ch->pcdata->bamfout);
     }
 
   /* ream gold */

@@ -159,6 +159,11 @@ if ($a == 1) {
 	for ($b = 0; $b < $count; $b++) {
 	    $tmp = "$orig[$b]$orig[$b+1]";
 	    $tmp2 = $orig[$b];
+		    $m1 = $orig[$b];
+		    $m2 = $orig[$b+1];
+		    if ($m1 eq "`") { $m1 = "{"; }
+		    if ($m2 eq "`") { $m2 = "{"; }
+		    $tmp = "$m1$m2";
 	    if ($tmp eq "{z") {
 		if ($fonts == 0) {
 		    $tmp2 = "<FONT COLOR=\"#000000\">";

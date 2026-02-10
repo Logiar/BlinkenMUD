@@ -758,6 +758,7 @@ init_descriptor_www (int wwwcontrol)
   int iLevelLower;
   int iLevelUpper;
   int nMatch;
+  int i;
   FILE *fg;
   bool rgfClass[MAX_CLASS];
   bool rgfRace[MAX_PC_RACE];
@@ -913,7 +914,11 @@ init_descriptor_www (int wwwcontrol)
 	    }
 	}
       sprintf (buf2, "%s", IS_NPC (wch) ? "" : wch->pcdata->title);
-      str_replace (buf2, "`%", "{-");
+      for (i = 0; buf2[i] != '\0'; i++)
+	{
+	  if (buf2[i] == COLOUR_MARKER)
+	    buf2[i] = '{';
+	}
       sprintf (buf, "%3d,%s,%s,%s,%s%s\n\r", wch->level,
 	       wch->race <
 	       MAX_PC_RACE ? pc_race_table[wch->race].who_name : "      ",
