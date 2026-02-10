@@ -45,6 +45,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 
 /* system calls */
 
@@ -261,7 +262,13 @@
 #define NOTE_WEDDINGS	6
 
 typedef short int sh_int;
-/* bool is provided by <stdbool.h> in modern C standards. */
+/* bool is provided by <stdbool.h> for game logic.
+ *
+ * On-disk player/area data and network traffic are text-based in this codebase
+ * (not raw struct serialization). For any future persisted/binary struct fields,
+ * use mud_bool_t to keep an explicit one-byte representation.
+ */
+typedef uint8_t mud_bool_t;
 
 /*
  * Structure types.
