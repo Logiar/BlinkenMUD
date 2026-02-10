@@ -42,10 +42,12 @@
 #define DECLARE_SPEC_FUN( fun )		SPEC_FUN  fun
 #define DECLARE_SPELL_FUN( fun )	SPELL_FUN fun
 
-/* system calls */
-int unlink ();
-int system ();
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
 
+/* system calls */
 
 /*
  * Short scalar types.
@@ -260,7 +262,13 @@ int system ();
 #define NOTE_WEDDINGS	6
 
 typedef short int sh_int;
-typedef unsigned char bool;
+/* bool is provided by <stdbool.h> for game logic.
+ *
+ * On-disk player/area data and network traffic are text-based in this codebase
+ * (not raw struct serialization). For any future persisted/binary struct fields,
+ * use mud_bool_t to keep an explicit one-byte representation.
+ */
+typedef uint8_t mud_bool_t;
 
 /*
  * Structure types.

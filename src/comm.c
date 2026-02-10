@@ -165,16 +165,6 @@ const char go_ahead_str[] = { IAC, GA, '\0' };
 #include <sys/fnctl.h>
 #endif
 
-#if	defined(linux)
-int close args ((int fd));
-int gettimeofday args ((struct timeval * tp, struct timezone * tzp));
-int listen args ((int s, int backlog));
-int read args ((int fd, char *buf, int nbyte));
-int select args ((int width, fd_set * readfds, fd_set * writefds,
-		  fd_set * exceptfds, struct timeval * timeout));
-int socket args ((int domain, int type, int protocol));
-int write args ((int fd, char *buf, int nbyte));
-#endif
 
 /*
  * Global variables.
