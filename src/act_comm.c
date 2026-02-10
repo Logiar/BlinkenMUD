@@ -51,11 +51,6 @@
 DECLARE_DO_FUN (do_quit);
 DECLARE_DO_FUN (do_announce);
 
-static bool
-is_color_marker_local (char c)
-{
-  return c == '`';
-}
 
 /* RT code to delete yourself */
 
@@ -841,7 +836,7 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
       str = format;
       while (*str)
 	{
-	  if (*str != '$' && !is_color_marker_local (*str))
+	  if (*str != '$' && !IS_COLOUR_MARKER (*str))
 	    {
 	      *point++ = *str++;
 	      continue;
@@ -909,14 +904,14 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 		}
 	      break;
 
-	    case '`':
+	    case COLOUR_MARKER:
 	      fColour = FALSE;
 	      {
 		char marker = *str;
 		++str;
 		if (*str == marker)
 		  {
-		    i = "`";
+		    i = COLOUR_MARKER_STR;
 		    break;
 		  }
 		i = NULL;
@@ -943,10 +938,16 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 		{
 		  for (i2 = fixed; *i; i++)
 		    {
-		      if (is_color_marker_local (*i))
+		      if (IS_COLOUR_MARKER (*i))
 			{
 			  char marker = *i;
 			  i++;
+			  if (*i == '\0')
+			    {
+			      *i2 = marker;
+			      *++i2 = '\0';
+			      break;
+			    }
 			  if (*i == marker)
 			    {
 			      *i2 = marker;
@@ -970,10 +971,16 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 		{
 		  for (i2 = fixed; *i; i++)
 		    {
-		      if (is_color_marker_local (*i))
+		      if (IS_COLOUR_MARKER (*i))
 			{
 			  char marker = *i;
 			  i++;
+			  if (*i == '\0')
+			    {
+			      *i2 = marker;
+			      *++i2 = '\0';
+			      break;
+			    }
 			  if (*i != marker)
 			    {
 			      continue;

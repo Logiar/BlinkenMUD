@@ -95,7 +95,7 @@ struct colour_map
 };
 
 struct colour_map mapping[] = {
-  {'z', BLINK}, {'`', "`"},
+  {'z', BLINK}, {COLOUR_MARKER, COLOUR_MARKER_STR},
   {'r', C_RED}, {'1', C_RED}, {'T', C_RED},
   {'g', C_GREEN}, {'2', C_GREEN}, {'Q', C_GREEN},
   {'y', C_YELLOW}, {'3', C_YELLOW}, {'J', C_YELLOW},
@@ -114,11 +114,6 @@ struct colour_map mapping[] = {
   {'Y', C_B_YELLOW}, {'#', C_B_YELLOW}, {'P', C_B_YELLOW}, {'j', C_B_YELLOW},
 };
 
-static bool
-is_color_marker (char c)
-{
-  return c == '`';
-}
 
 /* command procedures needed */
 DECLARE_DO_FUN (do_help);
@@ -2575,10 +2570,16 @@ send_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (is_color_marker (*point))
+	      if (IS_COLOUR_MARKER (*point))
 		{
 		  char marker = *point;
 		  point++;
+		  if (*point == '\0')
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      break;
+		    }
 		  if (*point == marker)
 		    {
 		      *point2 = marker;
@@ -2600,10 +2601,16 @@ send_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (is_color_marker (*point))
+	      if (IS_COLOUR_MARKER (*point))
 		{
 		  char marker = *point;
 		  point++;
+		  if (*point == '\0')
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      break;
+		    }
 		  if (*point != marker)
 		    {
 		      continue;
@@ -2659,10 +2666,16 @@ page_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (is_color_marker (*point))
+	      if (IS_COLOUR_MARKER (*point))
 		{
 		  char marker = *point;
 		  point++;
+		  if (*point == '\0')
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      break;
+		    }
 		  if (*point == marker)
 		    {
 		      *point2 = marker;
@@ -2687,10 +2700,16 @@ page_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (is_color_marker (*point))
+	      if (IS_COLOUR_MARKER (*point))
 		{
 		  char marker = *point;
 		  point++;
+		  if (*point == '\0')
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      break;
+		    }
 		  if (*point != marker)
 		    {
 		      continue;
@@ -2846,7 +2865,7 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
       str = format;
       while (*str)
 	{
-	  if (*str != '$' && !is_color_marker (*str))
+	  if (*str != '$' && !IS_COLOUR_MARKER (*str))
 	    {
 	      *point++ = *str++;
 	      continue;
@@ -2954,14 +2973,14 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		}
 	      break;
 
-	    case '`':
+	    case COLOUR_MARKER:
 	      fColour = FALSE;
 	      {
 		char marker = *str;
 		++str;
 		if (*str == marker)
 		  {
-		    i = "`";
+		    i = COLOUR_MARKER_STR;
 		    break;
 		  }
 		i = NULL;
@@ -2988,10 +3007,16 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		{
 		  for (i2 = fixed; *i; i++)
 		    {
-		      if (is_color_marker (*i))
+		      if (IS_COLOUR_MARKER (*i))
 			{
 			  char marker = *i;
 			  i++;
+			  if (*i == '\0')
+			    {
+			      *i2 = marker;
+			      *++i2 = '\0';
+			      break;
+			    }
 			  if (*i == marker)
 			    {
 			      *i2 = marker;
@@ -3013,10 +3038,16 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		{
 		  for (i2 = fixed; *i; i++)
 		    {
-		      if (is_color_marker (*i))
+		      if (IS_COLOUR_MARKER (*i))
 			{
 			  char marker = *i;
 			  i++;
+			  if (*i == '\0')
+			    {
+			      *i2 = marker;
+			      *++i2 = '\0';
+			      break;
+			    }
 			  if (*i != marker)
 			    {
 			      continue;
