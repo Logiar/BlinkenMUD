@@ -200,18 +200,18 @@ do_wizlist (CHAR_DATA * ch, char *argument)
   buffer = new_buf ();
   sprintf (title, "The Gods of Realms of Thoth");
   sprintf (buf,
-	   "{x  ___________________________________________________________________________\n\r");
+	   "`x  ___________________________________________________________________________\n\r");
   add_buf (buffer, buf);
-  sprintf (buf, "{x /\\_\\%70s\\_\\\n\r", " ");
+  sprintf (buf, "`x /\\_\\%70s\\_\\\n\r", " ");
   add_buf (buffer, buf);
   lngth = (70 - strlen (title)) / 2;
   for (; lngth >= 0; lngth--)
     {
       strcat (title, " ");
     }
-  sprintf (buf, "|/\\\\_\\{W%70s{x\\_\\\n\r", title);
+  sprintf (buf, "|/\\\\_\\`W%70s`x\\_\\\n\r", title);
   add_buf (buffer, buf);
-  sprintf (buf, "{x\\_/_|_|%69s|_|\n\r", " ");
+  sprintf (buf, "`x\\_/_|_|%69s|_|\n\r", " ");
   add_buf (buffer, buf);
   for (level = IMPLEMENTOR; level > HERO; level--)
     {
@@ -229,15 +229,15 @@ do_wizlist (CHAR_DATA * ch, char *argument)
 	{
 	  if (level == HERO + 1)
 	    {
-	      sprintf (buf, "{x ___|_|%69s|_|\n\r", " ");
+	      sprintf (buf, "`x ___|_|%69s|_|\n\r", " ");
 	      add_buf (buffer, buf);
 	    }
 	  continue;
 	}
-      sprintf (buf, "{x    |_|{R%37s {B[%d]{x%26s|_|\n\r",
+      sprintf (buf, "`x    |_|`R%37s `B[%d]`x%26s|_|\n\r",
 	       wiz_titles[IMPLEMENTOR - level], level, " ");
       add_buf (buffer, buf);
-      sprintf (buf, "{x    |_|{Y%25s******************{x%26s|_|\n\r",
+      sprintf (buf, "`x    |_|`Y%25s******************`x%26s|_|\n\r",
 	       " ", " ");
       add_buf (buffer, buf);
       lngth = 0;
@@ -249,21 +249,21 @@ do_wizlist (CHAR_DATA * ch, char *argument)
 		{
 		  if (amt > 2)
 		    {
-		      sprintf (buf, "{x    |_|{%s%12s%-17s ",
+		      sprintf (buf, "`x    |_|`%s%12s%-17s ",
 			       level >= DEMI ? "G" : "C", " ", pwiz->name);
 		      add_buf (buffer, buf);
 		      lngth = 1;
 		    }
 		  else if (amt > 1)
 		    {
-		      sprintf (buf, "{x    |_|{%s%21s%-17s ",
+		      sprintf (buf, "`x    |_|`%s%21s%-17s ",
 			       level >= DEMI ? "G" : "C", " ", pwiz->name);
 		      add_buf (buffer, buf);
 		      lngth = 1;
 		    }
 		  else
 		    {
-		      sprintf (buf, "{x    |_|{%s%30s%-39s{x|_|\n\r",
+		      sprintf (buf, "`x    |_|`%s%30s%-39s`x|_|\n\r",
 			       level >= DEMI ? "G" : "C", " ", pwiz->name);
 		      add_buf (buffer, buf);
 		      lngth = 0;
@@ -279,14 +279,14 @@ do_wizlist (CHAR_DATA * ch, char *argument)
 		    }
 		  else
 		    {
-		      sprintf (buf, "%-30s{x|_|\n\r", pwiz->name);
+		      sprintf (buf, "%-30s`x|_|\n\r", pwiz->name);
 		      add_buf (buffer, buf);
 		      lngth = 0;
 		    }
 		}
 	      else
 		{
-		  sprintf (buf, "%-21s{x|_|\n\r", pwiz->name);
+		  sprintf (buf, "%-21s`x|_|\n\r", pwiz->name);
 		  add_buf (buffer, buf);
 		  lngth = 0;
 		  amt -= 3;
@@ -295,20 +295,20 @@ do_wizlist (CHAR_DATA * ch, char *argument)
 	}
       if (level == HERO + 1)
 	{
-	  sprintf (buf, "{x ___|_|%69s|_|\n\r", " ");
+	  sprintf (buf, "`x ___|_|%69s|_|\n\r", " ");
 	}
       else
 	{
-	  sprintf (buf, "{x    |_|%69s|_|\n\r", " ");
+	  sprintf (buf, "`x    |_|%69s|_|\n\r", " ");
 	}
       add_buf (buffer, buf);
     }
-  sprintf (buf, "{x/ \\ |_|%69s|_|\n\r", " ");
+  sprintf (buf, "`x/ \\ |_|%69s|_|\n\r", " ");
   add_buf (buffer, buf);
-  sprintf (buf, "{x|\\//_/%70s/_/\n\r", " ");
+  sprintf (buf, "`x|\\//_/%70s/_/\n\r", " ");
   add_buf (buffer, buf);
   sprintf (buf,
-	   "{x \\/_/______________________________________________________________________/_/\n\r");
+	   "`x \\/_/______________________________________________________________________/_/\n\r");
   add_buf (buffer, buf);
   page_to_char (buf_string (buffer), ch);
   free_buf (buffer);

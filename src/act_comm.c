@@ -54,7 +54,7 @@ DECLARE_DO_FUN (do_announce);
 static bool
 is_color_marker_local (char c)
 {
-  return c == '`';
+  return c == '{' || c == '`';
 }
 
 /* RT code to delete yourself */
@@ -124,85 +124,85 @@ do_channels (CHAR_DATA * ch, char *argument)
 
   /* lists all channels and their status */
   send_to_char ("   channel     status\n\r", ch);
-  send_to_char ("{^---------------------{x\n\r", ch);
+  send_to_char ("`^---------------------`x\n\r", ch);
 
   send_to_char ("gossip         ", ch);
   if (!IS_SET (ch->comm, COMM_NOGOSSIP))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OF{xF\n\r", ch);
+    send_to_char ("`1OF`xF\n\r", ch);
 
   send_to_char ("clan gossip    ", ch);
   if (!IS_SET (ch->comm, COMM_NOCGOSSIP))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OFF{x\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   send_to_char ("quest gossip   ", ch);
   if (!IS_SET (ch->comm, COMM_NOCGOSSIP))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OFF{x\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   send_to_char ("ooc            ", ch);
   if (!IS_SET (ch->comm, COMM_NOOOC))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OFF{x\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   send_to_char ("music          ", ch);
   if (!IS_SET (ch->comm, COMM_NOMUSIC))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OFF{x\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   send_to_char ("Q/A            ", ch);
   if (!IS_SET (ch->comm, COMM_NOASK))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OFF{x\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   send_to_char ("Quote          ", ch);
   if (!IS_SET (ch->comm, COMM_NOQUOTE))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OFF{x\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   send_to_char ("grats          ", ch);
   if (!IS_SET (ch->comm, COMM_NOGRATS))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OFF{x\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   if (IS_IMMORTAL (ch))
     {
       send_to_char ("god channel    ", ch);
       if (!IS_SET (ch->comm, COMM_NOWIZ))
-	send_to_char ("{2ON{x\n\r", ch);
+	send_to_char ("`2ON`x\n\r", ch);
       else
-	send_to_char ("{1OFF{x\n\r", ch);
+	send_to_char ("`1OFF`x\n\r", ch);
     }
 
   send_to_char ("shouts         ", ch);
   if (!IS_SET (ch->comm, COMM_SHOUTSOFF))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OFF{x\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   send_to_char ("tells          ", ch);
   if (!IS_SET (ch->comm, COMM_DEAF))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OFF{x\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   send_to_char ("quiet mode     ", ch);
   if (IS_SET (ch->comm, COMM_QUIET))
-    send_to_char ("{2ON{x\n\r", ch);
+    send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("{1OFF{x\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   if (IS_SET (ch->comm, COMM_AFK))
-    send_to_char ("You are {3AFK{x.\n\r", ch);
+    send_to_char ("You are `3AFK`x.\n\r", ch);
 
   if (IS_SET (ch->comm, COMM_STORE))
     send_to_char ("You store tells during fights.\n\r", ch);
@@ -249,12 +249,12 @@ do_deaf (CHAR_DATA * ch, char *argument)
 
   if (IS_SET (ch->comm, COMM_DEAF))
     {
-      send_to_char ("You can now hear {%tells{x again.\n\r", ch);
+      send_to_char ("You can now hear `%tells`x again.\n\r", ch);
       REMOVE_BIT (ch->comm, COMM_DEAF);
     }
   else
     {
-      send_to_char ("From now on, you won't hear {%tells{x.\n\r", ch);
+      send_to_char ("From now on, you won't hear `%tells`x.\n\r", ch);
       SET_BIT (ch->comm, COMM_DEAF);
     }
 }
@@ -289,21 +289,21 @@ do_afk (CHAR_DATA * ch, char *argument)
       if (ch->tells)
 	{
 	  sprintf (buf,
-		   "AFK mode removed.  You have {R%d{x tells waiting.\n\r",
+		   "AFK mode removed.  You have `R%d`x tells waiting.\n\r",
 		   ch->tells);
 	  send_to_char (buf, ch);
-	  send_to_char ("Type '{6replay{x' to see {%tells{x.\n\r", ch);
+	  send_to_char ("Type '`6replay`x' to see `%tells`x.\n\r", ch);
 	}
       else
 	{
-	  send_to_char ("{3AFK{x mode removed.  You have no {%tells{x waiting.\n\r",
+	  send_to_char ("`3AFK`x mode removed.  You have no `%tells`x waiting.\n\r",
 			ch);
 	}
       REMOVE_BIT (ch->comm, COMM_AFK);
     }
   else
     {
-      send_to_char ("You are now in {3AFK{x mode.\n\r", ch);
+      send_to_char ("You are now in `3AFK`x mode.\n\r", ch);
       SET_BIT (ch->comm, COMM_AFK);
     }
 }
@@ -313,12 +313,12 @@ do_autostore (CHAR_DATA * ch, char *argument)
 {
   if (IS_SET (ch->comm, COMM_STORE))
     {
-      send_to_char ("You will no longer store {%tells{x during fights.\n\r", ch);
+      send_to_char ("You will no longer store `%tells`x during fights.\n\r", ch);
       REMOVE_BIT (ch->comm, COMM_STORE);
     }
   else
     {
-      send_to_char ("You will now store {%tells{x during fights.\n\r", ch);
+      send_to_char ("You will now store `%tells`x during fights.\n\r", ch);
       SET_BIT (ch->comm, COMM_STORE);
     }
 }
@@ -334,7 +334,7 @@ do_replay (CHAR_DATA * ch, char *argument)
 
   if (buf_string (ch->pcdata->buffer)[0] == '\0')
     {
-      send_to_char ("You have no {%tells{x to replay.\n\r", ch);
+      send_to_char ("You have no `%tells`x to replay.\n\r", ch);
       return;
     }
 
@@ -389,7 +389,7 @@ do_ooc (CHAR_DATA * ch, char *argument)
 	  return;
 	}
 
-      sprintf (buf, "You OOC '{A%s{x'\n\r", argument);
+      sprintf (buf, "You OOC '`A%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -413,7 +413,7 @@ do_ooc (CHAR_DATA * ch, char *argument)
 		}
 	      if (!found)
 		{
-		  act_new ("$n OOC '{A$t{x'",
+		  act_new ("$n OOC '`A$t`x'",
 			   ch, argument, d->character, TO_VICT, POS_DEAD);
 		}
 	    }
@@ -469,7 +469,7 @@ do_gossip (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOGOSSIP);
 
-      sprintf (buf, "You {bgo{Bs{Ws{Bi{bp{x '{m%s{x'\n\r", argument);
+      sprintf (buf, "You `bgo`Bs`Ws`Bi`bp`x '`m%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -493,7 +493,7 @@ do_gossip (CHAR_DATA * ch, char *argument)
 		}
 	      if (!found)
 		{
-		  act_new ("{W({bgo{Bs{Ws{Bi{bp{W) {B$n{x '{m$t{x'",
+		  act_new ("`W(`bgo`Bs`Ws`Bi`bp`W) `B$n`x '`m$t`x'",
 			   ch, argument, d->character, TO_VICT, POS_SLEEPING);
 		}
 	    }
@@ -554,7 +554,7 @@ do_qgossip (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOQGOSSIP);
 
-      sprintf (buf, "You qgossip '{l%s{x'\n\r", argument);
+      sprintf (buf, "You qgossip '`l%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -579,7 +579,7 @@ do_qgossip (CHAR_DATA * ch, char *argument)
 		}
 	      if (!found)
 		{
-		  act_new ("$n qgossips '{l$t{x'",
+		  act_new ("$n qgossips '`l$t`x'",
 			   ch, argument, d->character, TO_VICT, POS_SLEEPING);
 		}
 	    }
@@ -640,7 +640,7 @@ do_grats (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOGRATS);
 
-      sprintf (buf, "You grats '{J%s{x'\n\r", argument);
+      sprintf (buf, "You grats '`J%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -664,7 +664,7 @@ do_grats (CHAR_DATA * ch, char *argument)
 		}
 	      if (!found)
 		{
-		  act_new ("$n grats '{J$t{x'",
+		  act_new ("$n grats '`J$t`x'",
 			   ch, argument, d->character, TO_VICT, POS_SLEEPING);
 		}
 	    }
@@ -719,7 +719,7 @@ do_quote (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOQUOTE);
 
-      sprintf (buf, "You quote '{Q%s{x'\n\r", argument);
+      sprintf (buf, "You quote '`Q%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -743,7 +743,7 @@ do_quote (CHAR_DATA * ch, char *argument)
 		}
 	      if (!found)
 		{
-		  act_new ("$n quotes '{Q$t{x'",
+		  act_new ("$n quotes '`Q$t`x'",
 			   ch, argument, d->character, TO_VICT, POS_SLEEPING);
 		}
 	    }
@@ -909,6 +909,7 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 		}
 	      break;
 
+	    case '{':
 	    case '`':
 	      fColour = FALSE;
 	      {
@@ -916,7 +917,7 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 		++str;
 		if (*str == marker)
 		  {
-		    i = "`";
+		    i = (marker == '{') ? "{" : "`";
 		    break;
 		  }
 		i = NULL;
@@ -1002,10 +1003,10 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
       *point++ = '\r';
       *point = '\0';
       buf[0] = UPPER (buf[0]);
-      send_to_char ("{W", to);
+      send_to_char ("`W", to);
       if (to->desc)
 	write_to_buffer (to->desc, buf, point - buf);
-      send_to_char ("{x", to);
+      send_to_char ("`x", to);
     }
   return;
 }
@@ -1136,8 +1137,8 @@ do_gmote (CHAR_DATA * ch, char *argument)
 
 /*    if ( ch->pcdata->condition[COND_DRUNK] > 0 )
        { argument = makedrunk (ch, argument); } */
-  social_channel ("{B$n $T{x", ch, argument, TO_ROOM);
-  social_channel ("{B$n $T{x", ch, argument, TO_CHAR);
+  social_channel ("`B$n $T`x", ch, argument, TO_ROOM);
+  social_channel ("`B$n $T`x", ch, argument, TO_CHAR);
   return;
 
 }
@@ -1188,7 +1189,7 @@ do_ask (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOASK);
 
-      sprintf (buf, "You ask '{P%s{x'\n\r", argument);
+      sprintf (buf, "You ask '`P%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -1212,7 +1213,7 @@ do_ask (CHAR_DATA * ch, char *argument)
 		}
 	      if (!found)
 		{
-		  act_new ("$n asks '{P$t{x'",
+		  act_new ("$n asks '`P$t`x'",
 			   ch, argument, d->character, TO_VICT, POS_SLEEPING);
 		}
 	    }
@@ -1268,7 +1269,7 @@ do_answer (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOASK);
 
-      sprintf (buf, "You answer '{P%s{x'\n\r", argument);
+      sprintf (buf, "You answer '`P%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -1292,7 +1293,7 @@ do_answer (CHAR_DATA * ch, char *argument)
 		}
 	      if (!found)
 		{
-		  act_new ("$n answers '{P$t{x'",
+		  act_new ("$n answers '`P$t`x'",
 			   ch, argument, d->character, TO_VICT, POS_SLEEPING);
 		}
 	    }
@@ -1348,9 +1349,9 @@ do_music (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOMUSIC);
 
-      sprintf (buf, "You MUSIC: '{N%s{x'\n\r", argument);
+      sprintf (buf, "You MUSIC: '`N%s`x'\n\r", argument);
       send_to_char (buf, ch);
-      sprintf (buf, "$n MUSIC: '{N%s{x'", argument);
+      sprintf (buf, "$n MUSIC: '`N%s`x'", argument);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
 	  CHAR_DATA *victim;
@@ -1373,7 +1374,7 @@ do_music (CHAR_DATA * ch, char *argument)
 		}
 	      if (!found)
 		{
-		  act_new ("$n MUSIC: '{N$t{x'",
+		  act_new ("$n MUSIC: '`N$t`x'",
 			   ch, argument, d->character, TO_VICT, POS_SLEEPING);
 		}
 	    }
@@ -1393,12 +1394,12 @@ do_announce (CHAR_DATA * ch, char *argument)
     {
       if (IS_SET (ch->comm, COMM_NOANNOUNCE))
 	{
-	  send_to_char ("Info channel is now {2ON{x\n\r", ch);
+	  send_to_char ("Info channel is now `2ON`x\n\r", ch);
 	  REMOVE_BIT (ch->comm, COMM_NOANNOUNCE);
 	}
       else
 	{
-	  send_to_char ("Info channel is now {1OFF{x\n\r", ch);
+	  send_to_char ("Info channel is now `1OFF`x\n\r", ch);
 	  SET_BIT (ch->comm, COMM_NOANNOUNCE);
 	}
       return;
@@ -1406,14 +1407,14 @@ do_announce (CHAR_DATA * ch, char *argument)
 
   REMOVE_BIT (ch->comm, COMM_NOANNOUNCE);
 
-  sprintf (buf, "{D[{RINFO{D] {C$n {L%s{x", argument);
-  act_new ("{D[{RINFO{D] {C$n {L$t{x", ch, argument, NULL, TO_CHAR, POS_DEAD);
+  sprintf (buf, "`D[`RINFO`D] `C$n `L%s`x", argument);
+  act_new ("`D[`RINFO`D] `C$n `L$t`x", ch, argument, NULL, TO_CHAR, POS_DEAD);
   for (d = descriptor_list; d != NULL; d = d->next)
     {
       if (d->connected == CON_PLAYING &&
 	  d->character != ch && !IS_SET (d->character->comm, COMM_NOANNOUNCE))
 	{
-	  act_new ("{D[{RINFO{D] {C$n {L$t{x", ch, argument, d->character,
+	  act_new ("`D[`RINFO`D] `C$n `L$t`x", ch, argument, d->character,
 		   TO_VICT, POS_DEAD);
 	}
     }
@@ -1431,12 +1432,12 @@ do_immtalk (CHAR_DATA * ch, char *argument)
     {
       if (IS_SET (ch->comm, COMM_NOWIZ))
 	{
-	  send_to_char ("Immortal channel is now {2ON{x\n\r", ch);
+	  send_to_char ("Immortal channel is now `2ON`x\n\r", ch);
 	  REMOVE_BIT (ch->comm, COMM_NOWIZ);
 	}
       else
 	{
-	  send_to_char ("Immortal channel is now {1OFF{x\n\r", ch);
+	  send_to_char ("Immortal channel is now `1OFF`x\n\r", ch);
 	  SET_BIT (ch->comm, COMM_NOWIZ);
 	}
       return;
@@ -1444,15 +1445,15 @@ do_immtalk (CHAR_DATA * ch, char *argument)
 
   REMOVE_BIT (ch->comm, COMM_NOWIZ);
 
-  sprintf (buf, "{M[ {r$n {M] {C%s{x", argument);
-  act_new ("{M[ {r$n {M] {C$t{x", ch, argument, NULL, TO_CHAR, POS_DEAD);
+  sprintf (buf, "`M[ `r$n `M] `C%s`x", argument);
+  act_new ("`M[ `r$n `M] `C$t`x", ch, argument, NULL, TO_CHAR, POS_DEAD);
   for (d = descriptor_list; d != NULL; d = d->next)
     {
       if (d->connected == CON_PLAYING &&
 	  IS_IMMORTAL (d->character) &&
 	  !IS_SET (d->character->comm, COMM_NOWIZ))
 	{
-	  act_new ("{M[ {r$n {M] {C$t{x", ch, argument, d->character, TO_VICT,
+	  act_new ("`M[ `r$n `M] `C$t`x", ch, argument, d->character, TO_VICT,
 		   POS_DEAD);
 	}
     }
@@ -1470,8 +1471,8 @@ do_say (CHAR_DATA * ch, char *argument)
       return;
     }
 
-  act ("{Y $c {rs{Ra{ry{Rs{x '{W$T{x'", ch, NULL, argument, TO_ROOM);
-  act ("You {rs{Ra{ry{x '{R$T{x'", ch, NULL, argument, TO_CHAR);
+  act ("`Y $c `rs`Ra`ry`Rs`x '`W$T`x'", ch, NULL, argument, TO_ROOM);
+  act ("You `rs`Ra`ry`x '`R$T`x'", ch, NULL, argument, TO_CHAR);
 
   if (!IS_NPC (ch))
     {
@@ -1527,7 +1528,7 @@ do_shout (CHAR_DATA * ch, char *argument)
 
   WAIT_STATE (ch, 12);
 
-  act ("You shout '{T$T{x'", ch, NULL, argument, TO_CHAR);
+  act ("You shout '`T$T`x'", ch, NULL, argument, TO_CHAR);
   for (d = descriptor_list; d != NULL; d = d->next)
     {
       CHAR_DATA *victim;
@@ -1550,7 +1551,7 @@ do_shout (CHAR_DATA * ch, char *argument)
 	    }
 	  if (!found)
 	    {
-	      act ("$n shouts '{T$t{x'", ch, argument, d->character, TO_VICT);
+	      act ("$n shouts '`T$t`x'", ch, argument, d->character, TO_VICT);
 	    }
 	}
     }
@@ -1618,7 +1619,7 @@ do_tell (CHAR_DATA * ch, char *argument)
     {
       act ("$N seems to have misplaced $S link...try again later.",
 	   ch, NULL, victim, TO_CHAR);
-      sprintf (buf, "%s tells you '{U%s{x'\n\r", PERS (ch, victim), argument);
+      sprintf (buf, "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
       buf[0] = UPPER (buf[0]);
       add_buf (victim->pcdata->buffer, buf);
       victim->tells++;
@@ -1669,7 +1670,7 @@ do_tell (CHAR_DATA * ch, char *argument)
 
       act ("$E is AFK, but your tell will go through when $E returns.",
 	   ch, NULL, victim, TO_CHAR);
-      sprintf (buf, "%s tells you '{U%s{x'\n\r", PERS (ch, victim), argument);
+      sprintf (buf, "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
       buf[0] = UPPER (buf[0]);
       add_buf (victim->pcdata->buffer, buf);
       victim->tells++;
@@ -1687,15 +1688,15 @@ do_tell (CHAR_DATA * ch, char *argument)
 
       act ("$E is fighting, but your tell will go through when $E finishes.",
 	   ch, NULL, victim, TO_CHAR);
-      sprintf (buf, "%s tells you '{U%s{x'\n\r", PERS (ch, victim), argument);
+      sprintf (buf, "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
       buf[0] = UPPER (buf[0]);
       add_buf (victim->pcdata->buffer, buf);
       victim->tells++;
       return;
     }
 
-  act ("{MYou tell $N '{W$t{x'", ch, argument, victim, TO_CHAR);
-  act_new ("{M$n tells you '{W$t{x'", ch, argument, victim, TO_VICT,
+  act ("`MYou tell $N '`W$t`x'", ch, argument, victim, TO_CHAR);
+  act_new ("`M$n tells you '`W$t`x'", ch, argument, victim, TO_VICT,
 	   POS_DEAD);
   victim->reply = ch;
 
@@ -1743,7 +1744,7 @@ do_reply (CHAR_DATA * ch, char *argument)
     {
       act ("$N seems to have misplaced $S link...try again later.",
 	   ch, NULL, victim, TO_CHAR);
-      sprintf (buf, "%s tells you '{U%s{x'\n\r", PERS (ch, victim), argument);
+      sprintf (buf, "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
       buf[0] = UPPER (buf[0]);
       add_buf (victim->pcdata->buffer, buf);
       victim->tells++;
@@ -1804,16 +1805,16 @@ do_reply (CHAR_DATA * ch, char *argument)
 
       act_new ("$E is AFK, but your tell will go through when $E returns.",
 	       ch, NULL, victim, TO_CHAR, POS_DEAD);
-      sprintf (buf, "%s tells you '{U%s{x'\n\r", PERS (ch, victim), argument);
+      sprintf (buf, "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
       buf[0] = UPPER (buf[0]);
       add_buf (victim->pcdata->buffer, buf);
       victim->tells++;
       return;
     }
 
-  act_new ("{RYou reply to $N{x '{W$t{x'", ch, argument, victim, TO_CHAR,
+  act_new ("`RYou reply to $N`x '`W$t`x'", ch, argument, victim, TO_CHAR,
 	   POS_DEAD);
-  act_new ("{R$n replys to you{x '{W$t{x'", ch, argument, victim, TO_VICT,
+  act_new ("`R$n replys to you`x '`W$t`x'", ch, argument, victim, TO_VICT,
 	   POS_DEAD);
   victim->reply = ch;
 
@@ -1850,7 +1851,7 @@ do_yell (CHAR_DATA * ch, char *argument)
       return;
     }
 
-  act ("You yell '{T$t{x'", ch, argument, NULL, TO_CHAR);
+  act ("You yell '`T$t`x'", ch, argument, NULL, TO_CHAR);
   for (d = descriptor_list; d != NULL; d = d->next)
     {
       int pos;
@@ -1871,7 +1872,7 @@ do_yell (CHAR_DATA * ch, char *argument)
 	    }
 	  if (!found)
 	    {
-	      act ("$n yells '{T$t{x'", ch, argument, d->character, TO_VICT);
+	      act ("$n yells '`T$t`x'", ch, argument, d->character, TO_VICT);
 	    }
 	}
     }
@@ -1896,8 +1897,8 @@ do_emote (CHAR_DATA * ch, char *argument)
     }
 
   MOBtrigger = FALSE;
-  act ("{B$c $T{x", ch, NULL, argument, TO_ROOM);
-  act ("{B$c $T{x", ch, NULL, argument, TO_CHAR);
+  act ("`B$c $T`x", ch, NULL, argument, TO_ROOM);
+  act ("`B$c $T`x", ch, NULL, argument, TO_CHAR);
   MOBtrigger = TRUE;
   return;
 }
@@ -1923,7 +1924,7 @@ do_pmote (CHAR_DATA * ch, char *argument)
       return;
     }
 
-  act ("{c$n $t{x", ch, argument, NULL, TO_CHAR);
+  act ("`c$n $t`x", ch, argument, NULL, TO_CHAR);
 
   for (vch = ch->in_room->people; vch != NULL; vch = vch->next_in_room)
     {
@@ -1933,7 +1934,7 @@ do_pmote (CHAR_DATA * ch, char *argument)
       if ((letter = strstr (argument, vch->name)) == NULL)
 	{
 	  MOBtrigger = FALSE;
-	  act ("{c$N $t{x", vch, argument, ch, TO_CHAR);
+	  act ("`c$N $t`x", vch, argument, ch, TO_CHAR);
 	  MOBtrigger = TRUE;
 	  continue;
 	}
@@ -1985,7 +1986,7 @@ do_pmote (CHAR_DATA * ch, char *argument)
 	}
 
       MOBtrigger = FALSE;
-      act ("{c$N $t{x", vch, temp, ch, TO_CHAR);
+      act ("`c$N $t`x", vch, temp, ch, TO_CHAR);
       MOBtrigger = TRUE;
     }
 
@@ -2004,10 +2005,10 @@ struct pose_table_type
 const struct pose_table_type pose_table[] = {
   {
    {
-    "You sizzle with {Be{bn{Be{br{Bg{by{x.",
-    "$n sizzles with {Be{bn{Be{br{Bg{by{x.",
-    "You feel very {Wholy{x.",
-    "$n looks very {Wholy{x.",
+    "You sizzle with `Be`bn`Be`br`Bg`by`x.",
+    "$n sizzles with `Be`bn`Be`br`Bg`by`x.",
+    "You feel very `Wholy`x.",
+    "$n looks very `Wholy`x.",
     "You perform a small card trick.",
     "$n performs a small card trick.",
     "You show your bulging muscles.",
@@ -2030,8 +2031,8 @@ const struct pose_table_type pose_table[] = {
     "$n wiggles $s ears alternately.",
     "You crack nuts between your fingers.",
     "$n cracks nuts between $s fingers.",
-    "A {Whalo{x appears over your head.",
-    "A {Whalo{x appears over $n's head.",
+    "A `Whalo`x appears over your head.",
+    "A `Whalo`x appears over $n's head.",
     "Deep in prayer, you levitate.",
     "Deep in prayer, $n levitates.",
     "You steal the underwear off every person in the room.",
@@ -2040,10 +2041,10 @@ const struct pose_table_type pose_table[] = {
 
   {
    {
-    "{BBlue sparks{x fly from your fingers.",
-    "{BBlue sparks{x fly from $n's fingers.",
-    "A {Whalo{x appears over your head.",
-    "A {Whalo{x appears over $n's head.",
+    "`BBlue sparks`x fly from your fingers.",
+    "`BBlue sparks`x fly from $n's fingers.",
+    "A `Whalo`x appears over your head.",
+    "A `Whalo`x appears over $n's head.",
     "You nimbly tie yourself into a knot.",
     "$n nimbly ties $mself into a knot.",
     "You grizzle your teeth and look mean.",
@@ -2052,14 +2053,14 @@ const struct pose_table_type pose_table[] = {
     "Crunch, crunch -- $n munches a bottle.",
     "You juggle with daggers, apples, and eyeballs.",
     "$n juggles with daggers, apples, and eyeballs.",
-    "Little {rred{x lights dance in your {z{Re{xy{z{Re{xs.",
-    "Little {rred{x lights dance in $n's {z{Re{xy{z{Re{xs."}
+    "Little `rred`x lights dance in your `z`Re`xy`z`Re`xs.",
+    "Little `rred`x lights dance in $n's `z`Re`xy`z`Re`xs."}
    },
 
   {
    {
-    "Little {rred{x lights dance in your {z{Re{xy{z{Re{xs.",
-    "Little {rred{x lights dance in $n's {z{Re{xy{z{Re{xs.",
+    "Little `rred`x lights dance in your `z`Re`xy`z`Re`xs.",
+    "Little `rred`x lights dance in $n's `z`Re`xy`z`Re`xs.",
     "You recite words of wisdom.",
     "$n recites words of wisdom.",
     "You juggle with daggers, apples, and eyeballs.",
@@ -2076,8 +2077,8 @@ const struct pose_table_type pose_table[] = {
 
   {
    {
-    "A slimy {ggreen monster{x appears before you and bows.",
-    "A slimy {ggreen monster{x appears before $n and bows.",
+    "A slimy `ggreen monster`x appears before you and bows.",
+    "A slimy `ggreen monster`x appears before $n and bows.",
     "Deep in prayer, you levitate.",
     "Deep in prayer, $n levitates.",
     "You steal the underwear off every person in the room.",
@@ -2096,8 +2097,8 @@ const struct pose_table_type pose_table[] = {
    {
     "You turn everybody into a little pink elephant.",
     "You are turned into a little pink elephant by $n.",
-    "An {Wangel{x consults you.",
-    "An {Wangel{x consults $n.",
+    "An `Wangel`x consults you.",
+    "An `Wangel`x consults $n.",
     "The dice roll ... and you win again.",
     "The dice roll ... and $n craps out.",
     "... 98, 99, 100 ... you do pushups.",
@@ -2114,8 +2115,8 @@ const struct pose_table_type pose_table[] = {
    {
     "A small ball of light dances on your fingertips.",
     "A small ball of light dances on $n's fingertips.",
-    "Your body {Yglows with an unearthly light{x.",
-    "$n's body {Yglows with an unearthly light{x.",
+    "Your body `Yglows with an unearthly light`x.",
+    "$n's body `Yglows with an unearthly light`x.",
     "You count the money in everyone's pockets.",
     "Check your money, $n is counting it.",
     "Arnold Schwarzenegger admires your physique.",
@@ -2138,10 +2139,10 @@ const struct pose_table_type pose_table[] = {
     "$n balances a pocket knife on your tongue.",
     "Watch your feet, you are juggling granite boulders.",
     "Watch your feet, $n is juggling granite boulders.",
-    "A {Ccool breeze{x refreshes you.",
-    "A {Ccool breeze{x refreshes $n.",
-    "You step behind your {Dshadow{x.",
-    "$n steps behind $s {Dshadow{x.",
+    "A `Ccool breeze`x refreshes you.",
+    "A `Ccool breeze`x refreshes $n.",
+    "You step behind your `Dshadow`x.",
+    "$n steps behind $s `Dshadow`x.",
     "Arnold Schwarzenegger admires your physique.",
     "PeeWee Herman laughs at $n's physique."}
    },
@@ -2156,22 +2157,22 @@ const struct pose_table_type pose_table[] = {
     "$n produces a coin from your ear.",
     "Oomph!  You squeeze water out of a granite boulder.",
     "Oomph!  $n squeezes water out of a granite boulder.",
-    "The sky changes {Rc{Co{Gl{Bo{Yr{x to match your eyes.",
-    "The sky changes {Rc{Co{Gl{Bo{Yr{x to match $n's eyes.",
+    "The sky changes `Rc`Co`Gl`Bo`Yr`x to match your eyes.",
+    "The sky changes `Rc`Co`Gl`Bo`Yr`x to match $n's eyes.",
     "The ocean parts before you.",
     "The ocean parts before $n.",
     "Your head disappears.",
-    "$n's head disappears. {D(I was tired of looking at it anyway){x"}
+    "$n's head disappears. `D(I was tired of looking at it anyway)`x"}
    },
 
   {
    {
     "Your head disappears.",
-    "$n's head disappears. {D(I was tired of looking at it anyway){x",
-    "A {Ccool breeze{x refreshes you.",
-    "A {Ccool breeze{x refreshes $n.",
-    "You step behind your {Dshadow{x.",
-    "$n steps behind $s {Dshadow{x.",
+    "$n's head disappears. `D(I was tired of looking at it anyway)`x",
+    "A `Ccool breeze`x refreshes you.",
+    "A `Ccool breeze`x refreshes $n.",
+    "You step behind your `Dshadow`x.",
+    "$n steps behind $s `Dshadow`x.",
     "You pick your teeth with a spear.",
     "$n picks $s teeth with a spear.",
     "The stones dance to your command.",
@@ -2193,17 +2194,17 @@ const struct pose_table_type pose_table[] = {
     "Everyone is swept off their foot by your hug.",
     "You are swept off your feet by $n's hug.",
     "Your head disappears.",
-    "$n's head disappears. {D(I was tired of looking at it anyway){x",
-    "A {Ccool breeze{x refreshes you.",
-    "A {Ccool breeze{x refreshes $n.",
-    "You step behind your {Dshadow{x.",
-    "$n steps behind $s {Dshadow{x."}
+    "$n's head disappears. `D(I was tired of looking at it anyway)`x",
+    "A `Ccool breeze`x refreshes you.",
+    "A `Ccool breeze`x refreshes $n.",
+    "You step behind your `Dshadow`x.",
+    "$n steps behind $s `Dshadow`x."}
    },
 
   {
    {
-    "The sky changes {Rc{Co{Gl{Bo{Yr{x to match your eyes.",
-    "The sky changes {Rc{Co{Gl{Bo{Yr{x to match $n's eyes.",
+    "The sky changes `Rc`Co`Gl`Bo`Yr`x to match your eyes.",
+    "The sky changes `Rc`Co`Gl`Bo`Yr`x to match $n's eyes.",
     "The ocean parts before you.",
     "The ocean parts before $n.",
     "You deftly steal everyone's weapon.",
@@ -2248,8 +2249,8 @@ const struct pose_table_type pose_table[] = {
     "A boulder cracks at $n's frown.",
     "Everyone's clothes are transparent, and you are laughing.",
     "Your clothes are transparent, and $n is laughing.",
-    "An eye in a pyramid w{zi{xnks at you.",
-    "An eye in a pyramid w{zi{xnks at $n.",
+    "An eye in a pyramid w`zi`xnks at you.",
+    "An eye in a pyramid w`zi`xnks at $n.",
     "Everyone discovers your dagger a centimeter from their eye.",
     "You discover $n's dagger a centimeter from your eye."}
    },
@@ -2258,8 +2259,8 @@ const struct pose_table_type pose_table[] = {
    {
     "Everyone's clothes are transparent, and you are laughing.",
     "Your clothes are transparent, and $n is laughing.",
-    "An eye in a pyramid w{zi{xnks at you.",
-    "An eye in a pyramid w{zi{xnks at $n.",
+    "An eye in a pyramid w`zi`xnks at you.",
+    "An eye in a pyramid w`zi`xnks at $n.",
     "Everyone discovers your dagger a centimeter from their eye.",
     "You discover $n's dagger a centimeter from your eye.",
     "Mercenaries arrive to do your bidding.",
@@ -2395,9 +2396,9 @@ do_quit (CHAR_DATA * ch, char *argument)
       send_to_char ("You're not DEAD yet.\n\r", ch);
       return;
     }
-  send_to_char ("{rReality is attacking you!{x\n\r", ch);
-  send_to_char ("{cYou hit Reality hard!{x\n\r", ch);
-  send_to_char ("{BReality's truth does UNSPEAKABLE things to you!{x\n\r\n\r",
+  send_to_char ("`rReality is attacking you!`x\n\r", ch);
+  send_to_char ("`cYou hit Reality hard!`x\n\r", ch);
+  send_to_char ("`BReality's truth does UNSPEAKABLE things to you!`x\n\r\n\r",
 		ch);
   WAIT_STATE (ch, 25 * PULSE_VIOLENCE);
   act ("$n has left the game.", ch, NULL, NULL, TO_ROOM);
@@ -2459,9 +2460,9 @@ force_quit (CHAR_DATA * ch, char *argument)
       lose = (ch->desc != NULL) ? 50 : 100;
       gain_exp (ch, 0 - lose);
     }
-  send_to_char ("{rReality is attacking you!{x\n\r", ch);
-  send_to_char ("{cYou hit Reality hard!{x\n\r", ch);
-  send_to_char ("{BReality's truth does UNSPEAKABLE things to you!{x\n\r\n\r",
+  send_to_char ("`rReality is attacking you!`x\n\r", ch);
+  send_to_char ("`cYou hit Reality hard!`x\n\r", ch);
+  send_to_char ("`BReality's truth does UNSPEAKABLE things to you!`x\n\r\n\r",
 		ch);
   WAIT_STATE (ch, 25 * PULSE_VIOLENCE);
   act ("$n has left the game.", ch, NULL, NULL, TO_ROOM);
@@ -3054,7 +3055,7 @@ do_gtell (CHAR_DATA * ch, char *argument)
   /*
    * Note use of send_to_char, so gtell works on sleepers.
    */
-  sprintf (buf, "%s tells the group '{K%s{x'\n\r", ch->name, argument);
+  sprintf (buf, "%s tells the group '`K%s`x'\n\r", ch->name, argument);
   for (gch = char_list; gch != NULL; gch = gch->next)
     {
       if (is_same_group (gch, ch))
@@ -3101,7 +3102,7 @@ do_colour (CHAR_DATA * ch, char *argument)
       if (!IS_SET (ch->act, PLR_COLOUR))
 	{
 	  SET_BIT (ch->act, PLR_COLOUR);
-	  send_to_char ("{bC{ro{yl{co{mu{gr{x is now {rON{x, Way Cool!\n\r",
+	  send_to_char ("`bC`ro`yl`co`mu`gr`x is now `rON`x, Way Cool!\n\r",
 			ch);
 	}
       else
@@ -3138,100 +3139,100 @@ do_colour (CHAR_DATA * ch, char *argument)
   else if (!strcmp (arg, "0"))
     {
       ch->color = 0;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "1"))
     {
       ch->color = 1;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "2"))
     {
       ch->color = 2;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "3"))
     {
       ch->color = 3;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "4"))
     {
       ch->color = 4;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "5"))
     {
       ch->color = 5;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "6"))
     {
       ch->color = 6;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "7"))
     {
       ch->color = 7;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "8"))
     {
       ch->color = 8;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "9"))
     {
       ch->color = 9;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "10"))
     {
       ch->color = 10;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "11"))
     {
       ch->color = 11;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "12"))
     {
       ch->color = 12;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "13"))
     {
       ch->color = 13;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "14"))
     {
       ch->color = 14;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "15"))
     {
       ch->color = 15;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "16"))
     {
       ch->color = 16;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (!strcmp (arg, "17"))
     {
       ch->color = 0;
-      send_to_char ("{xOK\n\r", ch);
+      send_to_char ("`xOK\n\r", ch);
     }
   else if (argument[0] == '\0')
     {
-      send_to_char ("Syntax: color {{list|#|<channel> #}\n\r", ch);
+      send_to_char ("Syntax: color ``list|#|<channel> #}\n\r", ch);
     }
   else if (!is_number (argument))
     {
-      send_to_char ("Syntax: color {{list|#|<channel> #}\n\r", ch);
+      send_to_char ("Syntax: color ``list|#|<channel> #}\n\r", ch);
     }
   else
     {
@@ -3353,7 +3354,7 @@ do_colour (CHAR_DATA * ch, char *argument)
 	}
       else
 	{
-	  send_to_char ("Syntax: color {{list|#|<channel> #}\n\r", ch);
+	  send_to_char ("Syntax: color ``list|#|<channel> #}\n\r", ch);
 	}
 
     }

@@ -95,7 +95,7 @@ struct colour_map
 };
 
 struct colour_map mapping[] = {
-  {'z', BLINK}, {'`', "`"},
+  {'z', BLINK}, {'{', "{"}, {'`', "`"},
   {'r', C_RED}, {'1', C_RED}, {'T', C_RED},
   {'g', C_GREEN}, {'2', C_GREEN}, {'Q', C_GREEN},
   {'y', C_YELLOW}, {'3', C_YELLOW}, {'J', C_YELLOW},
@@ -117,7 +117,7 @@ struct colour_map mapping[] = {
 static bool
 is_color_marker (char c)
 {
-  return c == '`';
+  return c == '{' || c == '`';
 }
 
 /* command procedures needed */
@@ -918,7 +918,7 @@ init_descriptor_www (int wwwcontrol)
 	    }
 	}
       sprintf (buf2, "%s", IS_NPC (wch) ? "" : wch->pcdata->title);
-      str_replace (buf2, "{%", "{-");
+      str_replace (buf2, "`%", "{-");
       sprintf (buf, "%3d,%s,%s,%s,%s%s\n\r", wch->level,
 	       wch->race <
 	       MAX_PC_RACE ? pc_race_table[wch->race].who_name : "      ",
@@ -1217,55 +1217,55 @@ process_output (DESCRIPTOR_DATA * d, bool fPrompt)
 	    percent = -1;
 
 	  if (percent >= 100)
-	    sprintf (wound, "[{c********************{x]");
+	    sprintf (wound, "[`c********************`x]");
 	  else if (percent >= 95)
-	    sprintf (wound, "[{@******************* {x]");
+	    sprintf (wound, "[`@******************* `x]");
 	  else if (percent >= 90)
-	    sprintf (wound, "[{@******************  {x]");
+	    sprintf (wound, "[`@******************  `x]");
 	  else if (percent >= 85)
-	    sprintf (wound, "[{@*****************   {x]");
+	    sprintf (wound, "[`@*****************   `x]");
 	  else if (percent >= 80)
-	    sprintf (wound, "[{@****************    {x]");
+	    sprintf (wound, "[`@****************    `x]");
 	  else if (percent >= 75)
-	    sprintf (wound, "%s", "[{@**********75%**     {x]");
+	    sprintf (wound, "%s", "[`@**********75%**     `x]");
 	  else if (percent >= 70)
-	    sprintf (wound, "[{2**************      {x]");
+	    sprintf (wound, "[`2**************      `x]");
 	  else if (percent >= 65)
-	    sprintf (wound, "[{2*************       {x]");
+	    sprintf (wound, "[`2*************       `x]");
 	  else if (percent >= 60)
-	    sprintf (wound, "[{#************        {x]");
+	    sprintf (wound, "[`#************        `x]");
 	  else if (percent >= 55)
-	    sprintf (wound, "[{#***********         {x]");
+	    sprintf (wound, "[`#***********         `x]");
 	  else if (percent >= 50)
-	    sprintf (wound, "%s", "[{3**********50%       {x]");
+	    sprintf (wound, "%s", "[`3**********50%       `x]");
 	  else if (percent >= 45)
-	    sprintf (wound, "%s", "[{3********* 45%       {x]");
+	    sprintf (wound, "%s", "[`3********* 45%       `x]");
 	  else if (percent >= 40)
-	    sprintf (wound, "%s", "[{%********  40%       {x]");
+	    sprintf (wound, "%s", "[`%********  40%       `x]");
 	  else if (percent >= 35)
-	    sprintf (wound, "%s", "[{%*******   35%       {x]");
+	    sprintf (wound, "%s", "[`%*******   35%       `x]");
 	  else if (percent >= 30)
-	    sprintf (wound, "%s", "[{5******    30%       {x]");
+	    sprintf (wound, "%s", "[`5******    30%       `x]");
 	  else if (percent >= 25)
-	    sprintf (wound, "%s", "[{5*****     25%       {x]");
+	    sprintf (wound, "%s", "[`5*****     25%       `x]");
 	  else if (percent >= 20)
-	    sprintf (wound, "%s", "[{!****      20%       {x]");
+	    sprintf (wound, "%s", "[`!****      20%       `x]");
 	  else if (percent >= 15)
-	    sprintf (wound, "%s", "[{!**        15%       {x]");
+	    sprintf (wound, "%s", "[`!**        15%       `x]");
 	  else if (percent >= 10)
-	    sprintf (wound, "%s", "[{1**        10%       {x]");
+	    sprintf (wound, "%s", "[`1**        10%       `x]");
 	  else if (percent >= 5)
-	    sprintf (wound, "%s", "[{1*          5%       {x]");
+	    sprintf (wound, "%s", "[`1*          5%       `x]");
 	  else if (percent >= 0)
-	    sprintf (wound, "[{r      CRITICAL      {x]");
-	  sprintf (buf, "%s{x: %s{x\n\r",
+	    sprintf (wound, "[`r      CRITICAL      `x]");
+	  sprintf (buf, "%s`x: %s`x\n\r",
 		   IS_NPC (victim) ? victim->short_descr : victim->name,
 		   wound);
 	  buf[0] = UPPER (buf[0]);
 	  send_to_char (buf, ch);
 	  if (victim->stunned)
 	    {
-	      sprintf (buf, "{f%s is stunned.{x\n\r",
+	      sprintf (buf, "`f%s is stunned.`x\n\r",
 		       IS_NPC (victim) ? victim->short_descr : victim->name);
 	      send_to_char (buf, ch);
 	    }
@@ -1274,47 +1274,47 @@ process_output (DESCRIPTOR_DATA * d, bool fPrompt)
 	  else
 	    percent = -1;
 	  if (percent >= 100)
-	    sprintf (wound, "[{c********************{x]");
+	    sprintf (wound, "[`c********************`x]");
 	  else if (percent >= 95)
-	    sprintf (wound, "[{@******************* {x]");
+	    sprintf (wound, "[`@******************* `x]");
 	  else if (percent >= 90)
-	    sprintf (wound, "[{@******************  {x]");
+	    sprintf (wound, "[`@******************  `x]");
 	  else if (percent >= 85)
-	    sprintf (wound, "[{@*****************   {x]");
+	    sprintf (wound, "[`@*****************   `x]");
 	  else if (percent >= 80)
-	    sprintf (wound, "[{@****************    {x]");
+	    sprintf (wound, "[`@****************    `x]");
 	  else if (percent >= 75)
-	    sprintf (wound, "%s", "[{@**********75%**     {x]");
+	    sprintf (wound, "%s", "[`@**********75%**     `x]");
 	  else if (percent >= 70)
-	    sprintf (wound, "[{2**************      {x]");
+	    sprintf (wound, "[`2**************      `x]");
 	  else if (percent >= 65)
-	    sprintf (wound, "[{2*************       {x]");
+	    sprintf (wound, "[`2*************       `x]");
 	  else if (percent >= 60)
-	    sprintf (wound, "[{#************        {x]");
+	    sprintf (wound, "[`#************        `x]");
 	  else if (percent >= 55)
-	    sprintf (wound, "[{#***********         {x]");
+	    sprintf (wound, "[`#***********         `x]");
 	  else if (percent >= 50)
-	    sprintf (wound, "%s", "[{3**********50%       {x]");
+	    sprintf (wound, "%s", "[`3**********50%       `x]");
 	  else if (percent >= 45)
-	    sprintf (wound, "%s", "[{3********* 45%       {x]");
+	    sprintf (wound, "%s", "[`3********* 45%       `x]");
 	  else if (percent >= 40)
-	    sprintf (wound, "%s", "[{%********  40%       {x]");
+	    sprintf (wound, "%s", "[`%********  40%       `x]");
 	  else if (percent >= 35)
-	    sprintf (wound, "%s", "[{%*******   35%       {x]");
+	    sprintf (wound, "%s", "[`%*******   35%       `x]");
 	  else if (percent >= 30)
-	    sprintf (wound, "%s", "[{5******    30%       {x]");
+	    sprintf (wound, "%s", "[`5******    30%       `x]");
 	  else if (percent >= 25)
-	    sprintf (wound, "%s", "[{5*****     25%       {x]");
+	    sprintf (wound, "%s", "[`5*****     25%       `x]");
 	  else if (percent >= 20)
-	    sprintf (wound, "%s", "[{!****      20%       {x]");
+	    sprintf (wound, "%s", "[`!****      20%       `x]");
 	  else if (percent >= 15)
-	    sprintf (wound, "%s", "[{!**        15%       {x]");
+	    sprintf (wound, "%s", "[`!**        15%       `x]");
 	  else if (percent >= 10)
-	    sprintf (wound, "%s", "[{1**        10%       {x]");
+	    sprintf (wound, "%s", "[`1**        10%       `x]");
 	  else if (percent >= 5)
-	    sprintf (wound, "%s", "[{1*          5%       {x]");
+	    sprintf (wound, "%s", "[`1*          5%       `x]");
 	  else if (percent >= 0)
-	    sprintf (wound, "[{r      CRITICAL      {x]");
+	    sprintf (wound, "[`r      CRITICAL      `x]");
 	  sprintf (buf, "You: %s\n\r", wound);
 	  buf[0] = UPPER (buf[0]);
 	  send_to_char (buf, ch);
@@ -1322,7 +1322,7 @@ process_output (DESCRIPTOR_DATA * d, bool fPrompt)
 
 	  if (victim->stunned)
 	    {
-	      sprintf (buf, "{f%s is stunned.{x\n\r",
+	      sprintf (buf, "`f%s is stunned.`x\n\r",
 		       IS_NPC (victim) ? victim->short_descr : victim->name);
 	      send_to_char (buf, ch);
 	    }
@@ -2467,7 +2467,7 @@ check_reconnect (DESCRIPTOR_DATA * d, char *name, bool fConn)
 	      if (ch->tells)
 		{
 		  sprintf (buf,
-			   "Reconnecting.  You have {R%d{x tells waiting.\n\r",
+			   "Reconnecting.  You have `R%d`x tells waiting.\n\r",
 			   ch->tells);
 		  send_to_char (buf, ch);
 		  send_to_char ("Type 'replay' to see tells.\n\r", ch);
@@ -2954,6 +2954,7 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		}
 	      break;
 
+	    case '{':
 	    case '`':
 	      fColour = FALSE;
 	      {
@@ -2961,7 +2962,7 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		++str;
 		if (*str == marker)
 		  {
-		    i = "`";
+		    i = (marker == '{') ? "{" : "`";
 		    break;
 		  }
 		i = NULL;

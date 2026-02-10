@@ -76,7 +76,7 @@ do_heal (CHAR_DATA * ch, char *argument)
   if (arg[0] == '\0')
     {
       /* display price list */
-      act ("$N says '{aI offer the following spells:{x'", ch, NULL, mob,
+      act ("$N says '`aI offer the following spells:`x'", ch, NULL, mob,
 	   TO_CHAR);
       send_to_char ("  light: cure light wounds      10 gold\n\r", ch);
       send_to_char ("  serious: cure serious wounds  15 gold\n\r", ch);
@@ -175,14 +175,14 @@ do_heal (CHAR_DATA * ch, char *argument)
 
   else
     {
-      act ("$N says '{aType 'heal' for a list of spells.{x'",
+      act ("$N says '`aType 'heal' for a list of spells.`x'",
 	   ch, NULL, mob, TO_CHAR);
       return;
     }
 
   if (cost > ((ch->platinum * 10000) + (ch->gold * 100) + ch->silver))
     {
-      act ("$N says '{aYou do not have enough gold for my services.{x'",
+      act ("$N says '`aYou do not have enough gold for my services.`x'",
 	   ch, NULL, mob, TO_CHAR);
       return;
     }
@@ -190,13 +190,13 @@ do_heal (CHAR_DATA * ch, char *argument)
   WAIT_STATE (ch, PULSE_VIOLENCE);
 
   deduct_cost (ch, cost, VALUE_SILVER);
-  act ("$n utters the words '{a$T{x'.", mob, NULL, words, TO_ROOM);
+  act ("$n utters the words '`a$T`x'.", mob, NULL, words, TO_ROOM);
 
   if (spell == NULL)		/* restore mana trap...kinda hackish */
     {
       ch->mana += dice (2, 8) + mob->level / 3;
       ch->mana = UMIN (ch->mana, ch->max_mana);
-      send_to_char ("A warm {Yglow{x passes through you.\n\r", ch);
+      send_to_char ("A warm `Yglow`x passes through you.\n\r", ch);
       return;
     }
 

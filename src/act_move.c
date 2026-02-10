@@ -274,7 +274,7 @@ move_char (CHAR_DATA * ch, int door, bool follow, bool quiet)
 	  if (ch->say_descr[0] != '\0')
 	    {
 	      if (!quiet)
-		act ("$n says '{a$T{x'", ch, NULL, ch->say_descr, TO_ROOM);
+		act ("$n says '`a$T`x'", ch, NULL, ch->say_descr, TO_ROOM);
 	    }
 	}
     }
@@ -486,7 +486,7 @@ enter_exit (CHAR_DATA * ch, char *arg)
 	    {
 	      if (ch->say_descr[0] != '\0')
 		{
-		  act ("$n says '{a$T{x'", ch, NULL, ch->say_descr, TO_ROOM);
+		  act ("$n says '`a$T`x'", ch, NULL, ch->say_descr, TO_ROOM);
 		}
 	    }
 	}
@@ -1934,10 +1934,10 @@ do_recall (CHAR_DATA * ch, char *argument)
 	  if (!IS_NPC (victim) && ch->attacker == TRUE)
 	    {
 	      send_to_char
-		("The {RWrath of Thoth {YZAPS{x your butt on the way out!\n\r",
+		("The `RWrath of Thoth `YZAPS`x your butt on the way out!\n\r",
 		 ch);
 	      act
-		("$n is {Yzapped{x in the butt by a lightning bolt from above!",
+		("$n is `Yzapped`x in the butt by a lightning bolt from above!",
 		 ch, NULL, NULL, TO_ROOM);
 	      ch->hit -= (ch->hit / 4);
 	    }
@@ -2026,10 +2026,10 @@ do_crecall (CHAR_DATA * ch, char *argument)
 	  if (!IS_NPC (victim) && ch->attacker == TRUE)
 	    {
 	      send_to_char
-		("The {RWrath of Thoth {YZAPS{x your butt on the way out!\n\r",
+		("The `RWrath of Thoth `YZAPS`x your butt on the way out!\n\r",
 		 ch);
 	      act
-		("$n is {Yzapped{x in the butt by a lightning bolt from above!",
+		("$n is `Yzapped`x in the butt by a lightning bolt from above!",
 		 ch, NULL, NULL, TO_ROOM);
 	      ch->hit -= (ch->hit / 4);
 	    }

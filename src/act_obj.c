@@ -529,9 +529,9 @@ do_donate (CHAR_DATA * ch, char *argument)
 
   obj_from_char (obj);
   obj_to_obj (obj, pit);
-  act ("$p glows {Mpurple{x, then disappears from $n's inventory.", ch, obj,
+  act ("$p glows `Mpurple`x, then disappears from $n's inventory.", ch, obj,
        pit, TO_ROOM);
-  act ("$p glows {Mpurple{x, then disappears..", ch, obj, pit, TO_CHAR);
+  act ("$p glows `Mpurple`x, then disappears..", ch, obj, pit, TO_CHAR);
 
   return;
 }
@@ -641,9 +641,9 @@ do_cdonate (CHAR_DATA * ch, char *argument)
 
   obj_from_char (obj);
   obj_to_obj (obj, container);
-  act ("$p glows {Mpurple{x, then disappears from $n's inventory.", ch, obj,
+  act ("$p glows `Mpurple`x, then disappears from $n's inventory.", ch, obj,
        container, TO_ROOM);
-  act ("$p glows {Mpurple{x, then disappears..", ch, obj, container, TO_CHAR);
+  act ("$p glows `Mpurple`x, then disappears..", ch, obj, container, TO_CHAR);
 
   return;
 }
@@ -1321,7 +1321,7 @@ do_give (CHAR_DATA * ch, char *argument)
 	  int change;
 
 	  act
-	    ("$n tells you '{aI'm sorry, I no longer provide this service.{x'.",
+	    ("$n tells you '`aI'm sorry, I no longer provide this service.`x'.",
 	     victim, NULL, ch, TO_VICT);
 	  ch->reply = victim;
 	  if (platinum != 0)
@@ -1336,7 +1336,7 @@ do_give (CHAR_DATA * ch, char *argument)
 	  if (platinum != 0)
 	    {
 	      act
-		("$n tells you '{aI'm sorry, I can't convert past platinum.{x'.",
+		("$n tells you '`aI'm sorry, I can't convert past platinum.`x'.",
 		 victim, NULL, ch, TO_VICT);
 	      ch->reply = victim;
 	      sprintf (buf, "%d platinum %s", platinum, ch->name);
@@ -1361,7 +1361,7 @@ do_give (CHAR_DATA * ch, char *argument)
 	  if (change < 1 && can_see (victim, ch))
 	    {
 	      act
-		("$n tells you '{aI'm sorry, you did not give me enough to change{x'.",
+		("$n tells you '`aI'm sorry, you did not give me enough to change`x'.",
 		 victim, NULL, ch, TO_VICT);
 	      ch->reply = victim;
 	      sprintf (buf, "%d %s %s",
@@ -1377,7 +1377,7 @@ do_give (CHAR_DATA * ch, char *argument)
 		       (95 * amount / 100 - change * 100),
 		       silver != 0 ? "silver" : "gold", ch->name);
 	      do_give (victim, buf);
-	      act ("$n tells you '{aThank you, come again{x'.",
+	      act ("$n tells you '`aThank you, come again`x'.",
 		   victim, NULL, ch, TO_VICT);
 	      ch->reply = victim;
 	    }
@@ -1405,7 +1405,7 @@ do_give (CHAR_DATA * ch, char *argument)
 
   if (IS_NPC (victim) && victim->pIndexData->pShop != NULL)
     {
-      act ("$N tells you '{aSorry, you'll have to sell that{x'.",
+      act ("$N tells you '`aSorry, you'll have to sell that`x'.",
 	   ch, NULL, victim, TO_CHAR);
       ch->reply = victim;
       return;
@@ -2000,7 +2000,7 @@ do_restring (CHAR_DATA * ch, char *argument)
       return;
     }
   smash_tilde (argument);
-  sprintf (buf, "%s{x", argument);
+  sprintf (buf, "%s`x", argument);
   act ("You give $p to $N.", ch, obj, trainer, TO_CHAR);
   act ("$n gives $p to $N.", ch, obj, trainer, TO_NOTVICT);
   free_string (obj->short_descr);
@@ -2715,7 +2715,7 @@ do_sacrifice (CHAR_DATA * ch, char *argument)
     }
   else
     {
-      sprintf (buf, "$G gives you {g%d{x silver coins for your sacrifice.",
+      sprintf (buf, "$G gives you `g%d`x silver coins for your sacrifice.",
 	       silver);
       act (buf, ch, NULL, NULL, TO_CHAR);
     }
@@ -3131,18 +3131,18 @@ do_steal (CHAR_DATA * ch, char *argument)
       switch (number_range (0, 3))
 	{
 	case 0:
-	  sprintf (buf, "{z{R%s{x{R is a lousy thief!{x", ch->name);
+	  sprintf (buf, "`z`R%s`x`R is a lousy thief!`x", ch->name);
 	  break;
 	case 1:
 	  sprintf (buf,
-		   "{z{R%s{x{R couldn't rob %s way out of a paper bag!{x",
+		   "`z`R%s`x`R couldn't rob %s way out of a paper bag!`x",
 		   ch->name, (ch->sex == 2) ? "her" : "his");
 	  break;
 	case 2:
-	  sprintf (buf, "{z{R%s{x{R tried to rob me!{x", ch->name);
+	  sprintf (buf, "`z`R%s`x`R tried to rob me!`x", ch->name);
 	  break;
 	case 3:
-	  sprintf (buf, "{RKeep your hands out of there, {z%s{x{R!{x",
+	  sprintf (buf, "`RKeep your hands out of there, `z%s`x`R!`x",
 		   ch->name);
 	  break;
 	}
@@ -3156,7 +3156,7 @@ do_steal (CHAR_DATA * ch, char *argument)
 	    }
 	  else
 	    {
-	      sprintf (buf, "{R$N{x tried to steal from {B%s{x.",
+	      sprintf (buf, "`R$N`x tried to steal from `B%s`x.",
 		       victim->name);
 	      wiznet (buf, ch, NULL, WIZ_FLAGS, 0, 0);
 	    }
@@ -3184,12 +3184,12 @@ do_steal (CHAR_DATA * ch, char *argument)
       victim->silver -= silver;
       victim->gold -= gold;
       if (silver <= 0)
-	sprintf (buf, "Bingo!  You got {g%d{x gold coins.\n\r", gold);
+	sprintf (buf, "Bingo!  You got `g%d`x gold coins.\n\r", gold);
       else if (gold <= 0)
-	sprintf (buf, "Bingo!  You got {g%d{x silver coins.\n\r", silver);
+	sprintf (buf, "Bingo!  You got `g%d`x silver coins.\n\r", silver);
       else
 	sprintf (buf,
-		 "Bingo!  You got {g%d{x silver and {g%d{x gold coins.\n\r",
+		 "Bingo!  You got `g%d`x silver and `g%d`x gold coins.\n\r",
 		 silver, gold);
 
       send_to_char (buf, ch);
@@ -3259,8 +3259,8 @@ find_keeper (CHAR_DATA * ch)
    */
   if (!IS_NPC (ch) && IS_SET (ch->act, PLR_TWIT))
     {
-      do_say (keeper, "{aTwits are not welcome!{x");
-      sprintf (buf, "{a%s the {z{RTWIT{x is over here!{x\n\r", ch->name);
+      do_say (keeper, "`aTwits are not welcome!`x");
+      sprintf (buf, "`a%s the `z`RTWIT`x is over here!`x\n\r", ch->name);
       do_yell (keeper, buf);
       return NULL;
     }
@@ -3269,13 +3269,13 @@ find_keeper (CHAR_DATA * ch)
    */
   if (time_info.hour < pShop->open_hour)
     {
-      do_say (keeper, "{aSorry, I am closed. Come back later.{x");
+      do_say (keeper, "`aSorry, I am closed. Come back later.`x");
       return NULL;
     }
 
   if (time_info.hour > pShop->close_hour)
     {
-      do_say (keeper, "{aSorry, I am closed. Come back tomorrow.{x");
+      do_say (keeper, "`aSorry, I am closed. Come back tomorrow.`x");
       return NULL;
     }
 
@@ -3284,7 +3284,7 @@ find_keeper (CHAR_DATA * ch)
    */
   if (!can_see (keeper, ch))
     {
-      do_say (keeper, "{aI don't trade with folks I can't see.{x");
+      do_say (keeper, "`aI don't trade with folks I can't see.`x");
       return NULL;
     }
 
@@ -3498,7 +3498,7 @@ do_buy (CHAR_DATA * ch, char *argument)
       if (roll < get_skill (ch, gsn_haggle))
 	{
 	  cost -= cost / 2 * roll / 100;
-	  sprintf (buf, "You haggle the price down to {g%d{x coins.\n\r",
+	  sprintf (buf, "You haggle the price down to `g%d`x coins.\n\r",
 		   cost);
 	  send_to_char (buf, ch);
 	  check_improve (ch, gsn_haggle, TRUE, 4);
@@ -3519,7 +3519,7 @@ do_buy (CHAR_DATA * ch, char *argument)
 	  pet->name = str_dup (buf);
 	}
 
-      sprintf (buf, "%sA neck tag says '{cI belong to %s{x'.\n\r",
+      sprintf (buf, "%sA neck tag says '`cI belong to %s`x'.\n\r",
 	       pet->description, ch->name);
       free_string (pet->description);
       pet->description = str_dup (buf);
@@ -3549,7 +3549,7 @@ do_buy (CHAR_DATA * ch, char *argument)
 
       if (cost <= 0 || !can_see_obj (ch, obj))
 	{
-	  act ("$n tells you '{aI don't sell that -- try '{Mlist{a'{x'.",
+	  act ("$n tells you '`aI don't sell that -- try '`Mlist`a'`x'.",
 	       keeper, NULL, ch, TO_VICT);
 	  ch->reply = keeper;
 	  return;
@@ -3557,7 +3557,7 @@ do_buy (CHAR_DATA * ch, char *argument)
 
       if (number < 0)
 	{
-	  act ("$n tells you '{aNice try, jackass!{x'.",
+	  act ("$n tells you '`aNice try, jackass!`x'.",
 	       keeper, NULL, ch, TO_VICT);
 	  ch->reply = keeper;
 	  multi_hit (keeper, ch, TYPE_UNDEFINED);
@@ -3580,7 +3580,7 @@ do_buy (CHAR_DATA * ch, char *argument)
 
 	  if (count < number)
 	    {
-	      act ("$n tells you '{aI don't have that many in stock{x'.",
+	      act ("$n tells you '`aI don't have that many in stock`x'.",
 		   keeper, NULL, ch, TO_VICT);
 	      ch->reply = keeper;
 	      return;
@@ -3591,10 +3591,10 @@ do_buy (CHAR_DATA * ch, char *argument)
 	  cost * number)
 	{
 	  if (number > 1)
-	    act ("$n tells you '{aYou can't afford to buy that many{x'.",
+	    act ("$n tells you '`aYou can't afford to buy that many`x'.",
 		 keeper, obj, ch, TO_VICT);
 	  else
-	    act ("$n tells you '{aYou can't afford to buy $p{x'.",
+	    act ("$n tells you '`aYou can't afford to buy $p`x'.",
 		 keeper, obj, ch, TO_VICT);
 	  ch->reply = keeper;
 	  return;
@@ -3606,7 +3606,7 @@ do_buy (CHAR_DATA * ch, char *argument)
 	  || ((obj->level > ch->level)
 	      && (ch->class >= MAX_CLASS / 2) && (obj->level > 27)))
 	{
-	  act ("$n tells you '{aYou can't use $p {ayet{x'.",
+	  act ("$n tells you '`aYou can't use $p `ayet`x'.",
 	       keeper, obj, ch, TO_VICT);
 	  ch->reply = keeper;
 	  return;
@@ -3638,14 +3638,14 @@ do_buy (CHAR_DATA * ch, char *argument)
 	{
 	  sprintf (buf, "$n buys $p[%d].", number);
 	  act (buf, ch, obj, NULL, TO_ROOM);
-	  sprintf (buf, "You buy $p[%d] for {g%d{x silver.", number,
+	  sprintf (buf, "You buy $p[%d] for `g%d`x silver.", number,
 		   cost * number);
 	  act (buf, ch, obj, NULL, TO_CHAR);
 	}
       else
 	{
 	  act ("$n buys $p.", ch, obj, NULL, TO_ROOM);
-	  sprintf (buf, "You buy $p for {g%d{x silver.", cost);
+	  sprintf (buf, "You buy $p for `g%d`x silver.", cost);
 	  act (buf, ch, obj, NULL, TO_CHAR);
 	}
       multicost = cost * number;
@@ -3825,7 +3825,7 @@ do_sell (CHAR_DATA * ch, char *argument)
 
   if ((obj = get_obj_carry (ch, arg)) == NULL)
     {
-      act ("$n tells you '{aYou don't have that item{x'.",
+      act ("$n tells you '`aYou don't have that item`x'.",
 	   keeper, NULL, ch, TO_VICT);
       ch->reply = keeper;
       return;
@@ -3833,7 +3833,7 @@ do_sell (CHAR_DATA * ch, char *argument)
 
   if (!can_drop_obj (ch, obj))
     {
-      send_to_char ("{RYou can't let go of it{z!!{x\n\r", ch);
+      send_to_char ("`RYou can't let go of it`z!!`x\n\r", ch);
       return;
     }
 
@@ -3853,7 +3853,7 @@ do_sell (CHAR_DATA * ch, char *argument)
       (keeper->silver + (100 * keeper->gold) + (10000 * keeper->platinum)))
     {
       act
-	("$n tells you '{aI'm afraid I don't have enough wealth to buy $p{x'.",
+	("$n tells you '`aI'm afraid I don't have enough wealth to buy $p`x'.",
 	 keeper, obj, ch, TO_VICT);
       return;
     }
@@ -3873,7 +3873,7 @@ do_sell (CHAR_DATA * ch, char *argument)
 	       (10000 * keeper->platinum)));
       check_improve (ch, gsn_haggle, TRUE, 4);
     }
-  sprintf (buf, "You sell $p for {g%d{x silver piece%s.",
+  sprintf (buf, "You sell $p for `g%d`x silver piece%s.",
 	   cost, cost == 1 ? "" : "s");
   act (buf, ch, obj, NULL, TO_CHAR);
 
@@ -3942,7 +3942,7 @@ do_value (CHAR_DATA * ch, char *argument)
 
   if ((obj = get_obj_carry (ch, arg)) == NULL)
     {
-      act ("$n tells you '{aYou don't have that item{x'.",
+      act ("$n tells you '`aYou don't have that item`x'.",
 	   keeper, NULL, ch, TO_VICT);
       ch->reply = keeper;
       return;
@@ -3968,7 +3968,7 @@ do_value (CHAR_DATA * ch, char *argument)
     }
 
   sprintf (buf,
-	   "$n tells you '{aI'll give you {g%d{a silver coin%s for $p{x'.",
+	   "$n tells you '`aI'll give you `g%d`a silver coin%s for $p`x'.",
 	   cost, cost == 1 ? "" : "s");
   act (buf, keeper, obj, ch, TO_VICT);
   ch->reply = keeper;
@@ -4055,13 +4055,13 @@ do_second (CHAR_DATA * ch, char *argument)
 
   if (IS_WEAPON_STAT (get_eq_char (ch, WEAR_WIELD), WEAPON_TWO_HANDS))
     {
-      send_to_char ("Your primary weapon requires {z{Bboth{x hands!\n\r", ch);
+      send_to_char ("Your primary weapon requires `z`Bboth`x hands!\n\r", ch);
       return;
     }
 
   if (IS_WEAPON_STAT (obj, WEAPON_TWO_HANDS))
     {
-      send_to_char ("This weapon requires {z{Bboth{x hands!\n\r", ch);
+      send_to_char ("This weapon requires `z`Bboth`x hands!\n\r", ch);
       return;
     }
 

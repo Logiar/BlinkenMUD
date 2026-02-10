@@ -183,7 +183,7 @@ fwrite_char (CHAR_DATA * ch, FILE * fp)
     fprintf (fp, "LnD  %s~\n", ch->long_descr);
   if (ch->description[0] != '\0')
     fprintf (fp, "Desc %s~\n", ch->description);
-  if (ch->prompt != NULL || !str_cmp (ch->prompt, "<%{Rhhp {M%mm {G%vmv{x>"))
+  if (ch->prompt != NULL || !str_cmp (ch->prompt, "<%`Rhhp `M%mm `G%vmv`x>"))
     fprintf (fp, "Prom %s~\n", ch->prompt);
   fprintf (fp, "Race %s~\n", pc_race_table[ch->race].name);
   if (ch->clan)
@@ -673,7 +673,7 @@ load_char_obj (DESCRIPTOR_DATA * d, char *name)
   ch->race = race_lookup ("human");
   ch->act = PLR_NOSUMMON | PLR_COLOUR;
   ch->comm = COMM_COMBINE | COMM_PROMPT | COMM_STORE;
-  ch->prompt = str_dup ("<{R%hhp {M%mm {G%vmv{x>");
+  ch->prompt = str_dup ("<`R%hhp `M%mm `G%vmv`x>");
   ch->pcdata->confirm_delete = FALSE;
   ch->pcdata->pwd = str_dup ("");
   ch->pcdata->bamfin = str_dup ("");
