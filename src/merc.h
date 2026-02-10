@@ -43,6 +43,8 @@
 #define DECLARE_SPELL_FUN( fun )	SPELL_FUN fun
 
 #include <stdbool.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 /* system calls */
 
