@@ -95,7 +95,7 @@ struct colour_map
 };
 
 struct colour_map mapping[] = {
-  {'z', BLINK}, {'{', "{"},
+  {'z', BLINK}, {'`', "`"},
   {'r', C_RED}, {'1', C_RED}, {'T', C_RED},
   {'g', C_GREEN}, {'2', C_GREEN}, {'Q', C_GREEN},
   {'y', C_YELLOW}, {'3', C_YELLOW}, {'J', C_YELLOW},
@@ -113,6 +113,12 @@ struct colour_map mapping[] = {
   {'W', C_B_WHITE}, {'&', C_B_WHITE}, {'L', C_B_WHITE},
   {'Y', C_B_YELLOW}, {'#', C_B_YELLOW}, {'P', C_B_YELLOW}, {'j', C_B_YELLOW},
 };
+
+static bool
+is_color_marker (char c)
+{
+  return c == '`';
+}
 
 /* command procedures needed */
 DECLARE_DO_FUN (do_help);
@@ -2569,9 +2575,16 @@ send_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (*point == '{')
+	      if (is_color_marker (*point))
 		{
+		  char marker = *point;
 		  point++;
+		  if (*point == marker)
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      continue;
+		    }
 		  strcat (buf, colour (*point, ch));
 		  for (point2 = buf; *point2; point2++)
 		    ;
@@ -2587,10 +2600,11 @@ send_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (*point == '{')
+	      if (is_color_marker (*point))
 		{
+		  char marker = *point;
 		  point++;
-		  if (*point != '{')
+		  if (*point != marker)
 		    {
 		      continue;
 		    }
@@ -2645,9 +2659,16 @@ page_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (*point == '{')
+	      if (is_color_marker (*point))
 		{
+		  char marker = *point;
 		  point++;
+		  if (*point == marker)
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      continue;
+		    }
 		  strcat (buf, colour (*point, ch));
 		  for (point2 = buf; *point2; point2++)
 		    ;
@@ -2666,10 +2687,11 @@ page_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (*point == '{')
+	      if (is_color_marker (*point))
 		{
+		  char marker = *point;
 		  point++;
-		  if (*point != '{')
+		  if (*point != marker)
 		    {
 		      continue;
 		    }
@@ -2824,7 +2846,7 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
       str = format;
       while (*str)
 	{
-	  if (*str != '$' && *str != '{')
+	  if (*str != '$' && !is_color_marker (*str))
 	    {
 	      *point++ = *str++;
 	      continue;
@@ -2932,14 +2954,22 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		}
 	      break;
 
-	    case '{':
+	    case '`':
 	      fColour = FALSE;
-	      ++str;
-	      i = NULL;
-	      if (IS_SET (to->act, PLR_COLOUR))
-		{
-		  i = colour (*str, to);
-		}
+	      {
+		char marker = *str;
+		++str;
+		if (*str == marker)
+		  {
+		    i = "`";
+		    break;
+		  }
+		i = NULL;
+		if (IS_SET (to->act, PLR_COLOUR))
+		  {
+		    i = colour (*str, to);
+		  }
+	      }
 	      break;
 
 	    default:
@@ -2958,9 +2988,16 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		{
 		  for (i2 = fixed; *i; i++)
 		    {
-		      if (*i == '{')
+		      if (is_color_marker (*i))
 			{
+			  char marker = *i;
 			  i++;
+			  if (*i == marker)
+			    {
+			      *i2 = marker;
+			      *++i2 = '\0';
+			      continue;
+			    }
 			  strcat (fixed, colour (*i, to));
 			  for (i2 = fixed; *i2; i2++)
 			    ;
@@ -2976,10 +3013,11 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		{
 		  for (i2 = fixed; *i; i++)
 		    {
-		      if (*i == '{')
+		      if (is_color_marker (*i))
 			{
+			  char marker = *i;
 			  i++;
-			  if (*i != '{')
+			  if (*i != marker)
 			    {
 			      continue;
 			    }
@@ -3175,4 +3213,3 @@ colour (char type, CHAR_DATA * ch)
     }
   return clcode;
 }
-

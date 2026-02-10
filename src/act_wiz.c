@@ -4802,7 +4802,7 @@ do_string (CHAR_DATA * ch, char *argument)
 	  cnt = 0;
 	  for (plc = 0; plc < (int) strlen (arg3); plc++)
 	    {
-	      if (arg3[plc] != '{')
+	      if (arg3[plc] != '`')
 		{
 		  if (buf[0] == '\0')
 		    {
@@ -4815,15 +4815,15 @@ do_string (CHAR_DATA * ch, char *argument)
 		  sprintf (buf, "%s", buf2);
 		  cnt++;
 		}
-	      else if (arg3[plc + 1] == '{')
+	      else if (arg3[plc + 1] == arg3[plc])
 		{
 		  if (buf[0] == '\0')
 		    {
-		      sprintf (buf2, "{{");
+		      sprintf (buf2, "%c%c", arg3[plc], arg3[plc]);
 		    }
 		  else
 		    {
-		      sprintf (buf2, "%s{{", buf);
+		      sprintf (buf2, "%s%c%c", buf, arg3[plc], arg3[plc]);
 		    }
 		  sprintf (buf, "%s", buf2);
 		  cnt++;
@@ -4833,11 +4833,11 @@ do_string (CHAR_DATA * ch, char *argument)
 		{
 		  if (buf[0] == '\0')
 		    {
-		      sprintf (buf2, "{%c", arg3[plc + 1]);
+		      sprintf (buf2, "%c%c", arg3[plc], arg3[plc + 1]);
 		    }
 		  else
 		    {
-		      sprintf (buf2, "%s{%c", buf, arg3[plc + 1]);
+		      sprintf (buf2, "%s%c%c", buf, arg3[plc], arg3[plc + 1]);
 		    }
 		  sprintf (buf, "%s", buf2);
 		  plc++;

@@ -51,6 +51,12 @@
 DECLARE_DO_FUN (do_quit);
 DECLARE_DO_FUN (do_announce);
 
+static bool
+is_color_marker_local (char c)
+{
+  return c == '`';
+}
+
 /* RT code to delete yourself */
 
 void
@@ -835,7 +841,7 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
       str = format;
       while (*str)
 	{
-	  if (*str != '$' && *str != '{')
+	  if (*str != '$' && !is_color_marker_local (*str))
 	    {
 	      *point++ = *str++;
 	      continue;
@@ -903,14 +909,22 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 		}
 	      break;
 
-	    case '{':
+	    case '`':
 	      fColour = FALSE;
-	      ++str;
-	      i = NULL;
-	      if (IS_SET (to->act, PLR_COLOUR))
-		{
-		  i = colour (*str, to);
-		}
+	      {
+		char marker = *str;
+		++str;
+		if (*str == marker)
+		  {
+		    i = "`";
+		    break;
+		  }
+		i = NULL;
+		if (IS_SET (to->act, PLR_COLOUR))
+		  {
+		    i = colour (*str, to);
+		  }
+	      }
 	      break;
 
 	    default:
@@ -929,9 +943,16 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 		{
 		  for (i2 = fixed; *i; i++)
 		    {
-		      if (*i == '{')
+		      if (is_color_marker_local (*i))
 			{
+			  char marker = *i;
 			  i++;
+			  if (*i == marker)
+			    {
+			      *i2 = marker;
+			      *++i2 = '\0';
+			      continue;
+			    }
 			  strcat (fixed, colour (*i, to));
 			  for (i2 = fixed; *i2; i2++)
 			    ;
@@ -949,10 +970,11 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 		{
 		  for (i2 = fixed; *i; i++)
 		    {
-		      if (*i == '{')
+		      if (is_color_marker_local (*i))
 			{
+			  char marker = *i;
 			  i++;
-			  if (*i != '{')
+			  if (*i != marker)
 			    {
 			      continue;
 			    }
