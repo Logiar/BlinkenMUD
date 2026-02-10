@@ -17,11 +17,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set compiler
-        run: echo "CC=${{ matrix.compiler }}" >> "$GITHUB_ENV"
-
       - name: Compile project
-        run: make -C src clean all
+        run: make -C src CC=${{ matrix.compiler }} clean all
 
       - name: Run make test target
-        run: make -C src test
+        run: make -C src CC=${{ matrix.compiler }} test
