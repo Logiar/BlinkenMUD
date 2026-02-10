@@ -42,10 +42,9 @@
 #define DECLARE_SPEC_FUN( fun )		SPEC_FUN  fun
 #define DECLARE_SPELL_FUN( fun )	SPELL_FUN fun
 
-/* system calls */
-int unlink ();
-int system ();
+#include <stdbool.h>
 
+/* system calls */
 
 /*
  * Short scalar types.
@@ -260,7 +259,7 @@ int system ();
 #define NOTE_WEDDINGS	6
 
 typedef short int sh_int;
-typedef unsigned char bool;
+/* bool is provided by <stdbool.h> in modern C standards. */
 
 /*
  * Structure types.
