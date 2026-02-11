@@ -1825,7 +1825,7 @@ do_reply (CHAR_DATA * ch, char *argument)
 
   act_new ("`RYou reply to $N`x '`W$t`x'", ch, argument, victim, TO_CHAR,
 	   POS_DEAD);
-  act_new ("`R$n replys to you`x '`W$t`x'", ch, argument, victim, TO_VICT,
+  act_new ("`R$n replies to you`x '`W$t`x'", ch, argument, victim, TO_VICT,
 	   POS_DEAD);
   victim->reply = ch;
 

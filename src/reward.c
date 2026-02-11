@@ -433,7 +433,7 @@ do_reward (CHAR_DATA * ch, char *argument)
       act ("$c takes $p from you and gives you the bounty.", rewarder, obj,
 	   ch, TO_VICT);
       act
-	("`c You have recieved a '`x`GQuest Point`x`c',`x `cawesome!`x`c.`x",
+	("`c You have received a '`x`GQuest Point`x`c',`x `cawesome!`x`c.`x",
 	 rewarder, obj, ch, TO_VICT);
 
       extract_obj (obj);

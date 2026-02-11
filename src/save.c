@@ -733,6 +733,9 @@ migrate_legacy_colour_markers (char **field)
     return;
 
   src = *field;
+  if (strchr (src, '{') == NULL)
+    return;
+
   len = strlen (src);
   buf = alloc_mem (len + 1);
   dst = buf;
