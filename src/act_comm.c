@@ -125,7 +125,7 @@ do_channels (CHAR_DATA * ch, char *argument)
   if (!IS_SET (ch->comm, COMM_NOGOSSIP))
     send_to_char ("`2ON`x\n\r", ch);
   else
-    send_to_char ("`1OF`xF\n\r", ch);
+    send_to_char ("`1OFF`x\n\r", ch);
 
   send_to_char ("clan gossip    ", ch);
   if (!IS_SET (ch->comm, COMM_NOCGOSSIP))
