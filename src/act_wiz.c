@@ -4802,7 +4802,7 @@ do_string (CHAR_DATA * ch, char *argument)
 	  cnt = 0;
 	  for (plc = 0; plc < (int) strlen (arg3); plc++)
 	    {
-	      if (arg3[plc] != '`')
+	      if (!IS_COLOUR_MARKER (arg3[plc]))
 		{
 		  if (buf[0] == '\0')
 		    {
