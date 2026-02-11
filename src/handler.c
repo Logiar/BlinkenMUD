@@ -2000,9 +2000,9 @@ equip_char (CHAR_DATA * ch, OBJ_DATA * obj, int iWear)
 	  /*
 	   * Thanks to Morgenes for the bug fix here!
 	   */
-	  act ("{RYou are {Yzapped {Rby $p and drop it.{x", ch, obj, NULL,
+	  act ("`RYou are `Yzapped `Rby $p and drop it.`x", ch, obj, NULL,
 	       TO_CHAR);
-	  act ("{R$n is {Yzapped {Rby $p and drops it.{x", ch, obj, NULL,
+	  act ("`R$n is `Yzapped `Rby $p and drops it.`x", ch, obj, NULL,
 	       TO_ROOM);
 	  obj_from_char (obj);
 	  obj_to_room (obj, ch->in_room);
@@ -2014,9 +2014,9 @@ equip_char (CHAR_DATA * ch, OBJ_DATA * obj, int iWear)
     {
       REMOVE_BIT (obj->extra_flags, ITEM_QUESTPOINT);
       ch->qps++;
-      act ("{YYou gained a {RQuest Point {Yfrom $p!{x", ch, obj, NULL,
+      act ("`YYou gained a `RQuest Point `Yfrom $p!`x", ch, obj, NULL,
 	   TO_CHAR);
-      act ("{Y$n gained a {RQuest Point {Yfrom $p!{x", ch, obj, NULL,
+      act ("`Y$n gained a `RQuest Point `Yfrom $p!`x", ch, obj, NULL,
 	   TO_ROOM);
     }
 

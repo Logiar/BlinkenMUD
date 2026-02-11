@@ -189,7 +189,7 @@ wiznet (char *string, CHAR_DATA * ch, OBJ_DATA * obj,
   char buf[MAX_STRING_LENGTH];
   DESCRIPTOR_DATA *d;
 
-  sprintf (buf, "{V%s{x", string);
+  sprintf (buf, "`V%s`x", string);
   for (d = descriptor_list; d != NULL; d = d->next)
     {
       if (d->connected == CON_PLAYING
@@ -201,7 +201,7 @@ wiznet (char *string, CHAR_DATA * ch, OBJ_DATA * obj,
 	  && get_trust (d->character) >= min_level && d->character != ch)
 	{
 	  if (IS_SET (d->character->wiznet, WIZ_PREFIX))
-	    send_to_char ("{Y-->{x ", d->character);
+	    send_to_char ("`Y-->`x ", d->character);
 	  act_new (buf, d->character, obj, ch, TO_CHAR, POS_DEAD);
 	}
     }
@@ -787,7 +787,7 @@ do_wecho (CHAR_DATA * ch, char *argument)
       return;
     }
 
-  sprintf (buf, "{z{B***{x {R%s{x {z{B***{x", argument);
+  sprintf (buf, "`z`B***`x `R%s`x `z`B***`x", argument);
   do_echo (ch, buf);
   do_echo (ch, buf);
   do_echo (ch, buf);
@@ -1748,7 +1748,7 @@ do_ostat (CHAR_DATA * ch, char *argument)
 
   if (is_clan_obj (obj))
     {
-      sprintf (buf, "This object is owned by the [{%s%s{x] clan.\n\r",
+      sprintf (buf, "This object is owned by the [`%s%s`x] clan.\n\r",
 	       clan_table[obj->clan].pkill ? "B" : "M",
 	       clan_table[obj->clan].who_name);
       send_to_char (buf, ch);
@@ -2164,7 +2164,7 @@ do_vnum (CHAR_DATA * ch, char *argument)
 
       for (iArea = 0; iArea < iAreaHalf; iArea++)
 	{
-	  sprintf (buf, "%-26s {R%5d %5d{x  %-26s {R%5d %5d{x\n\r",
+	  sprintf (buf, "%-26s `R%5d %5d`x  %-26s `R%5d %5d`x\n\r",
 		   pArea1->name, pArea1->min_vnum, pArea1->max_vnum,
 		   (pArea2 != NULL) ? pArea2->name : "",
 		   (pArea2 != NULL) ? pArea2->min_vnum : 0,
@@ -3329,9 +3329,9 @@ do_advance (CHAR_DATA * ch, char *argument)
       int temp_prac;
 
       send_to_char ("Lowering a player's level!\n\r", ch);
-      send_to_char ("{R******** {GOOOOHHHHHHHHHH  NNNNOOOO {R*******{x\n\r",
+      send_to_char ("`R******** `GOOOOHHHHHHHHHH  NNNNOOOO `R*******`x\n\r",
 		    victim);
-      sprintf (buf, "{R**** {WYou've been demoted to level %d {R****{x\n\r",
+      sprintf (buf, "`R**** `WYou've been demoted to level %d `R****`x\n\r",
 	       level);
       send_to_char (buf, victim);
       if ((victim->level > HERO) || (level > HERO))
@@ -3354,9 +3354,9 @@ do_advance (CHAR_DATA * ch, char *argument)
   else
     {
       send_to_char ("Raising a player's level!\n\r", ch);
-      send_to_char ("{B******* {GOOOOHHHHHHHHHH  YYYYEEEESSS {B******{x\n\r",
+      send_to_char ("`B******* `GOOOOHHHHHHHHHH  YYYYEEEESSS `B******`x\n\r",
 		    victim);
-      sprintf (buf, "{B**** {WYou've been advanced to level %d {B****{x\n\r",
+      sprintf (buf, "`B**** `WYou've been advanced to level %d `B****`x\n\r",
 	       level);
       send_to_char (buf, victim);
       if ((victim->level > HERO) || (level > HERO))
@@ -3420,11 +3420,11 @@ do_knight (CHAR_DATA * ch, char *argument)
     }
   else
     {
-      act ("You touch $Ns shoulder with a sword called {GKnight's Faith{x.",
+      act ("You touch $Ns shoulder with a sword called `GKnight's Faith`x.",
 	   ch, NULL, victim, TO_CHAR);
-      act ("$n touches your shoulder with a sword called {GKnight's Faith{x.",
+      act ("$n touches your shoulder with a sword called `GKnight's Faith`x.",
 	   ch, NULL, victim, TO_VICT);
-      act ("$n touches $Ns shoulder with a sword called {GKnight's Faith{x.",
+      act ("$n touches $Ns shoulder with a sword called `GKnight's Faith`x.",
 	   ch, NULL, victim, TO_NOTVICT);
       act ("$N glows with an unearthly light as $S mortality slips away.", ch,
 	   NULL, victim, TO_NOTVICT);
@@ -3485,11 +3485,11 @@ do_squire (CHAR_DATA * ch, char *argument)
     }
   else
     {
-      act ("You touch $Ns shoulder with a sword called {BSquire's Faith{x.",
+      act ("You touch $Ns shoulder with a sword called `BSquire's Faith`x.",
 	   ch, NULL, victim, TO_CHAR);
-      act ("$n touches your shoulder with a sword called {BSquire's Faith{x.",
+      act ("$n touches your shoulder with a sword called `BSquire's Faith`x.",
 	   ch, NULL, victim, TO_VICT);
-      act ("$n touches $Ns shoulder with a sword called {BSquire's Faith{x.",
+      act ("$n touches $Ns shoulder with a sword called `BSquire's Faith`x.",
 	   ch, NULL, victim, TO_NOTVICT);
       act ("$N glows with an unearthly light as $S mortality slips away.", ch,
 	   NULL, victim, TO_NOTVICT);
@@ -4802,7 +4802,7 @@ do_string (CHAR_DATA * ch, char *argument)
 	  cnt = 0;
 	  for (plc = 0; plc < (int) strlen (arg3); plc++)
 	    {
-	      if (arg3[plc] != '{')
+	      if (arg3[plc] != '`')
 		{
 		  if (buf[0] == '\0')
 		    {
@@ -4815,15 +4815,15 @@ do_string (CHAR_DATA * ch, char *argument)
 		  sprintf (buf, "%s", buf2);
 		  cnt++;
 		}
-	      else if (arg3[plc + 1] == '{')
+	      else if (arg3[plc + 1] == arg3[plc])
 		{
 		  if (buf[0] == '\0')
 		    {
-		      sprintf (buf2, "{{");
+		      sprintf (buf2, "%c%c", arg3[plc], arg3[plc]);
 		    }
 		  else
 		    {
-		      sprintf (buf2, "%s{{", buf);
+		      sprintf (buf2, "%s%c%c", buf, arg3[plc], arg3[plc]);
 		    }
 		  sprintf (buf, "%s", buf2);
 		  cnt++;
@@ -4833,11 +4833,11 @@ do_string (CHAR_DATA * ch, char *argument)
 		{
 		  if (buf[0] == '\0')
 		    {
-		      sprintf (buf2, "{%c", arg3[plc + 1]);
+		      sprintf (buf2, "%c%c", arg3[plc], arg3[plc + 1]);
 		    }
 		  else
 		    {
-		      sprintf (buf2, "%s{%c", buf, arg3[plc + 1]);
+		      sprintf (buf2, "%s%c%c", buf, arg3[plc], arg3[plc + 1]);
 		    }
 		  sprintf (buf, "%s", buf2);
 		  plc++;
@@ -4847,7 +4847,7 @@ do_string (CHAR_DATA * ch, char *argument)
 		  plc = strlen (arg3);
 		}
 	    }
-	  sprintf (buf2, "%s{0", buf);
+	  sprintf (buf2, "%s`0", buf);
 	  sprintf (buf, "%s", buf2);
 	  while (cnt < 10)
 	    {
@@ -5479,7 +5479,7 @@ do_invis (CHAR_DATA * ch, char *argument)
 	  }
 	else
 	  {
-	    act ("$n appears in a blinding {z{Wflash{x!", ch, NULL, NULL,
+	    act ("$n appears in a blinding `z`Wflash`x!", ch, NULL, NULL,
 		 TO_ROOM);
 	  }
 	send_to_char ("You slowly fade back into existence.\n\r", ch);
@@ -5493,7 +5493,7 @@ do_invis (CHAR_DATA * ch, char *argument)
 	else
 	  {
 	    act
-	      ("A {Wblinding white light{x envelops $n, then {z{Dvanishes{x.",
+	      ("A `Wblinding white light`x envelops $n, then `z`Dvanishes`x.",
 	       ch, NULL, NULL, TO_ROOM);
 	  }
 	send_to_char ("You slowly vanish into thin air.\n\r", ch);
@@ -5518,7 +5518,7 @@ do_invis (CHAR_DATA * ch, char *argument)
 	  else
 	    {
 	      act
-		("A {Wblinding white light{x envelops $n, then {z{Dvanishes{x.",
+		("A `Wblinding white light`x envelops $n, then `z`Dvanishes`x.",
 		 ch, NULL, NULL, TO_ROOM);
 	    }
 	  send_to_char ("You slowly vanish into thin air.\n\r", ch);

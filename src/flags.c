@@ -298,22 +298,22 @@ do_flag (CHAR_DATA * ch, char *argument)
 	  return;
 	}
       send_to_char ("Which flags do you wish to change?\n\r", ch);
-      send_to_char ("  {Bchangeable  {Runchangeable{x\n\r", ch);
+      send_to_char ("  `Bchangeable  `Runchangeable`x\n\r", ch);
       col = 0;
       for (sn = 0; sn < 30; sn++)
 	{
 	  if (flag_table[sn].name == NULL)
 	    break;
 	  if (flag_table[sn].settable)
-	    sprintf (buf, "{B%-20s ", flag_table[sn].name);
+	    sprintf (buf, "`B%-20s ", flag_table[sn].name);
 	  else
-	    sprintf (buf, "{R%-20s ", flag_table[sn].name);
+	    sprintf (buf, "`R%-20s ", flag_table[sn].name);
 	  send_to_char (buf, ch);
 	  if (++col % 3 == 0)
-	    send_to_char ("{x\n\r", ch);
+	    send_to_char ("`x\n\r", ch);
 	}
       if (col % 3 != 0)
-	send_to_char ("{x\n\r", ch);
+	send_to_char ("`x\n\r", ch);
       return;
     }
 

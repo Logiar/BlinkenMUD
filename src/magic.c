@@ -693,11 +693,11 @@ do_cast (CHAR_DATA * ch, char *argument)
 	  ch->mana -= mana;
 	  obj_from_char (obj);
 	  obj_to_char (obj, victim);
-	  act ("$p glows {Ggreen{x, then disappears.", ch, obj, victim,
+	  act ("$p glows `Ggreen`x, then disappears.", ch, obj, victim,
 	       TO_CHAR);
 	  act ("$p suddenly appears in your inventory.", ch, obj, victim,
 	       TO_VICT);
-	  act ("$p glows {Ggreen{x, then disappears from $n's inventory.", ch,
+	  act ("$p glows `Ggreen`x, then disappears from $n's inventory.", ch,
 	       obj, victim, TO_NOTVICT);
 	  check_improve (ch, sn, TRUE, 1);
 	  if (IS_OBJ_STAT (obj, ITEM_FORCED) && (victim->level <= HERO))
@@ -1127,8 +1127,8 @@ spell_call_lightning (int sn, int level, CHAR_DATA * ch, void *vo, int target)
 
   dam = dice (level / 2, 8);
 
-  act ("$G's {Ylightning{x strikes your foes!", ch, NULL, NULL, TO_CHAR);
-  act ("$n calls $G's {Ylightning{x to strike $s foes!",
+  act ("$G's `Ylightning`x strikes your foes!", ch, NULL, NULL, TO_CHAR);
+  act ("$n calls $G's `Ylightning`x to strike $s foes!",
        ch, NULL, NULL, TO_ROOM);
 
   for (vch = char_list; vch != NULL; vch = vch_next)
@@ -1153,7 +1153,7 @@ spell_call_lightning (int sn, int level, CHAR_DATA * ch, void *vo, int target)
 
       if (vch->in_room->area == ch->in_room->area
 	  && IS_OUTSIDE (vch) && IS_AWAKE (vch))
-	send_to_char ("{z{YLightning{x flashes in the sky.\n\r", vch);
+	send_to_char ("`z`YLightning`x flashes in the sky.\n\r", vch);
     }
 
   return;
@@ -1779,8 +1779,8 @@ spell_create_rose (int sn, int level, CHAR_DATA * ch, void *vo, int target)
 {
   OBJ_DATA *rose;
   rose = create_object (get_obj_index (OBJ_VNUM_ROSE), 0);
-  act ("$n has created a beautiful {Rred rose{x.", ch, rose, NULL, TO_ROOM);
-  send_to_char ("You create a beautiful {Rred rose{x.\n\r", ch);
+  act ("$n has created a beautiful `Rred rose`x.", ch, rose, NULL, TO_ROOM);
+  send_to_char ("You create a beautiful `Rred rose`x.\n\r", ch);
   obj_to_char (rose, ch);
   return;
 }
@@ -3786,7 +3786,7 @@ spell_identify (int sn, int level, CHAR_DATA * ch, void *vo, int target)
     }
   if (is_clan_obj (obj))
     {
-      sprintf (buf, "This object is owned by the [{%s%s{x] clan.\n\r",
+      sprintf (buf, "This object is owned by the [`%s%s`x] clan.\n\r",
 	       clan_table[obj->clan].pkill ? "B" : "M",
 	       clan_table[obj->clan].who_name);
       send_to_char (buf, ch);
@@ -4938,8 +4938,8 @@ spell_ventriloquate (int sn, int level, CHAR_DATA * ch, void *vo, int target)
 
   target_name = one_argument (target_name, speaker);
 
-  sprintf (buf1, "%s says '{S%s{x'.\n\r", speaker, target_name);
-  sprintf (buf2, "Someone makes %s say '{S%s{x'.\n\r", speaker, target_name);
+  sprintf (buf1, "%s says '`S%s`x'.\n\r", speaker, target_name);
+  sprintf (buf2, "Someone makes %s say '`S%s`x'.\n\r", speaker, target_name);
   buf1[0] = UPPER (buf1[0]);
 
   for (vch = ch->in_room->people; vch != NULL; vch = vch->next_in_room)

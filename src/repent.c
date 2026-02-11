@@ -76,7 +76,7 @@ do_repent (CHAR_DATA * ch, char *argument)
   if (arg[0] == '\0')
     {
       /* display price list */
-      act ("$N says '{aI offer the following services:{x'", ch, NULL, mob,
+      act ("$N says '`aI offer the following services:`x'", ch, NULL, mob,
 	   TO_CHAR);
       send_to_char ("  align: Thoth's forgiveness     20 gold\n\r", ch);
       send_to_char ("  bless: Thoth's blessing        20 gold\n\r", ch);
@@ -120,21 +120,21 @@ do_repent (CHAR_DATA * ch, char *argument)
 
   else
     {
-      act ("$N says '{aType 'repent' for a list of spells.{x'",
+      act ("$N says '`aType 'repent' for a list of spells.`x'",
 	   ch, NULL, mob, TO_CHAR);
       return;
     }
 
   if (cost > ((ch->platinum * 10000) + (ch->gold * 100) + ch->silver))
     {
-      act ("$N says '{aYou do not have enough gold for my services.{x'",
+      act ("$N says '`aYou do not have enough gold for my services.`x'",
 	   ch, NULL, mob, TO_CHAR);
       return;
     }
 
   if (spell != NULL && ch->alignment < 0)
     {
-      act ("$N says '{aThoth does not protect the evil at heart!{x'",
+      act ("$N says '`aThoth does not protect the evil at heart!`x'",
 	   ch, NULL, mob, TO_CHAR);
       return;
     }
@@ -146,23 +146,23 @@ do_repent (CHAR_DATA * ch, char *argument)
       if (remove_voodoo (ch))
 	{
 	  deduct_cost (ch, cost, VALUE_SILVER);
-	  act ("$n utters the words '{a$T{x'.", mob, NULL, words, TO_ROOM);
+	  act ("$n utters the words '`a$T`x'.", mob, NULL, words, TO_ROOM);
 	  act
-	    ("$n tells you '{aThe voodoo curses on you will soon be destroyed.{x'",
+	    ("$n tells you '`aThe voodoo curses on you will soon be destroyed.`x'",
 	     mob, NULL, ch, TO_VICT);
 	  return;
 	}
       deduct_cost (ch, cost / 5, VALUE_SILVER);
-      act ("$n utters the words '{a$T{x'.", mob, NULL, words, TO_ROOM);
+      act ("$n utters the words '`a$T`x'.", mob, NULL, words, TO_ROOM);
       act
-	("$n tells you '{aI couldn't find any voodoo dolls with your name.{x'",
+	("$n tells you '`aI couldn't find any voodoo dolls with your name.`x'",
 	 mob, NULL, ch, TO_VICT);
       return;
     }
 
 
   deduct_cost (ch, cost, VALUE_SILVER);
-  act ("$n utters the words '{a$T{x'.", mob, NULL, words, TO_ROOM);
+  act ("$n utters the words '`a$T`x'.", mob, NULL, words, TO_ROOM);
 
   if (spell == NULL)		/* Increase alignment toward good */
     {

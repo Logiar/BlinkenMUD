@@ -130,31 +130,31 @@ get_ascii (ROOM_INDEX_DATA * pRoom, bool fWall)
       switch (pRoom->sector_type)
 	{
 	case SECT_HILLS:
-	  return "{Gn";
+	  return "`Gn";
 	case SECT_DESERT:
-	  return "{Y.";
+	  return "`Y.";
 	case SECT_UNUSED:
-	  return "{D.";
+	  return "`D.";
 	case SECT_CITY:
-	  return "{B.";
+	  return "`B.";
 	case SECT_MOUNTAIN:
-	  return "{y^";
+	  return "`y^";
 	case SECT_INSIDE:
-	  return "{C.";
+	  return "`C.";
 	case SECT_FIELD:
-	  return "{g'";
+	  return "`g'";
 	case SECT_FOREST:
-	  return "{G$";
+	  return "`G$";
 	case SECT_WATER_SWIM:
 	  if (number_range (1, 3) < 2)
-	    return "{C~";
+	    return "`C~";
 	  else
-	    return "{c~";
+	    return "`c~";
 	case SECT_WATER_NOSWIM:
 	  if (number_range (1, 3) < 2)
-	    return "{B~";
+	    return "`B~";
 	  else
-	    return "{b~";
+	    return "`b~";
 	default:
 	  return " ";
 	}
@@ -168,22 +168,22 @@ get_ascii (ROOM_INDEX_DATA * pRoom, bool fWall)
 	case SECT_CITY:
 	case SECT_MOUNTAIN:
 	case SECT_INSIDE:
-	  return "{w#";
+	  return "`w#";
 	case SECT_HILLS:
 	case SECT_FIELD:
-	  return "{G'";
+	  return "`G'";
 	case SECT_FOREST:
-	  return "{g$";
+	  return "`g$";
 	case SECT_WATER_SWIM:
 	  if (number_range (1, 3) < 2)
-	    return "{C~";
+	    return "`C~";
 	  else
-	    return "{c~";
+	    return "`c~";
 	case SECT_WATER_NOSWIM:
 	  if (number_range (1, 3) < 2)
-	    return "{B~";
+	    return "`B~";
 	  else
-	    return "{b~";
+	    return "`b~";
 	default:
 	  return " ";
 	}
@@ -217,11 +217,11 @@ add_map_char (CHAR_DATA * ch, int x, int y, int x_pos, int y_pos)
 
 	  //Display doors.  Grey are locked, off white are just closed.
 	  if (!IS_SET (pExit->exit_info, EX_CLOSED))
-	    return "{B^";
+	    return "`B^";
 	  else if (IS_SET (pExit->exit_info, EX_LOCKED))
-	    return "{Y^";
+	    return "`Y^";
 	  else
-	    return "{D^";
+	    return "`D^";
 	}
 
       //Make sure map rooms aren't NULL.
@@ -280,9 +280,9 @@ add_map_char (CHAR_DATA * ch, int x, int y, int x_pos, int y_pos)
 	  if (!IS_SET (pExit->exit_info, EX_CLOSED))
 	    return room_floor;
 	  else if (IS_SET (pExit->exit_info, EX_LOCKED))
-	    return "{Y-";
+	    return "`Y-";
 	  else
-	    return "{D-";
+	    return "`D-";
 	}
       else
 	return room_wall;
@@ -344,9 +344,9 @@ add_map_char (CHAR_DATA * ch, int x, int y, int x_pos, int y_pos)
 	  if (!IS_SET (pExit->exit_info, EX_CLOSED))
 	    return room_floor;
 	  else if (IS_SET (pExit->exit_info, EX_LOCKED))
-	    return "{Y|";
+	    return "`Y|";
 	  else
-	    return "{D|";
+	    return "`D|";
 	}
       else
 	return room_wall;
@@ -368,13 +368,13 @@ add_map_char (CHAR_DATA * ch, int x, int y, int x_pos, int y_pos)
 	}
 
       if (x == center_x && y == center_y)	//Ch's position.
-	return "{Y@";
+	return "`Y@";
       else if (fCombat)
-	return "{R#";
+	return "`R#";
       else if (fPlayer)
-	return "{C@";
+	return "`C@";
       else if (found)
-	return "{M*";
+	return "`M*";
       else
 	return room_floor;
     }
@@ -396,9 +396,9 @@ add_map_char (CHAR_DATA * ch, int x, int y, int x_pos, int y_pos)
 	  if (!IS_SET (pExit->exit_info, EX_CLOSED))
 	    return room_floor;
 	  else if (IS_SET (pExit->exit_info, EX_LOCKED))
-	    return "{Y|";
+	    return "`Y|";
 	  else
-	    return "{D|";
+	    return "`D|";
 	}
       else
 	return room_wall;
@@ -462,9 +462,9 @@ add_map_char (CHAR_DATA * ch, int x, int y, int x_pos, int y_pos)
 	  if (!IS_SET (pExit->exit_info, EX_CLOSED))
 	    return room_floor;
 	  else if (IS_SET (pExit->exit_info, EX_LOCKED))
-	    return "{Y-";
+	    return "`Y-";
 	  else
-	    return "{D-";
+	    return "`D-";
 	}
       else
 	return room_wall;
@@ -479,11 +479,11 @@ add_map_char (CHAR_DATA * ch, int x, int y, int x_pos, int y_pos)
 
 	  //Display doors.  Grey are locked, off white are just closed.
 	  if (!IS_SET (pExit->exit_info, EX_CLOSED))
-	    return "{Bv";
+	    return "`Bv";
 	  else if (IS_SET (pExit->exit_info, EX_LOCKED))
-	    return "{Yv";
+	    return "`Yv";
 	  else
-	    return "{Dv";
+	    return "`Dv";
 	}
 
       //Make sure map rooms aren't NULL.
@@ -645,12 +645,12 @@ display_map (CHAR_DATA * ch)
   if (IS_IMMORTAL (ch))
     {
       sprintf (buf, "%5d", ch->in_room->vnum);
-      strcat (map_buf, "\n\r{W+{D------- {C");
+      strcat (map_buf, "\n\r`W+`D------- `C");
       strcat (map_buf, buf);
-      strcat (map_buf, "{D -{W+{x\n\r");
+      strcat (map_buf, "`D -`W+`x\n\r");
     }
   else
-    strcat (map_buf, "\n\r{W+{D---------------{W+{x\n\r");
+    strcat (map_buf, "\n\r`W+`D---------------`W+`x\n\r");
 
 
 
@@ -658,7 +658,7 @@ display_map (CHAR_DATA * ch)
     {
       for (y_pos = 0; y_pos < 3; y_pos++)
 	{
-	  strcat (map_buf, "{D|{x");
+	  strcat (map_buf, "`D|`x");
 
 	  for (x = min_x; x < max_x; ++x)
 	    {
@@ -670,7 +670,7 @@ display_map (CHAR_DATA * ch)
 
 	  if (y == min_y && y_pos == 0)
 	    {
-	      sprintf (buf, "{D| {C %s", ch->in_room->name);
+	      sprintf (buf, "`D| `C %s", ch->in_room->name);
 	      strcat (map_buf, buf);
 	    }
 
@@ -699,20 +699,20 @@ display_map (CHAR_DATA * ch)
 		      str_pos += 1;
 		    }
 		}
-	      strcat (map_buf, "{D|{x ");
+	      strcat (map_buf, "`D|`x ");
 	      line[str_pos - start] = '\0';
 
 	      if (y == min_y && y_pos == 1)
 		strcat (map_buf, "  ");
 
-	      strcat (map_buf, "   {x");
+	      strcat (map_buf, "   `x");
 	      strcat (map_buf, line);
-	      strcat (map_buf, "{x");
+	      strcat (map_buf, "`x");
 	    }
 	  strcat (map_buf, "\n\r");
 	}
     }
-  strcat (map_buf, "{W+{D---------------{W+{x    ");
+  strcat (map_buf, "`W+`D---------------`W+`x    ");
 
 
   while (desc[desc_pos] != '\0')
@@ -742,12 +742,12 @@ display_map (CHAR_DATA * ch)
 
       line[str_pos - start] = '\0';
       if (linum > 0)
-	strcat (map_buf, "{x                     ");
+	strcat (map_buf, "`x                     ");
       strcat (map_buf, line);
       strcat (map_buf, "\n\r");
       linum++;
     }
-  strcat (map_buf, "{x\n\r\n\r");
+  strcat (map_buf, "`x\n\r\n\r");
   send_to_char (map_buf, ch);
   return;
 }
