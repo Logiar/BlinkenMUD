@@ -134,7 +134,7 @@ do_remort (CHAR_DATA * ch, char *argument)
     }
 
   send_to_char ("Type remort again to confirm this command.\n\r", ch);
-  send_to_char ("`rWARNING`x: `WMhis command is irreversible`x.\n\r", ch);
+  send_to_char ("`rWARNING`x: `WThis command is irreversible`x.\n\r", ch);
   send_to_char
     ("Typing '`yremort stop`x' [or any other argument] will undo remort status.\n\r",
      ch);

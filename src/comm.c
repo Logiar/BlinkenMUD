@@ -165,8 +165,7 @@ normalize_colour_markers_for_www (char *txt)
 
 	  if (*(src + 1) == COLOUR_MARKER)
 	    {
-	      *dst++ = '{';
-	      *dst++ = '{';
+	      *dst++ = COLOUR_MARKER;
 	      src += 2;
 	      continue;
 	    }
