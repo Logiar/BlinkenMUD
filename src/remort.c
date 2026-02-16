@@ -41,7 +41,7 @@
 void
 do_remor (CHAR_DATA * ch, char *argument)
 {
-  send_to_char ("If you want to {rREMORT{x, you must spell it out.\n\r", ch);
+  send_to_char ("If you want to `rREMORT`x, you must spell it out.\n\r", ch);
   return;
 }
 
@@ -81,7 +81,7 @@ do_remort (CHAR_DATA * ch, char *argument)
 	  sprintf (strsave, "%s%s", PLAYER_DIR, capitalize (ch->name));
 	  stop_fighting (ch, TRUE);
 	  send_to_char
-	    ("{WYou have chosen to {rremort{W.  You will now be dropped in at the race\n\r",
+	    ("`WYou have chosen to `rremort`W.  You will now be dropped in at the race\n\r",
 	     ch);
 	  send_to_char
 	    ("selection section of character creation, and will be allowed to choose from\n\r",
@@ -94,9 +94,9 @@ do_remort (CHAR_DATA * ch, char *argument)
 	  send_to_char
 	    ("crashes while you are creating your character, create a new character\n\r",
 	     ch);
-	  send_to_char ("as normal and write a note to 'immortal'.{x\n\r",
+	  send_to_char ("as normal and write a note to 'immortal'.`x\n\r",
 			ch);
-	  send_to_char ("\n\r{c[Hit Enter to Continue]{x\n\r", ch);
+	  send_to_char ("\n\r`c[Hit Enter to Continue]`x\n\r", ch);
 	  wiznet ("$N has remorted.", ch, NULL, 0, 0, 0);
 
 	  /*
@@ -134,9 +134,9 @@ do_remort (CHAR_DATA * ch, char *argument)
     }
 
   send_to_char ("Type remort again to confirm this command.\n\r", ch);
-  send_to_char ("{rWARNING{x: {WMhis command is irreversible{x.\n\r", ch);
+  send_to_char ("`rWARNING`x: `WThis command is irreversible`x.\n\r", ch);
   send_to_char
-    ("Typing '{yremort stop{x' [or any other argument] will undo remort status.\n\r",
+    ("Typing '`yremort stop`x' [or any other argument] will undo remort status.\n\r",
      ch);
   ch->pcdata->confirm_remort = TRUE;
   wiznet ("$N is contemplating remorting.", ch, NULL, 0, 0, get_trust (ch));

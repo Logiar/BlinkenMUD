@@ -74,7 +74,7 @@ pkill should be TRUE if pkilling is allowed
    OBJ_VNUM_PIT,
    TRUE, TRUE, "Unused"},
 
-  {"devotion", " {WD{De{Wv{Do{Wt{Di{Wo{Dn{x ",
+  {"devotion", " `WD`De`Wv`Do`Wt`Di`Wo`Dn`x ",
    20050, 20051,
    20099,
    FALSE, TRUE, "The Immortals of Eternal Devotion"},
@@ -306,7 +306,7 @@ do_member (CHAR_DATA * ch, char *argument)
 	}
       if (!str_cmp (arg1, "accept"))
 	{
-	  sprintf (buf, "{RYou are now a member of clan {x[{%s%s{x]\n\r",
+	  sprintf (buf, "`RYou are now a member of clan `x[`%s%s`x]\n\r",
 		   clan_table[ch->invited].pkill ? "B" : "M",
 		   clan_table[ch->invited].who_name);
 	  send_to_char (buf, ch);
@@ -388,12 +388,12 @@ do_member (CHAR_DATA * ch, char *argument)
     }
   sprintf (buf, "%s has been invited to join your clan.\n\r", victim->name);
   send_to_char (buf, ch);
-  sprintf (buf, "{RYou have been invited to join clan {x[{%s%s{x]\n\r",
+  sprintf (buf, "`RYou have been invited to join clan `x[`%s%s`x]\n\r",
 	   clan_table[ch->clan].pkill ? "B" : "M",
 	   clan_table[ch->clan].who_name);
   send_to_char (buf, victim);
-  send_to_char ("{YUse {Gmember accept{Y to join this clan,{x\n\r", victim);
-  send_to_char ("{Yor {Gmember deny{Y to turn down the invitation.{x\n\r",
+  send_to_char ("`YUse `Gmember accept`Y to join this clan,`x\n\r", victim);
+  send_to_char ("`Yor `Gmember deny`Y to turn down the invitation.`x\n\r",
 		victim);
   victim->invited = ch->clan;
 }
@@ -466,7 +466,7 @@ do_cgossip (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOCGOSSIP);
 
-      sprintf (buf, "You cgossip '{E%s{x'\n\r", argument);
+      sprintf (buf, "You cgossip '`E%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -491,7 +491,7 @@ do_cgossip (CHAR_DATA * ch, char *argument)
 		}
 	      if (!found)
 		{
-		  act_new ("$n cgossips '{E$t{x'",
+		  act_new ("$n cgossips '`E$t`x'",
 			   ch, argument, d->character, TO_VICT, POS_SLEEPING);
 		}
 	    }
@@ -543,9 +543,9 @@ do_clantalk (CHAR_DATA * ch, char *argument)
 
   REMOVE_BIT (ch->comm, COMM_NOCLAN);
 
-  sprintf (buf, "You clan '{F%s{x'\n\r", argument);
+  sprintf (buf, "You clan '`F%s`x'\n\r", argument);
   send_to_char (buf, ch);
-  sprintf (buf, "$n clans '{F%s{x'", argument);
+  sprintf (buf, "$n clans '`F%s`x'", argument);
   for (d = descriptor_list; d != NULL; d = d->next)
     {
       int pos;
@@ -566,7 +566,7 @@ do_clantalk (CHAR_DATA * ch, char *argument)
 	    }
 	  if (!found)
 	    {
-	      act_new ("$n clans '{F$t{x'", ch, argument, d->character,
+	      act_new ("$n clans '`F$t`x'", ch, argument, d->character,
 		       TO_VICT, POS_DEAD);
 	    }
 	}
@@ -585,13 +585,13 @@ do_clanlist (CHAR_DATA * ch, char *argument)
   CLN_DATA *pcln;
 
   output = new_buf ();
-  sprintf (buf, "{x\n\r{B* = Pkill Clans    {M = Non-Pkill Clans{x\n\r");
+  sprintf (buf, "`x\n\r`B* = Pkill Clans    `M = Non-Pkill Clans`x\n\r");
   add_buf (output, buf);
   for (e = 0; e < MAX_CLAN; e++)
     {
       if (str_cmp (clan_table[e].exname, "Unused"))
 	{
-	  sprintf (buf, "{x-------------------------------------");
+	  sprintf (buf, "`x-------------------------------------");
 	  add_buf (output, buf);
 	  sprintf (buf, "--------------------------------------\n\r");
 	  add_buf (output, buf);
@@ -605,7 +605,7 @@ do_clanlist (CHAR_DATA * ch, char *argument)
 	    }
 	  if (IS_IMMORTAL (ch))
 	    {
-	      sprintf (buf, "{xName: {Y%s{x", clan_table[e].name);
+	      sprintf (buf, "`xName: `Y%s`x", clan_table[e].name);
 	      for (;;)
 		{
 		  if (strlen (buf) > 29)
@@ -614,17 +614,17 @@ do_clanlist (CHAR_DATA * ch, char *argument)
 		  strcat (buf, " ");
 		}
 	      add_buf (output, buf);
-	      sprintf (buf, "{xVnum: {Y%d{x\n\r", clan_table[e].hall);
+	      sprintf (buf, "`xVnum: `Y%d`x\n\r", clan_table[e].hall);
 	      add_buf (output, buf);
 	    }
 	  if (clan_table[e].pkill)
-	    sprintf (buf, "*[{B%s{x]\tMembers: {G%d{x\n\rDesc: {c%s{x\n\r",
+	    sprintf (buf, "*[`B%s`x]\tMembers: `G%d`x\n\rDesc: `c%s`x\n\r",
 		     clan_table[e].who_name, members, clan_table[e].exname);
 	  else
-	    sprintf (buf, " [{M%s{x]\tMembers: {G%d{x\n\rDesc: {c%s{x\n\r",
+	    sprintf (buf, " [`M%s`x]\tMembers: `G%d`x\n\rDesc: `c%s`x\n\r",
 		     clan_table[e].who_name, members, clan_table[e].exname);
 	  add_buf (output, buf);
-	  sprintf (buf, "Leaders:{R");
+	  sprintf (buf, "Leaders:`R");
 	  add_buf (output, buf);
 	  for (pcln = cln_list; pcln != NULL; pcln = pcln->next)
 	    {
@@ -637,11 +637,11 @@ do_clanlist (CHAR_DATA * ch, char *argument)
 		    }
 		}
 	    }
-	  sprintf (buf, "{x\n\r");
+	  sprintf (buf, "`x\n\r");
 	  add_buf (output, buf);
 	}
     }
-  sprintf (buf, "{x----------------------------------------");
+  sprintf (buf, "`x----------------------------------------");
   add_buf (output, buf);
   sprintf (buf, "-----------------------------------\n\r\n\r");
   add_buf (output, buf);

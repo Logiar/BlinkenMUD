@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * *    reward.c    * * * * * * * * * * * * * * *
 *                                                                       *
 *    Original Diku Mud copyright (C) 1990, 1991 by Sebastian Hammer,    *
-*   Michael Seifert, Hans-Henrik Stæfeldt, Tom Madsen and Katja Nyboe   *
+*   Michael Seifert, Hans-Henrik StÃ¦feldt, Tom Madsen and Katja Nyboe   *
 *                                                                       *
 *         Merc Diku Mud improvements copyright (C) 1992, 1993 by        *
 *            Michael Chastain, Michael Quan, and Mitchell Tse           *
@@ -433,7 +433,7 @@ do_reward (CHAR_DATA * ch, char *argument)
       act ("$c takes $p from you and gives you the bounty.", rewarder, obj,
 	   ch, TO_VICT);
       act
-	("{c You have recieved a '{x{GQuest Point{x{c',{x {cawesome!{x{c.{x",
+	("`c You have received a '`x`GQuest Point`x`c',`x `cawesome!`x`c.`x",
 	 rewarder, obj, ch, TO_VICT);
 
       extract_obj (obj);

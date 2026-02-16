@@ -156,7 +156,7 @@ check_assist (CHAR_DATA * ch, CHAR_DATA * victim)
 	      && IS_SET (rch->off_flags, ASSIST_PLAYERS)
 	      && rch->level + 6 > victim->level)
 	    {
-	      do_emote (rch, "{Rscreams and attacks!{x");
+	      do_emote (rch, "`Rscreams and attacks!`x");
 	      multi_hit (rch, victim, TYPE_UNDEFINED);
 	      continue;
 	    }
@@ -211,7 +211,7 @@ check_assist (CHAR_DATA * ch, CHAR_DATA * victim)
 
 		  if (target != NULL)
 		    {
-		      do_emote (rch, "{Rscreams and attacks!{x");
+		      do_emote (rch, "`Rscreams and attacks!`x");
 		      multi_hit (rch, target, TYPE_UNDEFINED);
 		    }
 		}
@@ -790,9 +790,9 @@ one_hit (CHAR_DATA * ch, CHAR_DATA * victim, int dt, bool secondary)
 	  if (!saves_spell (level / 2, victim, DAM_POISON))
 	    {
 	      send_to_char
-		("{cYou feel {ypoison{c coursing through your veins.{x",
+		("`cYou feel `ypoison`c coursing through your veins.`x",
 		 victim);
-	      act ("$n is {ypoisoned{x by the venom on $p.", victim, wield,
+	      act ("$n is `ypoisoned`x by the venom on $p.", victim, wield,
 		   NULL, TO_ROOM);
 
 	      af.where = TO_AFFECTS;
@@ -812,7 +812,7 @@ one_hit (CHAR_DATA * ch, CHAR_DATA * victim, int dt, bool secondary)
 	      poison->duration = UMAX (0, poison->duration - 1);
 
 	      if (poison->level == 0 || poison->duration == 0)
-		act ("The {ypoison{x on $p has worn off.", ch, wield, NULL,
+		act ("The `ypoison`x on $p has worn off.", ch, wield, NULL,
 		     TO_CHAR);
 	    }
 	}
@@ -821,8 +821,8 @@ one_hit (CHAR_DATA * ch, CHAR_DATA * victim, int dt, bool secondary)
       if (ch->fighting == victim && IS_WEAPON_STAT (wield, WEAPON_VAMPIRIC))
 	{
 	  dam = number_range (1, wield->level / 5 + 1);
-	  act ("{k$p draws life from $n.{x", victim, wield, NULL, TO_ROOM);
-	  act ("{iYou feel $p drawing your life away.{x",
+	  act ("`k$p draws life from $n.`x", victim, wield, NULL, TO_ROOM);
+	  act ("`iYou feel $p drawing your life away.`x",
 	       victim, wield, NULL, TO_CHAR);
 	  damage_old (ch, victim, dam, 0, DAM_NEGATIVE, FALSE);
 	  ch->alignment = UMAX (-1000, ch->alignment - 1);
@@ -834,8 +834,8 @@ one_hit (CHAR_DATA * ch, CHAR_DATA * victim, int dt, bool secondary)
       if (ch->fighting == victim && IS_WEAPON_STAT (wield, WEAPON_FLAMING))
 	{
 	  dam = number_range (1, wield->level / 4 + 1);
-	  act ("{k$n is {rburned{k by $p.{x", victim, wield, NULL, TO_ROOM);
-	  act ("{i$p {rsears{i your flesh.{x", victim, wield, NULL, TO_CHAR);
+	  act ("`k$n is `rburned`k by $p.`x", victim, wield, NULL, TO_ROOM);
+	  act ("`i$p `rsears`i your flesh.`x", victim, wield, NULL, TO_CHAR);
 	  fire_effect ((void *) victim, wield->level / 2, dam, TARGET_CHAR);
 	  damage (ch, victim, dam, 0, DAM_FIRE, FALSE);
 	}
@@ -843,8 +843,8 @@ one_hit (CHAR_DATA * ch, CHAR_DATA * victim, int dt, bool secondary)
       if (ch->fighting == victim && IS_WEAPON_STAT (wield, WEAPON_FROST))
 	{
 	  dam = number_range (1, wield->level / 6 + 2);
-	  act ("{k$p {cfreezes{k $n.{x", victim, wield, NULL, TO_ROOM);
-	  act ("{iThe {Ccold{i touch of $p surrounds you with {Cice.{x",
+	  act ("`k$p `cfreezes`k $n.`x", victim, wield, NULL, TO_ROOM);
+	  act ("`iThe `Ccold`i touch of $p surrounds you with `Cice.`x",
 	       victim, wield, NULL, TO_CHAR);
 	  cold_effect (victim, wield->level / 2, dam, TARGET_CHAR);
 	  damage (ch, victim, dam, 0, DAM_COLD, FALSE);
@@ -853,8 +853,8 @@ one_hit (CHAR_DATA * ch, CHAR_DATA * victim, int dt, bool secondary)
       if (ch->fighting == victim && IS_WEAPON_STAT(wield,WEAPON_SHOCKING))
 	{
 	  dam = number_range(1,wield->level/5 + 2);
-	  act("{k$n is struck by {Ylightning{k from $p.{x",victim,wield,NULL,TO_ROOM);
-	  act("{iYou are {Yshocked{i by $p.{x",victim,wield,NULL,TO_CHAR);
+	  act("`k$n is struck by `Ylightning`k from $p.`x",victim,wield,NULL,TO_ROOM);
+	  act("`iYou are `Yshocked`i by $p.`x",victim,wield,NULL,TO_CHAR);
 	    shock_effect(victim,wield->level/2,dam,TARGET_CHAR);
 	    damage(ch,victim,dam,0,DAM_LIGHTNING,FALSE);
 	}
@@ -1152,7 +1152,7 @@ damage (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, int dam_type,
 	{
 	  OBJ_DATA *obj;
 	  obj = get_eq_char (ch, WEAR_WIELD);
-	  send_to_char ("{cYou {z{Breally{x{c shouldn't cheat.{x\n\r", ch);
+	  send_to_char ("`cYou `z`Breally`x`c shouldn't cheat.`x\n\r", ch);
 	  if (obj != NULL)
 	    extract_obj (obj);
 	}
@@ -1301,45 +1301,45 @@ damage (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, int dam_type,
   switch (victim->position)
     {
     case POS_MORTAL:
-      act ("{c$n is mortally wounded, and will die soon, if not aided.{x",
+      act ("`c$n is mortally wounded, and will die soon, if not aided.`x",
 	   victim, NULL, NULL, TO_ROOM);
       send_to_char
-	("{cYou are mortally wounded, and will die soon, if not aided.{x\n\r",
+	("`cYou are mortally wounded, and will die soon, if not aided.`x\n\r",
 	 victim);
       break;
 
     case POS_INCAP:
-      act ("{c$n is incapacitated and will slowly die, if not aided.{x",
+      act ("`c$n is incapacitated and will slowly die, if not aided.`x",
 	   victim, NULL, NULL, TO_ROOM);
       send_to_char
-	("{cYou are incapacitated and will slowly {z{Rdie{x{c, if not aided.{x\n\r",
+	("`cYou are incapacitated and will slowly `z`Rdie`x`c, if not aided.`x\n\r",
 	 victim);
       break;
 
     case POS_STUNNED:
-      act ("{c$n is stunned, but will probably recover.{x",
+      act ("`c$n is stunned, but will probably recover.`x",
 	   victim, NULL, NULL, TO_ROOM);
-      send_to_char ("{cYou are stunned, but will probably recover.{x\n\r",
+      send_to_char ("`cYou are stunned, but will probably recover.`x\n\r",
 		    victim);
       break;
 
     case POS_DEAD:
       if ((IS_NPC (victim)) && (victim->die_descr[0] != '\0'))
 	{
-	  act ("{c$n $T{x", victim, 0, victim->die_descr, TO_ROOM);
+	  act ("`c$n $T`x", victim, 0, victim->die_descr, TO_ROOM);
 	}
       else
 	{
-	  act ("{c$n is {CDEAD!!{x", victim, 0, 0, TO_ROOM);
+	  act ("`c$n is `CDEAD!!`x", victim, 0, 0, TO_ROOM);
 	}
-      send_to_char ("{cYou have been {RKILLED!!{x\n\r\n\r", victim);
+      send_to_char ("`cYou have been `RKILLED!!`x\n\r\n\r", victim);
       break;
 
     default:
       if (dam > victim->max_hit / 4)
-	send_to_char ("{cThat really did {RHURT!{x\n\r", victim);
+	send_to_char ("`cThat really did `RHURT!`x\n\r", victim);
       if (victim->hit < victim->max_hit / 4)
-	send_to_char ("{cYou sure are {z{RBLEEDING!{x\n\r", victim);
+	send_to_char ("`cYou sure are `z`RBLEEDING!`x\n\r", victim);
       break;
     }
 
@@ -1543,10 +1543,10 @@ damage_mock (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt,
   if (ch == victim)
     {
       sprintf (buf1,
-	       "{y$n's {gmock {B%s{g would have done {R%d hp{g damage to {y$mself{g.{x",
+	       "`y$n's `gmock `B%s`g would have done `R%d hp`g damage to `y$mself`g.`x",
 	       attack, dam);
       sprintf (buf2,
-	       "{yYour {gmock {B%s{g would have done {R%d hp{g damage to {yyourself{g.{x",
+	       "`yYour `gmock `B%s`g would have done `R%d hp`g damage to `yyourself`g.`x",
 	       attack, dam);
       act (buf1, ch, NULL, NULL, TO_ROOM);
       act (buf2, ch, NULL, NULL, TO_CHAR);
@@ -1554,13 +1554,13 @@ damage_mock (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt,
   else if (ch->level < MAX_LEVEL)
     {
       sprintf (buf1,
-	       "{y$n's {gmock {B%s{g would have done {R%d hp{g damage to {y$N{g.{x",
+	       "`y$n's `gmock `B%s`g would have done `R%d hp`g damage to `y$N`g.`x",
 	       attack, dam);
       sprintf (buf2,
-	       "{yYour {gmock {B%s{g would have done {R%d hp{g damage to {y$N{g.{x",
+	       "`yYour `gmock `B%s`g would have done `R%d hp`g damage to `y$N`g.`x",
 	       attack, dam);
       sprintf (buf3,
-	       "{y$n's {gmock {B%s{g would have done {R%d hp{g damage to {yyou{g.{x",
+	       "`y$n's `gmock `B%s`g would have done `R%d hp`g damage to `yyou`g.`x",
 	       attack, dam);
       act (buf1, ch, NULL, victim, TO_NOTVICT);
       act (buf2, ch, NULL, victim, TO_CHAR);
@@ -1569,13 +1569,13 @@ damage_mock (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt,
   else
     {
       sprintf (buf1,
-	       "{y$n's {gmock {B%s{g would have done {R%lu hp{g damage to {y$N{g.{x",
+	       "`y$n's `gmock `B%s`g would have done `R%lu hp`g damage to `y$N`g.`x",
 	       attack, immdam);
       sprintf (buf2,
-	       "{yYour {gmock {B%s{g would have done {R%lu hp{g damage to {y$N{g.{x",
+	       "`yYour `gmock `B%s`g would have done `R%lu hp`g damage to `y$N`g.`x",
 	       attack, immdam);
       sprintf (buf3,
-	       "{y$n's {gmock {B%s{g would have done {R%lu hp{g damage to {yyou{g.{x",
+	       "`y$n's `gmock `B%s`g would have done `R%lu hp`g damage to `yyou`g.`x",
 	       attack, immdam);
       act (buf1, ch, NULL, victim, TO_NOTVICT);
       act (buf2, ch, NULL, victim, TO_CHAR);
@@ -1612,7 +1612,7 @@ damage_old (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, int
 	{
 	  OBJ_DATA *obj;
 	  obj = get_eq_char (ch, WEAR_WIELD);
-	  send_to_char ("{cYou {z{Greally{x{c shouldn't cheat.{x\n\r", ch);
+	  send_to_char ("`cYou `z`Greally`x`c shouldn't cheat.`x\n\r", ch);
 	  if (obj != NULL)
 	    extract_obj (obj);
 	}
@@ -1755,45 +1755,45 @@ damage_old (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, int
   switch (victim->position)
     {
     case POS_MORTAL:
-      act ("{c$n is mortally wounded, and will die soon, if not aided.{x",
+      act ("`c$n is mortally wounded, and will die soon, if not aided.`x",
 	   victim, NULL, NULL, TO_ROOM);
       send_to_char
-	("{cYou are mortally wounded, and will die soon, if not aided.{x\n\r",
+	("`cYou are mortally wounded, and will die soon, if not aided.`x\n\r",
 	 victim);
       break;
 
     case POS_INCAP:
-      act ("{c$n is incapacitated and will slowly die, if not aided.{x",
+      act ("`c$n is incapacitated and will slowly die, if not aided.`x",
 	   victim, NULL, NULL, TO_ROOM);
       send_to_char
-	("{cYou are incapacitated and will slowly {Rdie{c, if not aided.{x\n\r",
+	("`cYou are incapacitated and will slowly `Rdie`c, if not aided.`x\n\r",
 	 victim);
       break;
 
     case POS_STUNNED:
-      act ("{c$n is stunned, but will probably recover.{x",
+      act ("`c$n is stunned, but will probably recover.`x",
 	   victim, NULL, NULL, TO_ROOM);
-      send_to_char ("{cYou are stunned, but will probably recover.{x\n\r",
+      send_to_char ("`cYou are stunned, but will probably recover.`x\n\r",
 		    victim);
       break;
 
     case POS_DEAD:
       if ((IS_NPC (victim)) && (victim->die_descr[0] != '\0'))
 	{
-	  act ("{c$n $T{x", victim, 0, victim->die_descr, TO_ROOM);
+	  act ("`c$n $T`x", victim, 0, victim->die_descr, TO_ROOM);
 	}
       else
 	{
-	  act ("{c$n is {CDEAD!!{x", victim, 0, 0, TO_ROOM);
+	  act ("`c$n is `CDEAD!!`x", victim, 0, 0, TO_ROOM);
 	}
-      send_to_char ("{cYou have been {RKILLED!!{x\n\r\n\r", victim);
+      send_to_char ("`cYou have been `RKILLED!!`x\n\r\n\r", victim);
       break;
 
     default:
       if (dam > victim->max_hit / 4)
-	send_to_char ("{cThat really did {RHURT!{x\n\r", victim);
+	send_to_char ("`cThat really did `RHURT!`x\n\r", victim);
       if (victim->hit < victim->max_hit / 4)
-	send_to_char ("{cYou sure are {z{RBLEEDING!{x\n\r", victim);
+	send_to_char ("`cYou sure are `z`RBLEEDING!`x\n\r", victim);
       break;
     }
 
@@ -2092,7 +2092,7 @@ is_safe_mock (CHAR_DATA * ch, CHAR_DATA * victim)
     }
   if (IS_NPC (victim))
     {
-      send_to_char ("{RYou can only use this on a player.{x\n\r", ch);
+      send_to_char ("`RYou can only use this on a player.`x\n\r", ch);
       return TRUE;
     }
   return FALSE;
@@ -2293,8 +2293,8 @@ check_parry (CHAR_DATA * ch, CHAR_DATA * victim)
   if (number_percent () >= chance + victim->level - ch->level)
     return FALSE;
 
-  act ("{iYou parry $n's attack.{x", ch, NULL, victim, TO_VICT);
-  act ("{h$N parries your attack.{x", ch, NULL, victim, TO_CHAR);
+  act ("`iYou parry $n's attack.`x", ch, NULL, victim, TO_VICT);
+  act ("`h$N parries your attack.`x", ch, NULL, victim, TO_CHAR);
   check_improve (victim, gsn_parry, TRUE, 6);
   return TRUE;
 }
@@ -2323,9 +2323,9 @@ check_shield_block (CHAR_DATA * ch, CHAR_DATA * victim)
   if (victim->stunned)
     return FALSE;
 
-  act ("{iYou block $n's attack with your shield.{x", ch, NULL, victim,
+  act ("`iYou block $n's attack with your shield.`x", ch, NULL, victim,
        TO_VICT);
-  act ("{h$N blocks your attack with a shield.{x", ch, NULL, victim, TO_CHAR);
+  act ("`h$N blocks your attack with a shield.`x", ch, NULL, victim, TO_CHAR);
   check_improve (victim, gsn_shield_block, TRUE, 6);
   return TRUE;
 }
@@ -2353,8 +2353,8 @@ check_dodge (CHAR_DATA * ch, CHAR_DATA * victim)
   if (victim->stunned)
     return FALSE;
 
-  act ("{iYou dodge $n's attack.{x", ch, NULL, victim, TO_VICT);
-  act ("{h$N dodges your attack.{x", ch, NULL, victim, TO_CHAR);
+  act ("`iYou dodge $n's attack.`x", ch, NULL, victim, TO_VICT);
+  act ("`h$N dodges your attack.`x", ch, NULL, victim, TO_CHAR);
   check_improve (victim, gsn_dodge, TRUE, 6);
   return TRUE;
 }
@@ -2442,7 +2442,7 @@ stop_fighting (CHAR_DATA * ch, bool fBoth)
 	  if (IS_SET (fch->comm, COMM_STORE))
 	    if (fch->tells)
 	      {
-		sprintf (buf, "You have {R%d{x tells waiting.\n\r",
+		sprintf (buf, "You have `R%d`x tells waiting.\n\r",
 			 fch->tells);
 		send_to_char (buf, fch);
 		send_to_char ("Type 'replay' to see tells.\n\r", fch);
@@ -2991,7 +2991,7 @@ group_gain (CHAR_DATA * ch, CHAR_DATA * victim)
 
 
       xp = xp_compute (gch, victim, group_levels);
-      sprintf (buf, "{BYou receive {W%d{B experience points.{x\n\r", xp);
+      sprintf (buf, "`BYou receive `W%d`B experience points.`x\n\r", xp);
       send_to_char (buf, gch);
       gain_exp (gch, xp);
 
@@ -3005,8 +3005,8 @@ group_gain (CHAR_DATA * ch, CHAR_DATA * victim)
 	      || (IS_OBJ_STAT (obj, ITEM_ANTI_GOOD) && IS_GOOD (ch))
 	      || (IS_OBJ_STAT (obj, ITEM_ANTI_NEUTRAL) && IS_NEUTRAL (ch)))
 	    {
-	      act ("{cYou are {Wzapped{c by $p.{x", ch, obj, NULL, TO_CHAR);
-	      act ("$n is {Wzapped{x by $p.", ch, obj, NULL, TO_ROOM);
+	      act ("`cYou are `Wzapped`c by $p.`x", ch, obj, NULL, TO_CHAR);
+	      act ("$n is `Wzapped`x by $p.", ch, obj, NULL, TO_ROOM);
 	      obj_from_char (obj);
 	      obj_to_room (obj, ch->in_room);
 	    }
@@ -3016,11 +3016,11 @@ group_gain (CHAR_DATA * ch, CHAR_DATA * victim)
 	  && IS_SET (ch->act, PLR_QUESTOR)
 	  && (ch->questmob == victim->pIndexData->vnum))
 	{
-	  act ("{2QUEST{x almost {4COMPLETED{x", ch, NULL, NULL, TO_CHAR);
+	  act ("`2QUEST`x almost `4COMPLETED`x", ch, NULL, NULL, TO_CHAR);
 	  act
-	    ("{7Return to the questmaster at once to {4complete{x your quest",
+	    ("`7Return to the questmaster at once to `4complete`x your quest",
 	     ch, NULL, NULL, TO_CHAR);
-	  act ("a {2Quest{x is being completed", ch, NULL, NULL, TO_ROOM);
+	  act ("a `2Quest`x is being completed", ch, NULL, NULL, TO_ROOM);
 	  ch->questmob = -1;
 	  ch->countdown += number_range (0, 5);	//Give some time to get back
 	}
@@ -3395,14 +3395,14 @@ dam_message (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, bool immune)
     {
       if (ch == victim)
 	{
-	  sprintf (buf1, "{k$n %s $melf%c{x", vp, punct);
-	  sprintf (buf2, "{hYou %s yourself%c{x", vs, punct);
+	  sprintf (buf1, "`k$n %s $melf%c`x", vp, punct);
+	  sprintf (buf2, "`hYou %s yourself%c`x", vs, punct);
 	}
       else
 	{
-	  sprintf (buf1, "{k$n %s $N%c{x", vp, punct);
-	  sprintf (buf2, "{hYou %s $N%c{x", vs, punct);
-	  sprintf (buf3, "{i$n %s you%c{x", vp, punct);
+	  sprintf (buf1, "`k$n %s $N%c`x", vp, punct);
+	  sprintf (buf2, "`hYou %s $N%c`x", vs, punct);
+	  sprintf (buf3, "`i$n %s you%c`x", vp, punct);
 	}
     }
   else
@@ -3422,28 +3422,28 @@ dam_message (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, bool immune)
 	{
 	  if (ch == victim)
 	    {
-	      sprintf (buf1, "{k$n is unaffected by $s own %s.{x", attack);
-	      sprintf (buf2, "{hLuckily, you are immune to that.{x");
+	      sprintf (buf1, "`k$n is unaffected by $s own %s.`x", attack);
+	      sprintf (buf2, "`hLuckily, you are immune to that.`x");
 	    }
 	  else
 	    {
-	      sprintf (buf1, "{k$N is unaffected by $n's %s!{x", attack);
-	      sprintf (buf2, "{h$N is unaffected by your %s!{x", attack);
-	      sprintf (buf3, "{i$n's %s is powerless against you.{x", attack);
+	      sprintf (buf1, "`k$N is unaffected by $n's %s!`x", attack);
+	      sprintf (buf2, "`h$N is unaffected by your %s!`x", attack);
+	      sprintf (buf3, "`i$n's %s is powerless against you.`x", attack);
 	    }
 	}
       else
 	{
 	  if (ch == victim)
 	    {
-	      sprintf (buf1, "{k$n's %s %s $m%c{x", attack, vp, punct);
-	      sprintf (buf2, "{hYour %s %s you%c{x", attack, vp, punct);
+	      sprintf (buf1, "`k$n's %s %s $m%c`x", attack, vp, punct);
+	      sprintf (buf2, "`hYour %s %s you%c`x", attack, vp, punct);
 	    }
 	  else
 	    {
-	      sprintf (buf1, "{k$n's %s %s $N%c{x", attack, vp, punct);
-	      sprintf (buf2, "{hYour %s %s $N%c{x", attack, vp, punct);
-	      sprintf (buf3, "{i$n's %s %s you%c{x", attack, vp, punct);
+	      sprintf (buf1, "`k$n's %s %s $N%c`x", attack, vp, punct);
+	      sprintf (buf2, "`hYour %s %s $N%c`x", attack, vp, punct);
+	      sprintf (buf3, "`i$n's %s %s you%c`x", attack, vp, punct);
 	    }
 	}
     }
@@ -3479,18 +3479,18 @@ disarm (CHAR_DATA * ch, CHAR_DATA * victim)
 
   if (IS_OBJ_STAT (obj, ITEM_NOREMOVE))
     {
-      act ("{j$S weapon won't budge!{x", ch, NULL, victim, TO_CHAR);
-      act ("{j$n tries to disarm you, but your weapon won't budge!{x",
+      act ("`j$S weapon won't budge!`x", ch, NULL, victim, TO_CHAR);
+      act ("`j$n tries to disarm you, but your weapon won't budge!`x",
 	   ch, NULL, victim, TO_VICT);
-      act ("{k$n tries to disarm $N, but fails.{x", ch, NULL, victim,
+      act ("`k$n tries to disarm $N, but fails.`x", ch, NULL, victim,
 	   TO_NOTVICT);
       return;
     }
 
-  act ("{j$n DISARMS you and sends your weapon flying!{x",
+  act ("`j$n DISARMS you and sends your weapon flying!`x",
        ch, NULL, victim, TO_VICT);
-  act ("{jYou disarm $N!{x", ch, NULL, victim, TO_CHAR);
-  act ("{k$n disarms $N!{x", ch, NULL, victim, TO_NOTVICT);
+  act ("`jYou disarm $N!`x", ch, NULL, victim, TO_CHAR);
+  act ("`k$n disarms $N!`x", ch, NULL, victim, TO_NOTVICT);
 
   obj_from_char (obj);
   if (IS_OBJ_STAT (obj, ITEM_NODROP) || IS_OBJ_STAT (obj, ITEM_INVENTORY))
@@ -3516,26 +3516,26 @@ do_berserk (CHAR_DATA * ch, char *argument)
 	  && ch->level < skill_table[gsn_berserk].skill_level[ch->class]))
     {
       send_to_char
-	("{hYou turn {rred{h in the face, but nothing happens.{x\n\r", ch);
+	("`hYou turn `rred`h in the face, but nothing happens.`x\n\r", ch);
       return;
     }
 
   if (IS_AFFECTED (ch, AFF_BERSERK) || is_affected (ch, gsn_berserk)
       || is_affected (ch, skill_lookup ("frenzy")))
     {
-      send_to_char ("{hYou get a little madder.{x\n\r", ch);
+      send_to_char ("`hYou get a little madder.`x\n\r", ch);
       return;
     }
 
   if (IS_AFFECTED (ch, AFF_CALM))
     {
-      send_to_char ("{hYou're feeling to mellow to berserk.{x\n\r", ch);
+      send_to_char ("`hYou're feeling to mellow to berserk.`x\n\r", ch);
       return;
     }
 
   if (ch->mana < 50)
     {
-      send_to_char ("{hYou can't get up enough energy.{x\n\r", ch);
+      send_to_char ("`hYou can't get up enough energy.`x\n\r", ch);
       return;
     }
 
@@ -3561,9 +3561,9 @@ do_berserk (CHAR_DATA * ch, char *argument)
       ch->hit += ch->level * 2;
       ch->hit = UMIN (ch->hit, ch->max_hit);
 
-      send_to_char ("{hYour pulse races as you are consumed by {rrage!{x\n\r",
+      send_to_char ("`hYour pulse races as you are consumed by `rrage!`x\n\r",
 		    ch);
-      act ("{k$n gets a {cw{gi{rl{yd{k look in $s eyes.{x", ch, NULL, NULL,
+      act ("`k$n gets a `cw`gi`rl`yd`k look in $s eyes.`x", ch, NULL, NULL,
 	   TO_ROOM);
       check_improve (ch, gsn_berserk, TRUE, 2);
 
@@ -3591,7 +3591,7 @@ do_berserk (CHAR_DATA * ch, char *argument)
       ch->mana -= 25;
       ch->move /= 2;
 
-      send_to_char ("{hYour pulse speeds up, but nothing happens.{x\n\r", ch);
+      send_to_char ("`hYour pulse speeds up, but nothing happens.`x\n\r", ch);
       check_improve (ch, gsn_berserk, FALSE, 2);
     }
 }
@@ -3694,7 +3694,7 @@ do_vdpi (CHAR_DATA * ch, char *argument)
 	  act ("$n sticks a pin into a voodoo doll.", ch, NULL, NULL,
 	       TO_ROOM);
 	  send_to_char
-	    ("{RYou double over with a sudden pain in your gut!{x\n\r", wch);
+	    ("`RYou double over with a sudden pain in your gut!`x\n\r", wch);
 	  act ("$n suddenly doubles over with a look of extreme pain!", wch,
 	       NULL, NULL, TO_ROOM);
 	  af.where = TO_SHIELDS;
@@ -3764,8 +3764,8 @@ do_vdtr (CHAR_DATA * ch, char *argument)
 			ch);
 	  act ("$n slams a voodoo doll against the ground.", ch, NULL, NULL,
 	       TO_ROOM);
-	  send_to_char ("{RYour feet slide out from under you!{x\n\r", wch);
-	  send_to_char ("{RYou hit the ground face first!{x\n\r", wch);
+	  send_to_char ("`RYour feet slide out from under you!`x\n\r", wch);
+	  send_to_char ("`RYou hit the ground face first!`x\n\r", wch);
 	  act
 	    ("$n trips over $s own feet, and does a nose dive into the ground!",
 	     wch, NULL, NULL, TO_ROOM);
@@ -3850,10 +3850,10 @@ do_vdth (CHAR_DATA * ch, char *argument)
 	  if ((wch->fighting != NULL) || (number_percent () < 25))
 	    {
 	      send_to_char
-		("{RA sudden gust of wind throws you through the air!{x\n\r",
+		("`RA sudden gust of wind throws you through the air!`x\n\r",
 		 wch);
 	      send_to_char
-		("{RYou slam face first into the nearest wall!{x\n\r", wch);
+		("`RYou slam face first into the nearest wall!`x\n\r", wch);
 	      act
 		("A sudden gust of wind picks up $n and throws $m into a wall!",
 		 wch, NULL, NULL, TO_ROOM);
@@ -3884,20 +3884,20 @@ do_vdth (CHAR_DATA * ch, char *argument)
 		       dir_name[door]);
 	      act (buf, wch, NULL, NULL, TO_ROOM);
 	      send_to_char
-		("{RA sudden gust of wind throws you through the air!{x\n\r",
+		("`RA sudden gust of wind throws you through the air!`x\n\r",
 		 wch);
 	      wch->in_room = now_in;
 	      act ("$n sails into the room and slams face first into a wall!",
 		   wch, NULL, NULL, TO_ROOM);
 	      do_look (wch, "auto");
 	      send_to_char
-		("{RYou slam face first into the nearest wall!{x\n\r", wch);
+		("`RYou slam face first into the nearest wall!`x\n\r", wch);
 	      return;
 	    }
 	  send_to_char
-	    ("{RA sudden gust of wind throws you through the air!{x\n\r",
+	    ("`RA sudden gust of wind throws you through the air!`x\n\r",
 	     wch);
-	  send_to_char ("{RYou slam face first into the nearest wall!{x\n\r",
+	  send_to_char ("`RYou slam face first into the nearest wall!`x\n\r",
 			wch);
 	  act ("A sudden gust of wind picks up $n and throws $m into a wall!",
 	       wch, NULL, NULL, TO_ROOM);
@@ -4017,8 +4017,8 @@ do_bash (CHAR_DATA * ch, char *argument)
 
   if (!IS_NPC (victim) && chance < get_skill (victim, gsn_dodge))
     {				/*
-				   act("{i$n tries to bash you, but you dodge it.{x",ch,NULL,victim,TO_VICT);
-				   act("{h$N dodges your bash, you fall flat on your face.{x",ch,NULL,victim,TO_CHAR);
+				   act("`i$n tries to bash you, but you dodge it.`x",ch,NULL,victim,TO_VICT);
+				   act("`h$N dodges your bash, you fall flat on your face.`x",ch,NULL,victim,TO_CHAR);
 				   WAIT_STATE(ch,skill_table[gsn_bash].beats);
 				   return; */
       chance -= 3 * (get_skill (victim, gsn_dodge) - chance);
@@ -4028,11 +4028,11 @@ do_bash (CHAR_DATA * ch, char *argument)
   if (number_percent () < chance)
     {
 
-      act ("{i$n sends you sprawling with a powerful bash!{x",
+      act ("`i$n sends you sprawling with a powerful bash!`x",
 	   ch, NULL, victim, TO_VICT);
-      act ("{hYou slam into $N, and send $M flying!{x", ch, NULL, victim,
+      act ("`hYou slam into $N, and send $M flying!`x", ch, NULL, victim,
 	   TO_CHAR);
-      act ("{k$n sends $N sprawling with a powerful bash.{x", ch, NULL,
+      act ("`k$n sends $N sprawling with a powerful bash.`x", ch, NULL,
 	   victim, TO_NOTVICT);
       check_improve (ch, gsn_bash, TRUE, 1);
 
@@ -4053,10 +4053,10 @@ do_bash (CHAR_DATA * ch, char *argument)
 	    {
 	      victim->stunned = 1;
 	    }
-	  act ("{iYou are stunned, and have trouble getting back up!{x",
+	  act ("`iYou are stunned, and have trouble getting back up!`x",
 	       ch, NULL, victim, TO_VICT);
-	  act ("{h$N is stunned by your bash!{x", ch, NULL, victim, TO_CHAR);
-	  act ("{k$N is having trouble getting back up.{x",
+	  act ("`h$N is stunned by your bash!`x", ch, NULL, victim, TO_CHAR);
+	  act ("`k$N is having trouble getting back up.`x",
 	       ch, NULL, victim, TO_NOTVICT);
 	  check_improve (ch, gsn_stun, TRUE, 1);
 	}
@@ -4064,9 +4064,9 @@ do_bash (CHAR_DATA * ch, char *argument)
   else
     {
       damage (ch, victim, 0, gsn_bash, DAM_BASH, FALSE);
-      act ("{hYou fall flat on your face!{x", ch, NULL, victim, TO_CHAR);
-      act ("{k$n falls flat on $s face.{x", ch, NULL, victim, TO_NOTVICT);
-      act ("{iYou evade $n's bash, causing $m to fall flat on $s face.{x",
+      act ("`hYou fall flat on your face!`x", ch, NULL, victim, TO_CHAR);
+      act ("`k$n falls flat on $s face.`x", ch, NULL, victim, TO_NOTVICT);
+      act ("`iYou evade $n's bash, causing $m to fall flat on $s face.`x",
 	   ch, NULL, victim, TO_VICT);
       check_improve (ch, gsn_bash, FALSE, 1);
       ch->position = POS_RESTING;
@@ -4088,7 +4088,7 @@ do_dirt (CHAR_DATA * ch, char *argument)
       || (!IS_NPC (ch)
 	  && ch->level < skill_table[gsn_dirt].skill_level[ch->class]))
     {
-      send_to_char ("{hYou get your feet dirty.{x\n\r", ch);
+      send_to_char ("`hYou get your feet dirty.`x\n\r", ch);
       return;
     }
 
@@ -4110,7 +4110,7 @@ do_dirt (CHAR_DATA * ch, char *argument)
 
   if (IS_AFFECTED (victim, AFF_BLIND))
     {
-      act ("{h$E's already been blinded.{x", ch, NULL, victim, TO_CHAR);
+      act ("`h$E's already been blinded.`x", ch, NULL, victim, TO_CHAR);
       return;
     }
 
@@ -4203,7 +4203,7 @@ do_dirt (CHAR_DATA * ch, char *argument)
 
   if (chance == 0)
     {
-      send_to_char ("{hThere isn't any dirt to kick.{x\n\r", ch);
+      send_to_char ("`hThere isn't any dirt to kick.`x\n\r", ch);
       return;
     }
 
@@ -4211,11 +4211,11 @@ do_dirt (CHAR_DATA * ch, char *argument)
   if (number_percent () < chance)
     {
       AFFECT_DATA af;
-      act ("{k$n is blinded by the dirt in $s eyes!{x", victim, NULL, NULL,
+      act ("`k$n is blinded by the dirt in $s eyes!`x", victim, NULL, NULL,
 	   TO_ROOM);
-      act ("{i$n kicks dirt in your eyes!{x", ch, NULL, victim, TO_VICT);
+      act ("`i$n kicks dirt in your eyes!`x", ch, NULL, victim, TO_VICT);
       damage (ch, victim, number_range (2, 5), gsn_dirt, DAM_NONE, FALSE);
-      send_to_char ("{DYou can't see a thing!{x\n\r", victim);
+      send_to_char ("`DYou can't see a thing!`x\n\r", victim);
       check_improve (ch, gsn_dirt, TRUE, 2);
       WAIT_STATE (ch, skill_table[gsn_dirt].beats);
 
@@ -4250,7 +4250,7 @@ do_gouge (CHAR_DATA * ch, char *argument)
       || (!IS_NPC (ch)
 	  && ch->level < skill_table[gsn_gouge].skill_level[ch->class]))
     {
-      send_to_char ("Gouge?  What's that?{x\n\r", ch);
+      send_to_char ("Gouge?  What's that?`x\n\r", ch);
       return;
     }
 
@@ -4272,7 +4272,7 @@ do_gouge (CHAR_DATA * ch, char *argument)
 
   if (IS_AFFECTED (victim, AFF_BLIND))
     {
-      act ("{h$E's already been blinded.{x", ch, NULL, victim, TO_CHAR);
+      act ("`h$E's already been blinded.`x", ch, NULL, victim, TO_CHAR);
       return;
     }
 
@@ -4333,11 +4333,11 @@ do_gouge (CHAR_DATA * ch, char *argument)
   if (number_percent () < chance)
     {
       AFFECT_DATA af;
-      act ("{k$n is blinded by a poke in the eyes!{x", victim, NULL, NULL,
+      act ("`k$n is blinded by a poke in the eyes!`x", victim, NULL, NULL,
 	   TO_ROOM);
-      act ("{i$n gouges at your eyes!{x", ch, NULL, victim, TO_VICT);
+      act ("`i$n gouges at your eyes!`x", ch, NULL, victim, TO_VICT);
       damage (ch, victim, number_range (2, 5), gsn_gouge, DAM_NONE, FALSE);
-      send_to_char ("{DYou see nothing but stars!{x\n\r", victim);
+      send_to_char ("`DYou see nothing but stars!`x\n\r", victim);
       check_improve (ch, gsn_gouge, TRUE, 2);
       WAIT_STATE (ch, skill_table[gsn_gouge].beats);
 
@@ -4412,21 +4412,21 @@ do_trip (CHAR_DATA * ch, char *argument)
 
   if (IS_AFFECTED (victim, AFF_FLYING))
     {
-      act ("{h$S feet aren't on the ground.{x", ch, NULL, victim, TO_CHAR);
+      act ("`h$S feet aren't on the ground.`x", ch, NULL, victim, TO_CHAR);
       return;
     }
 
   if (victim->position < POS_FIGHTING)
     {
-      act ("{h$N is already down.{c", ch, NULL, victim, TO_CHAR);
+      act ("`h$N is already down.`c", ch, NULL, victim, TO_CHAR);
       return;
     }
 
   if (victim == ch)
     {
-      send_to_char ("{hYou fall flat on your face!{x\n\r", ch);
+      send_to_char ("`hYou fall flat on your face!`x\n\r", ch);
       WAIT_STATE (ch, 2 * skill_table[gsn_trip].beats);
-      act ("{k$n trips over $s own feet!{x", ch, NULL, NULL, TO_ROOM);
+      act ("`k$n trips over $s own feet!`x", ch, NULL, NULL, TO_ROOM);
       return;
     }
 
@@ -4465,9 +4465,9 @@ do_trip (CHAR_DATA * ch, char *argument)
   /* now the attack */
   if (number_percent () < chance)
     {
-      act ("{i$n trips you and you go down!{x", ch, NULL, victim, TO_VICT);
-      act ("{hYou trip $N and $N goes down!{x", ch, NULL, victim, TO_CHAR);
-      act ("{k$n trips $N, sending $M to the ground.{x", ch, NULL, victim,
+      act ("`i$n trips you and you go down!`x", ch, NULL, victim, TO_VICT);
+      act ("`hYou trip $N and $N goes down!`x", ch, NULL, victim, TO_CHAR);
+      act ("`k$n trips $N, sending $M to the ground.`x", ch, NULL, victim,
 	   TO_NOTVICT);
       check_improve (ch, gsn_trip, TRUE, 1);
 
@@ -4508,7 +4508,7 @@ do_kill (CHAR_DATA * ch, char *argument)
     }
   if (victim == ch)
     {
-      send_to_char ("{hYou hit yourself.  {z{COuch!{x\n\r", ch);
+      send_to_char ("`hYou hit yourself.  `z`COuch!`x\n\r", ch);
       multi_hit (ch, ch, TYPE_UNDEFINED);
       return;
     }
@@ -4577,13 +4577,13 @@ do_mock (CHAR_DATA * ch, char *argument)
 
   if (victim->fighting != NULL)
     {
-      send_to_char ("{gThis player is busy at the moment.{x\n\r", ch);
+      send_to_char ("`gThis player is busy at the moment.`x\n\r", ch);
       return;
     }
 
   if (ch->position == POS_FIGHTING)
     {
-      send_to_char ("{gYou've already got your hands full!{x\n\r", ch);
+      send_to_char ("`gYou've already got your hands full!`x\n\r", ch);
       return;
     }
 
@@ -4595,7 +4595,7 @@ do_mock (CHAR_DATA * ch, char *argument)
 void
 do_murde (CHAR_DATA * ch, char *argument)
 {
-  send_to_char ("If you want to {RMURDER{x, spell it out.\n\r", ch);
+  send_to_char ("If you want to `RMURDER`x, spell it out.\n\r", ch);
   return;
 }
 
@@ -4691,7 +4691,7 @@ do_backstab (CHAR_DATA * ch, char *argument)
 
   if (ch->fighting != NULL)
     {
-      send_to_char ("{hYou're facing the wrong end.{x\n\r", ch);
+      send_to_char ("`hYou're facing the wrong end.`x\n\r", ch);
       return;
     }
 
@@ -4719,7 +4719,7 @@ do_backstab (CHAR_DATA * ch, char *argument)
 
   if ((obj = get_eq_char (ch, WEAR_WIELD)) == NULL)
     {
-      send_to_char ("{hYou need to wield a primary weapon to backstab.{x\n\r",
+      send_to_char ("`hYou need to wield a primary weapon to backstab.`x\n\r",
 		    ch);
       return;
     }
@@ -4803,17 +4803,17 @@ do_circle (CHAR_DATA * ch, char *argument)
       || (get_skill (ch, gsn_circle) >= 2 && !IS_AWAKE (victim)))
     {
       check_improve (ch, gsn_circle, TRUE, 1);
-      act ("{i$n circles around behind you.{x", ch, NULL, victim, TO_VICT);
-      act ("{hYou circle around $N.{x", ch, NULL, victim, TO_CHAR);
-      act ("{k$n circles around behind $N.{x", ch, NULL, victim, TO_NOTVICT);
+      act ("`i$n circles around behind you.`x", ch, NULL, victim, TO_VICT);
+      act ("`hYou circle around $N.`x", ch, NULL, victim, TO_CHAR);
+      act ("`k$n circles around behind $N.`x", ch, NULL, victim, TO_NOTVICT);
       multi_hit (ch, victim, gsn_circle);
     }
   else
     {
       check_improve (ch, gsn_circle, FALSE, 1);
-      act ("{i$n tries to circle around you.{x", ch, NULL, victim, TO_VICT);
-      act ("{h$N circles with you.{x", ch, NULL, victim, TO_CHAR);
-      act ("{k$n tries to circle around $N.{x", ch, NULL, victim, TO_NOTVICT);
+      act ("`i$n tries to circle around you.`x", ch, NULL, victim, TO_VICT);
+      act ("`h$N circles with you.`x", ch, NULL, victim, TO_CHAR);
+      act ("`k$n tries to circle around $N.`x", ch, NULL, victim, TO_NOTVICT);
       damage (ch, victim, 0, gsn_circle, DAM_NONE, TRUE);
     }
 
@@ -4858,9 +4858,9 @@ do_feed (CHAR_DATA * ch, char *argument)
       || (get_skill (ch, gsn_feed) >= 2 && !IS_AWAKE (victim)))
     {
       check_improve (ch, gsn_feed, TRUE, 1);
-      act ("{i$n bites you.{x", ch, NULL, victim, TO_VICT);
-      act ("{hYou bite $N.{x", ch, NULL, victim, TO_CHAR);
-      act ("{k$n bites $N.{x", ch, NULL, victim, TO_NOTVICT);
+      act ("`i$n bites you.`x", ch, NULL, victim, TO_VICT);
+      act ("`hYou bite $N.`x", ch, NULL, victim, TO_CHAR);
+      act ("`k$n bites $N.`x", ch, NULL, victim, TO_NOTVICT);
       dam = number_range ((((ch->level / 2) + (victim->level / 2)) / 3),
 			  (((ch->level / 2) + (victim->level / 2)) / 3) * 2);
       damage (ch, victim, dam, gsn_feed, DAM_NEGATIVE, TRUE);
@@ -4868,10 +4868,10 @@ do_feed (CHAR_DATA * ch, char *argument)
   else
     {
       check_improve (ch, gsn_feed, FALSE, 1);
-      act ("{i$n tries to bite you, but hits only air.{x", ch, NULL, victim,
+      act ("`i$n tries to bite you, but hits only air.`x", ch, NULL, victim,
 	   TO_VICT);
-      act ("{hYou chomp a mouthfull of air.{x", ch, NULL, victim, TO_CHAR);
-      act ("{k$n tries to bite $N.{x", ch, NULL, victim, TO_NOTVICT);
+      act ("`hYou chomp a mouthfull of air.`x", ch, NULL, victim, TO_CHAR);
+      act ("`k$n tries to bite $N.`x", ch, NULL, victim, TO_NOTVICT);
       damage (ch, victim, 0, gsn_feed, DAM_NEGATIVE, TRUE);
     }
 
@@ -4915,16 +4915,16 @@ do_flee (CHAR_DATA * ch, char *argument)
 	continue;
 
       ch->in_room = was_in;
-      act ("$n has {Yfled{x!", ch, NULL, NULL, TO_ROOM);
+      act ("$n has `Yfled`x!", ch, NULL, NULL, TO_ROOM);
       if (!IS_NPC (ch))
 	{
-	  send_to_char ("{BYou {Yflee{B from combat!{x\n\r", ch);
+	  send_to_char ("`BYou `Yflee`B from combat!`x\n\r", ch);
 	  if (((ch->class == 2) || (ch->class == (MAX_CLASS / 2) + 1))
 	      && (number_percent () < 3 * (ch->level / 2)))
 	    {
 	      if (IS_NPC (victim) || ch->attacker == FALSE)
 		{
-		  send_to_char ("You {Ysnuck away{x safely.\n\r", ch);
+		  send_to_char ("You `Ysnuck away`x safely.\n\r", ch);
 		}
 	      else
 		{
@@ -4932,7 +4932,7 @@ do_flee (CHAR_DATA * ch, char *argument)
 		    ("You feel something singe your butt on the way out.\n\r",
 		     ch);
 		  act
-		    ("$n is nearly {Yzapped{x in the butt by a lightning bolt from above!",
+		    ("$n is nearly `Yzapped`x in the butt by a lightning bolt from above!",
 		     ch, NULL, NULL, TO_ROOM);
 		  ch->hit -= (ch->hit / 8);
 		}
@@ -4942,10 +4942,10 @@ do_flee (CHAR_DATA * ch, char *argument)
 	      if (!IS_NPC (victim) && ch->attacker == TRUE)
 		{
 		  send_to_char
-		    ("The {RWrath of Thoth {YZAPS{x your butt on the way out!\n\r",
+		    ("The `RWrath of Thoth `YZAPS`x your butt on the way out!\n\r",
 		     ch);
 		  act
-		    ("$n is {Yzapped{x in the butt by a lightning bolt from above!",
+		    ("$n is `Yzapped`x in the butt by a lightning bolt from above!",
 		     ch, NULL, NULL, TO_ROOM);
 		  ch->hit -= (ch->hit / 4);
 		}
@@ -4958,7 +4958,7 @@ do_flee (CHAR_DATA * ch, char *argument)
       return;
     }
 
-  send_to_char ("{z{CPANIC!{x{B You couldn't escape!{x\n\r", ch);
+  send_to_char ("`z`CPANIC!`x`B You couldn't escape!`x\n\r", ch);
   return;
 }
 
@@ -4986,7 +4986,7 @@ do_rescue (CHAR_DATA * ch, char *argument)
 
   if (victim == ch)
     {
-      send_to_char ("What about {Yfleeing{x instead?\n\r", ch);
+      send_to_char ("What about `Yfleeing`x instead?\n\r", ch);
       return;
     }
 
@@ -5022,9 +5022,9 @@ do_rescue (CHAR_DATA * ch, char *argument)
       return;
     }
 
-  act ("{yYou rescue $N!{x", ch, NULL, victim, TO_CHAR);
-  act ("{y$n rescues you!{x", ch, NULL, victim, TO_VICT);
-  act ("{y$n rescues $N!{x", ch, NULL, victim, TO_NOTVICT);
+  act ("`yYou rescue $N!`x", ch, NULL, victim, TO_CHAR);
+  act ("`y$n rescues you!`x", ch, NULL, victim, TO_VICT);
+  act ("`y$n rescues $N!`x", ch, NULL, victim, TO_NOTVICT);
   check_improve (ch, gsn_rescue, TRUE, 1);
 
   stop_fighting (fch, FALSE);
@@ -5121,7 +5121,7 @@ do_disarm (CHAR_DATA * ch, char *argument)
 
   if ((obj = get_eq_char (victim, WEAR_WIELD)) == NULL)
     {
-      send_to_char ("{hYour opponent is not wielding a weapon.{x\n\r", ch);
+      send_to_char ("`hYour opponent is not wielding a weapon.`x\n\r", ch);
       return;
     }
 
@@ -5173,9 +5173,9 @@ do_disarm (CHAR_DATA * ch, char *argument)
       check_improve (victim, gsn_grip, TRUE, 1);
     }
   WAIT_STATE (ch, skill_table[gsn_disarm].beats);
-  act ("{hYou fail to disarm $N.{x", ch, NULL, victim, TO_CHAR);
-  act ("{i$n tries to disarm you, but fails.{x", ch, NULL, victim, TO_VICT);
-  act ("{k$n tries to disarm $N, but fails.{x", ch, NULL, victim, TO_NOTVICT);
+  act ("`hYou fail to disarm $N.`x", ch, NULL, victim, TO_CHAR);
+  act ("`i$n tries to disarm you, but fails.`x", ch, NULL, victim, TO_VICT);
+  act ("`k$n tries to disarm $N, but fails.`x", ch, NULL, victim, TO_NOTVICT);
   check_improve (ch, gsn_disarm, FALSE, 1);
   return;
 }
@@ -5206,7 +5206,7 @@ do_surrender (CHAR_DATA * ch, char *argument)
 void
 do_sla (CHAR_DATA * ch, char *argument)
 {
-  send_to_char ("If you want to {RSLAY{x, spell it out.\n\r", ch);
+  send_to_char ("If you want to `RSLAY`x, spell it out.\n\r", ch);
   return;
 }
 
@@ -5239,52 +5239,52 @@ do_slay (CHAR_DATA * ch, char *argument)
 
   if (!IS_NPC (victim) && victim->level >= get_trust (ch))
     {
-      send_to_char ("{hYou failed.{c\n\r", ch);
+      send_to_char ("`hYou failed.`c\n\r", ch);
       return;
     }
 
   if (IS_NPC (victim) || get_trust (ch) >= CREATOR)
     {
-      act ("{hYou slay $M in cold blood!{x", ch, NULL, victim, TO_CHAR);
-      act ("{i$n slays you in cold blood!{x", ch, NULL, victim, TO_VICT);
-      act ("{k$n slays $N in cold blood!{x", ch, NULL, victim, TO_NOTVICT);
+      act ("`hYou slay $M in cold blood!`x", ch, NULL, victim, TO_CHAR);
+      act ("`i$n slays you in cold blood!`x", ch, NULL, victim, TO_VICT);
+      act ("`k$n slays $N in cold blood!`x", ch, NULL, victim, TO_NOTVICT);
       raw_kill (victim, ch);
     }
   else
     {
-      act ("{i$N wields a sword called '{z{RGodSlayer{i'!{x", ch, NULL,
+      act ("`i$N wields a sword called '`z`RGodSlayer`i'!`x", ch, NULL,
 	   victim, TO_CHAR);
-      act ("{hYou wield a sword called '{z{RGodSlayer{h'!{x", ch, NULL,
+      act ("`hYou wield a sword called '`z`RGodSlayer`h'!`x", ch, NULL,
 	   victim, TO_VICT);
-      act ("{k$N wields a sword called '{z{RGodSlayer{k'!{x", ch, NULL,
+      act ("`k$N wields a sword called '`z`RGodSlayer`k'!`x", ch, NULL,
 	   victim, TO_NOTVICT);
-      act ("{i$N's slice takes off your left arm!{x", ch, NULL, victim,
+      act ("`i$N's slice takes off your left arm!`x", ch, NULL, victim,
 	   TO_CHAR);
-      act ("{hYour slice takes off $n's left arm!{x", ch, NULL, victim,
+      act ("`hYour slice takes off $n's left arm!`x", ch, NULL, victim,
 	   TO_VICT);
-      act ("{k$N's slice takes off $n's left arm!{x", ch, NULL, victim,
+      act ("`k$N's slice takes off $n's left arm!`x", ch, NULL, victim,
 	   TO_NOTVICT);
-      act ("{i$N's slice takes off your right arm!{x", ch, NULL, victim,
+      act ("`i$N's slice takes off your right arm!`x", ch, NULL, victim,
 	   TO_CHAR);
-      act ("{hYour slice takes off $n's right arm!{x", ch, NULL, victim,
+      act ("`hYour slice takes off $n's right arm!`x", ch, NULL, victim,
 	   TO_VICT);
-      act ("{k$N's slice takes off $n's right arm!{x", ch, NULL, victim,
+      act ("`k$N's slice takes off $n's right arm!`x", ch, NULL, victim,
 	   TO_NOTVICT);
-      act ("{i$N's slice cuts off both of your legs!{x", ch, NULL, victim,
+      act ("`i$N's slice cuts off both of your legs!`x", ch, NULL, victim,
 	   TO_CHAR);
-      act ("{hYour slice cuts off both of $n's legs!{x", ch, NULL, victim,
+      act ("`hYour slice cuts off both of $n's legs!`x", ch, NULL, victim,
 	   TO_VICT);
-      act ("{k$N's slice cuts off both of $n's legs!{x", ch, NULL, victim,
+      act ("`k$N's slice cuts off both of $n's legs!`x", ch, NULL, victim,
 	   TO_NOTVICT);
-      act ("{i$N's slice beheads you!{x", ch, NULL, victim, TO_CHAR);
-      act ("{hYour slice beheads $n!{x", ch, NULL, victim, TO_VICT);
-      act ("{k$N's slice beheads $n!{x", ch, NULL, victim, TO_NOTVICT);
-      act ("{iYou are DEAD!!!{x", ch, NULL, victim, TO_CHAR);
-      act ("{h$n is DEAD!!!{x", ch, NULL, victim, TO_VICT);
-      act ("{k$n is DEAD!!!{x", ch, NULL, victim, TO_NOTVICT);
-      act ("A sword called '{z{RGodSlayer{x' vanishes.", ch, NULL, victim,
+      act ("`i$N's slice beheads you!`x", ch, NULL, victim, TO_CHAR);
+      act ("`hYour slice beheads $n!`x", ch, NULL, victim, TO_VICT);
+      act ("`k$N's slice beheads $n!`x", ch, NULL, victim, TO_NOTVICT);
+      act ("`iYou are DEAD!!!`x", ch, NULL, victim, TO_CHAR);
+      act ("`h$n is DEAD!!!`x", ch, NULL, victim, TO_VICT);
+      act ("`k$n is DEAD!!!`x", ch, NULL, victim, TO_NOTVICT);
+      act ("A sword called '`z`RGodSlayer`x' vanishes.", ch, NULL, victim,
 	   TO_VICT);
-      act ("A sword called '{z{RGodSlayer{x' vanishes.", ch, NULL, victim,
+      act ("A sword called '`z`RGodSlayer`x' vanishes.", ch, NULL, victim,
 	   TO_NOTVICT);
       raw_kill (ch, victim);
     }

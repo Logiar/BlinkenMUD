@@ -83,7 +83,7 @@ do_gain (CHAR_DATA * ch, char *argument)
 
   if (arg[0] == '\0')
     {
-      do_say (trainer, "{aPardon me?{x");
+      do_say (trainer, "`aPardon me?`x");
       return;
     }
 
@@ -150,7 +150,7 @@ do_gain (CHAR_DATA * ch, char *argument)
     {
       if (ch->practice < 6)
 	{
-	  act ("$N tells you '{aYou are not yet ready.{x'",
+	  act ("$N tells you '`aYou are not yet ready.`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
@@ -166,7 +166,7 @@ do_gain (CHAR_DATA * ch, char *argument)
     {
       if (ch->train < 1)
 	{
-	  act ("$N tells you '{aYou are not yet ready.{x'",
+	  act ("$N tells you '`aYou are not yet ready.`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
@@ -182,14 +182,14 @@ do_gain (CHAR_DATA * ch, char *argument)
     {
       if (ch->train < 2)
 	{
-	  act ("$N tells you '{aYou are not yet ready.{x'",
+	  act ("$N tells you '`aYou are not yet ready.`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
 
       if (ch->pcdata->points <= 40)
 	{
-	  act ("$N tells you '{aThere would be no point in that.{x'",
+	  act ("$N tells you '`aThere would be no point in that.`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
@@ -210,21 +210,21 @@ do_gain (CHAR_DATA * ch, char *argument)
     {
       if (ch->pcdata->group_known[gn])
 	{
-	  act ("$N tells you '{aYou already know that group!{x'",
+	  act ("$N tells you '`aYou already know that group!`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
 
       if (group_table[gn].rating[ch->class] <= 0)
 	{
-	  act ("$N tells you '{aThat group is beyond your powers.{x'",
+	  act ("$N tells you '`aThat group is beyond your powers.`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
 
       if (ch->train < group_table[gn].rating[ch->class])
 	{
-	  act ("$N tells you '{aYou are not yet ready for that group.{x'",
+	  act ("$N tells you '`aYou are not yet ready for that group.`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
@@ -242,7 +242,7 @@ do_gain (CHAR_DATA * ch, char *argument)
     {
       if (skill_table[sn].spell_fun != spell_null)
 	{
-	  act ("$N tells you '{aYou must learn the full group.{x'",
+	  act ("$N tells you '`aYou must learn the full group.`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
@@ -250,21 +250,21 @@ do_gain (CHAR_DATA * ch, char *argument)
 
       if (ch->pcdata->learned[sn])
 	{
-	  act ("$N tells you '{aYou already know that skill!{x'",
+	  act ("$N tells you '`aYou already know that skill!`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
 
       if (skill_table[sn].rating[ch->class] <= 0)
 	{
-	  act ("$N tells you '{aThat skill is beyond your powers.{x'",
+	  act ("$N tells you '`aThat skill is beyond your powers.`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
 
       if (ch->train < skill_table[sn].rating[ch->class])
 	{
-	  act ("$N tells you '{aYou are not yet ready for that skill.{x'",
+	  act ("$N tells you '`aYou are not yet ready for that skill.`x'",
 	       ch, NULL, trainer, TO_CHAR);
 	  return;
 	}
@@ -277,7 +277,7 @@ do_gain (CHAR_DATA * ch, char *argument)
       return;
     }
 
-  act ("$N tells you '{aI do not understand...{x'", ch, NULL, trainer,
+  act ("$N tells you '`aI do not understand...`x'", ch, NULL, trainer,
        TO_CHAR);
 }
 
@@ -895,7 +895,7 @@ do_class (CHAR_DATA * ch, char *argument)
   send_to_char ("Spells available in this group:\n\r", ch);
   send_to_char ("-------------------------------\n\r", ch);
   send_to_char
-    ("{BLevel{x-{GSpell{x--------------- {BLevel{x-{GSpell{x---------------\n\r",
+    ("`BLevel`x-`GSpell`x--------------- `BLevel`x-`GSpell`x---------------\n\r",
      ch);
   for (sn = 0; sn < MAX_IN_GROUP; sn++)
     {
@@ -903,16 +903,16 @@ do_class (CHAR_DATA * ch, char *argument)
 	break;
       if ((tn = spell_avail (ch, group_table[gn].spells[sn])) >= 0)
 	{
-	  sprintf (buf, "{B%-5d {G%-20s ",
+	  sprintf (buf, "`B%-5d `G%-20s ",
 		   skill_table[tn].skill_level[ch->class],
 		   group_table[gn].spells[sn]);
 	  send_to_char (buf, ch);
 	  if (++col % 2 == 0)
-	    send_to_char ("{x\n\r", ch);
+	    send_to_char ("`x\n\r", ch);
 	}
     }
   if (col % 2 != 0)
-    send_to_char ("{x\n\r", ch);
+    send_to_char ("`x\n\r", ch);
 }
 
 int

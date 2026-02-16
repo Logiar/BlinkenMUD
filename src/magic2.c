@@ -318,7 +318,7 @@ spell_resurrect (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   if (!IS_SET (pet->affected_by, AFF_CHARM))
     SET_BIT (pet->affected_by, AFF_CHARM);
   pet->comm = COMM_NOTELL | COMM_NOSHOUT | COMM_NOCHANNELS;
-  sprintf (buf, "%s{GThe mark of %s is on it's forehead.{x.\n\r",
+  sprintf (buf, "%s`GThe mark of %s is on it's forehead.`x.\n\r",
 	   pet->description, ch->name);
   free_string (pet->description);
   pet->description = str_dup (buf);
@@ -406,7 +406,7 @@ spell_conjure (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   if (!IS_SET (pet->affected_by, AFF_CHARM))
     SET_BIT (pet->affected_by, AFF_CHARM);
   pet->comm = COMM_NOTELL | COMM_NOSHOUT | COMM_NOCHANNELS;
-  sprintf (buf, "%s{GThe mark of %s is on it's forehead.{x.\n\r",
+  sprintf (buf, "%s`GThe mark of %s is on it's forehead.`x.\n\r",
 	   pet->description, ch->name);
   free_string (pet->description);
   pet->description = str_dup (buf);
@@ -461,7 +461,7 @@ spell_animate (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   pet = create_mobile (pMobIndex);
   SET_BIT (pet->affected_by, AFF_CHARM);
   pet->comm = COMM_NOTELL | COMM_NOSHOUT | COMM_NOCHANNELS;
-  sprintf (buf, "%s{GIt's branded with the mark of %s.{x.\n\r",
+  sprintf (buf, "%s`GIt's branded with the mark of %s.`x.\n\r",
 	   obj->description, ch->name);
   free_string (pet->description);
   pet->description = str_dup (buf);
@@ -497,10 +497,10 @@ spell_iceshield (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   if (IS_SHIELDED (victim, SHD_ICE))
     {
       if (victim == ch)
-	send_to_char ("You are already surrounded by an {Cicy{x shield.\n\r",
+	send_to_char ("You are already surrounded by an `Cicy`x shield.\n\r",
 		      ch);
       else
-	act ("$N is already surrounded by an {Cicy{x shield.", ch, NULL,
+	act ("$N is already surrounded by an `Cicy`x shield.", ch, NULL,
 	     victim, TO_CHAR);
       return;
     }
@@ -515,10 +515,10 @@ spell_iceshield (int sn, int level, CHAR_DATA * ch, void *vo, int target)
     if ( (skill_table[sn].skill_level[victim->class] > LEVEL_HERO)
 	&& (victim->level < LEVEL_IMMORTAL) )
     {
-	send_to_char("You are surrounded by an {Cicy{x shield.\n\r", victim);
-	act("$n is surrounded by an {Cicy{x shield.",victim, NULL,NULL,TO_ROOM);
-	send_to_char("Your {Cicy{x shield quickly melts away.\n\r", victim);
-	act("$n's {Cicy{x shield quickly melts away.",victim, NULL,NULL,TO_ROOM);
+	send_to_char("You are surrounded by an `Cicy`x shield.\n\r", victim);
+	act("$n is surrounded by an `Cicy`x shield.",victim, NULL,NULL,TO_ROOM);
+	send_to_char("Your `Cicy`x shield quickly melts away.\n\r", victim);
+	act("$n's `Cicy`x shield quickly melts away.",victim, NULL,NULL,TO_ROOM);
 	return;
     }
 */
@@ -532,8 +532,8 @@ spell_iceshield (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   af.bitvector = SHD_ICE;
 
   affect_to_char (victim, &af);
-  send_to_char ("You are surrounded by an {Cicy{x shield.\n\r", victim);
-  act ("$n is surrounded by an {Cicy{x shield.", victim, NULL, NULL, TO_ROOM);
+  send_to_char ("You are surrounded by an `Cicy`x shield.\n\r", victim);
+  act ("$n is surrounded by an `Cicy`x shield.", victim, NULL, NULL, TO_ROOM);
   return;
 }
 
@@ -547,10 +547,10 @@ spell_fireshield (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   if (IS_SHIELDED (victim, SHD_FIRE))
     {
       if (victim == ch)
-	send_to_char ("You are already surrounded by a {Rfirey{x shield.\r\n",
+	send_to_char ("You are already surrounded by a `Rfirey`x shield.\r\n",
 		      ch);
       else
-	act ("$N is already surrounded by a {Rfiery{x shield.", ch, NULL,
+	act ("$N is already surrounded by a `Rfiery`x shield.", ch, NULL,
 	     victim, TO_CHAR);
       return;
     }
@@ -565,10 +565,10 @@ spell_fireshield (int sn, int level, CHAR_DATA * ch, void *vo, int target)
     if ( (skill_table[sn].skill_level[victim->class] > LEVEL_HERO)
 	&& (victim->level < LEVEL_IMMORTAL) )
     {
-	send_to_char("You are surrounded by a {Rfiery{x shield.\n\r", victim);
-	act("$n is surrounded by a {Rfiery{x shield.",victim, NULL,NULL,TO_ROOM);
-	send_to_char("Your {Rfirey{x shield gutters out.\n\r", victim);
-	act("$n's {Rfirey{x shield gutters out.",victim, NULL,NULL,TO_ROOM);
+	send_to_char("You are surrounded by a `Rfiery`x shield.\n\r", victim);
+	act("$n is surrounded by a `Rfiery`x shield.",victim, NULL,NULL,TO_ROOM);
+	send_to_char("Your `Rfirey`x shield gutters out.\n\r", victim);
+	act("$n's `Rfirey`x shield gutters out.",victim, NULL,NULL,TO_ROOM);
 	return;
     }
 */
@@ -582,8 +582,8 @@ spell_fireshield (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   af.bitvector = SHD_FIRE;
 
   affect_to_char (victim, &af);
-  send_to_char ("You are surrounded by a {Rfiery{x shield.\n\r", victim);
-  act ("$n is surrounded by a {Rfiery{x shield.", victim, NULL, NULL,
+  send_to_char ("You are surrounded by a `Rfiery`x shield.\n\r", victim);
+  act ("$n is surrounded by a `Rfiery`x shield.", victim, NULL, NULL,
        TO_ROOM);
   return;
 
@@ -600,9 +600,9 @@ spell_shockshield (int sn, int level, CHAR_DATA * ch, void *vo, int target)
     {
       if (victim == ch)
 	send_to_char
-	  ("You are already surrounded in a {Bcrackling{x shield.\n\r", ch);
+	  ("You are already surrounded in a `Bcrackling`x shield.\n\r", ch);
       else
-	act ("$N is already surrounded by a {Bcrackling{x shield.", ch, NULL,
+	act ("$N is already surrounded by a `Bcrackling`x shield.", ch, NULL,
 	     victim, TO_CHAR);
       return;
     }
@@ -617,10 +617,10 @@ spell_shockshield (int sn, int level, CHAR_DATA * ch, void *vo, int target)
     if ( (skill_table[sn].skill_level[victim->class] > LEVEL_HERO)
 	&& (victim->level < LEVEL_IMMORTAL) )
     {
-	send_to_char("You are surrounded by a {Bcrackling{x shield.\n\r", victim);
-	act("$n is surrounded by a {Bcrackling{x shield.",victim, NULL,NULL,TO_ROOM);
-	send_to_char("Your {Bcrackling{x shield sizzles and fades.\n\r", victim);
-	act("$n's {Bcrackling{x shield sizzles and fades.",victim, NULL,NULL,TO_ROOM);
+	send_to_char("You are surrounded by a `Bcrackling`x shield.\n\r", victim);
+	act("$n is surrounded by a `Bcrackling`x shield.",victim, NULL,NULL,TO_ROOM);
+	send_to_char("Your `Bcrackling`x shield sizzles and fades.\n\r", victim);
+	act("$n's `Bcrackling`x shield sizzles and fades.",victim, NULL,NULL,TO_ROOM);
 	return;
     }
 */
@@ -634,8 +634,8 @@ spell_shockshield (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   af.bitvector = SHD_SHOCK;
 
   affect_to_char (victim, &af);
-  send_to_char ("You are surrounded by a {Bcrackling{x field.\n\r", victim);
-  act ("$n is surrounded by a {Bcrackling{x shield.", victim, NULL, NULL,
+  send_to_char ("You are surrounded by a `Bcrackling`x field.\n\r", victim);
+  act ("$n is surrounded by a `Bcrackling`x shield.", victim, NULL, NULL,
        TO_ROOM);
   return;
 }
@@ -649,7 +649,7 @@ spell_quest_pill (int sn, int level, CHAR_DATA * ch, void *vo, int target)
     return;
 
   victim->qps++;
-  send_to_char ("{YYou've gained a {RQuest Point{Y!{x\n\r", victim);
+  send_to_char ("`YYou've gained a `RQuest Point`Y!`x\n\r", victim);
   if (ch != victim)
     send_to_char ("Ok.\n\r", ch);
   return;

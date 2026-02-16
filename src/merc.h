@@ -63,6 +63,10 @@
 
 #define WWW_WHO		"/home/WWW/cgi-bin/output/rot.who"
 
+#define COLOUR_MARKER           '`'
+#define COLOUR_MARKER_STR       "`"
+#define IS_COLOUR_MARKER(c)     ((c) == COLOUR_MARKER)
+
 
 /*
  * String and memory management parameters.

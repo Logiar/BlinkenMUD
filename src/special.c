@@ -192,26 +192,26 @@ spec_troll_member (CHAR_DATA * ch)
       message = NULL;
       break;
     case 0:
-      message = "$n yells '{aI've been looking for you, punk!{x'";
+      message = "$n yells '`aI've been looking for you, punk!`x'";
       break;
     case 1:
       message = "With a scream of rage, $n attacks $N.";
       break;
     case 2:
       message =
-	"$n says '{aWhat's slimy Ogre trash like you doing around here?{x'";
+	"$n says '`aWhat's slimy Ogre trash like you doing around here?`x'";
       break;
     case 3:
-      message = "$n cracks his knuckles and says '{SDo ya feel lucky?{x'";
+      message = "$n cracks his knuckles and says '`SDo ya feel lucky?`x'";
       break;
     case 4:
-      message = "$n says '{aThere's no cops to save you this time!{x'";
+      message = "$n says '`aThere's no cops to save you this time!`x'";
       break;
     case 5:
-      message = "$n says '{aTime to join your brother, spud.{x'";
+      message = "$n says '`aTime to join your brother, spud.`x'";
       break;
     case 6:
-      message = "$n says '{aLet's rock.{x'";
+      message = "$n says '`aLet's rock.`x'";
       break;
     }
 
@@ -261,26 +261,26 @@ spec_ogre_member (CHAR_DATA * ch)
       message = NULL;
       break;
     case 0:
-      message = "$n yells '{aI've been looking for you, punk!{x'";
+      message = "$n yells '`aI've been looking for you, punk!`x'";
       break;
     case 1:
       message = "With a scream of rage, $n attacks $N.'";
       break;
     case 2:
       message =
-	"$n says '{aWhat's Troll filth like you doing around here?{x'";
+	"$n says '`aWhat's Troll filth like you doing around here?`x'";
       break;
     case 3:
-      message = "$n cracks his knuckles and says '{SDo ya feel lucky?{x'";
+      message = "$n cracks his knuckles and says '`SDo ya feel lucky?`x'";
       break;
     case 4:
-      message = "$n says '{aThere's no cops to save you this time!{x'";
+      message = "$n says '`aThere's no cops to save you this time!`x'";
       break;
     case 5:
-      message = "$n says '{aTime to join your brother, spud.{x'";
+      message = "$n says '`aTime to join your brother, spud.`x'";
       break;
     case 6:
-      message = "$n says '{aLet's rock.{x'";
+      message = "$n says '`aLet's rock.`x'";
       break;
     }
 
@@ -373,13 +373,13 @@ spec_boaz (CHAR_DATA * ch)
       message = NULL;
       break;
     case 0:
-      message = "$n yells '{aLeave me alone!{x'";
+      message = "$n yells '`aLeave me alone!`x'";
       break;
     case 1:
       message = "With a scream of rage, $n attacks $N.";
       break;
     case 2:
-      message = "$n shouts '{aStop that! Stop that!{x' and attacks.";
+      message = "$n shouts '`aStop that! Stop that!`x' and attacks.";
       break;
     case 3:
       message = NULL;
@@ -388,10 +388,10 @@ spec_boaz (CHAR_DATA * ch)
       message = "$n snorts a line of cocaine.";
       break;
     case 5:
-      message = "$n yells '{aGet out!{x'";
+      message = "$n yells '`aGet out!`x'";
       break;
     case 6:
-      message = "$n shouts '{aLeave mommy alone, you little shit!{x'";
+      message = "$n shouts '`aLeave mommy alone, you little shit!`x'";
       break;
     case 7:
       message = "$n lights up another cigarette.";
@@ -540,16 +540,16 @@ spec_patrolman (CHAR_DATA * ch)
       message = NULL;
       break;
     case 0:
-      message = "$n yells '{aAll roit! All roit! break it up!{x'";
+      message = "$n yells '`aAll roit! All roit! break it up!`x'";
       break;
     case 1:
-      message = "$n says '{aSociety's to blame, but what's a bloke to do?{x'";
+      message = "$n says '`aSociety's to blame, but what's a bloke to do?`x'";
       break;
     case 2:
-      message = "$n mumbles '{abloody kids will be the death of us all.{x'";
+      message = "$n mumbles '`abloody kids will be the death of us all.`x'";
       break;
     case 3:
-      message = "$n shouts '{aStop that! Stop that!{T' and attacks.";
+      message = "$n shouts '`aStop that! Stop that!`T' and attacks.";
       break;
     case 4:
       message = "$n pulls out his billy and goes to work.";
@@ -558,7 +558,7 @@ spec_patrolman (CHAR_DATA * ch)
       message = "$n sighs in resignation and proceeds to break up the fight.";
       break;
     case 6:
-      message = "$n says '{aSettle down, you hooligans!{x'";
+      message = "$n says '`aSettle down, you hooligans!`x'";
       break;
     }
 
@@ -1292,7 +1292,7 @@ spec_executioner (CHAR_DATA * ch)
   if (victim == NULL)
     return FALSE;
 
-  sprintf (buf, "{a%s is a %s!  PROTECT THE INNOCENT!  MORE BLOOOOD!!!{x",
+  sprintf (buf, "`a%s is a %s!  PROTECT THE INNOCENT!  MORE BLOOOOD!!!`x",
 	   victim->name, crime);
   REMOVE_BIT (ch->comm, COMM_NOSHOUT);
   do_yell (ch, buf);
@@ -1373,7 +1373,7 @@ spec_guard (CHAR_DATA * ch)
 
   if (victim != NULL)
     {
-      sprintf (buf, "{a%s is a %s!  PROTECT THE INNOCENT!!  BANZAI!!{x",
+      sprintf (buf, "`a%s is a %s!  PROTECT THE INNOCENT!!  BANZAI!!`x",
 	       victim->name, crime);
       REMOVE_BIT (ch->comm, COMM_NOSHOUT);
       do_yell (ch, buf);
@@ -1383,7 +1383,7 @@ spec_guard (CHAR_DATA * ch)
 
   if (ech != NULL)
     {
-      act ("$n screams '{aPROTECT THE INNOCENT!!  BANZAI!!{x",
+      act ("$n screams '`aPROTECT THE INNOCENT!!  BANZAI!!`x",
 	   ch, NULL, NULL, TO_ROOM);
       multi_hit (ch, ech, TYPE_UNDEFINED);
       return TRUE;
@@ -1478,32 +1478,32 @@ spec_mayor (CHAR_DATA * ch)
       break;
 
     case 'a':
-      act ("{x$n says '{aHello Honey!{x'", ch, NULL, NULL, TO_ROOM);
+      act ("`x$n says '`aHello Honey!`x'", ch, NULL, NULL, TO_ROOM);
       break;
 
     case 'b':
       act
-	("{x$n says '{aWhat a view!  I must do something about that dump!{x'",
+	("`x$n says '`aWhat a view!  I must do something about that dump!`x'",
 	 ch, NULL, NULL, TO_ROOM);
       break;
 
     case 'c':
       act
-	("{x$n says '{aVandals!  Youngsters have no respect for anything!{x'",
+	("`x$n says '`aVandals!  Youngsters have no respect for anything!`x'",
 	 ch, NULL, NULL, TO_ROOM);
       break;
 
     case 'd':
-      act ("{x$n says '{aGood day, citizens!{x'", ch, NULL, NULL, TO_ROOM);
+      act ("`x$n says '`aGood day, citizens!`x'", ch, NULL, NULL, TO_ROOM);
       break;
 
     case 'e':
-      act ("{x$n says '{aI hereby declare the city of Midgaard open!{x'",
+      act ("`x$n says '`aI hereby declare the city of Midgaard open!`x'",
 	   ch, NULL, NULL, TO_ROOM);
       break;
 
     case 'E':
-      act ("{x$n says '{aI hereby declare the city of Midgaard closed!{x'",
+      act ("`x$n says '`aI hereby declare the city of Midgaard closed!`x'",
 	   ch, NULL, NULL, TO_ROOM);
       break;
 
@@ -1570,9 +1570,9 @@ spec_thief (CHAR_DATA * ch)
 
       if (IS_AWAKE (victim) && number_range (0, ch->level) == 0)
 	{
-	  act ("You discover $n's hands in your {zwallet!{x",
+	  act ("You discover $n's hands in your `zwallet!`x",
 	       ch, NULL, victim, TO_VICT);
-	  act ("$N discovers $n's hands in $S {zwallet!{x",
+	  act ("$N discovers $n's hands in $S `zwallet!`x",
 	       ch, NULL, victim, TO_NOTVICT);
 	  return TRUE;
 	}

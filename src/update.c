@@ -249,7 +249,7 @@ gain_exp (CHAR_DATA * ch, int gain)
       ch->move = ch->max_move;
       update_pos (ch);
       send_to_char
-	("\n\r{MThe gods of {CBlinkenMuD{x {Mhave given you the {Yp{Ro{Yw{Re{Yr {Mto continue{x  \n\r",
+	("\n\r`MThe gods of `CBlinkenMuD`x `Mhave given you the `Yp`Ro`Yw`Re`Yr `Mto continue`x  \n\r",
 	 ch);
       save_char_obj (ch);
     }
@@ -632,22 +632,22 @@ weather_update (void)
     {
     case 5:
       weather_info.sunlight = SUN_LIGHT;
-      strcat (buf, "{WThe day has begun.{x\n\r");
+      strcat (buf, "`WThe day has begun.`x\n\r");
       break;
 
     case 6:
       weather_info.sunlight = SUN_RISE;
-      strcat (buf, "The {ysun{x rises in the east.\n\r");
+      strcat (buf, "The `ysun`x rises in the east.\n\r");
       break;
 
     case 19:
       weather_info.sunlight = SUN_SET;
-      strcat (buf, "The {ysun{x slowly disappears in the west.\n\r");
+      strcat (buf, "The `ysun`x slowly disappears in the west.\n\r");
       break;
 
     case 20:
       weather_info.sunlight = SUN_DARK;
-      strcat (buf, "The {Dnight{x has begun.\n\r");
+      strcat (buf, "The `Dnight`x has begun.\n\r");
       break;
 
     case 24:
@@ -695,7 +695,7 @@ weather_update (void)
       if (weather_info.mmhg < 990
 	  || (weather_info.mmhg < 1010 && number_bits (2) == 0))
 	{
-	  strcat (buf, "The sky is getting {bcloudy{x.\n\r");
+	  strcat (buf, "The sky is getting `bcloudy`x.\n\r");
 	  weather_info.sky = SKY_CLOUDY;
 	}
       break;
@@ -710,7 +710,7 @@ weather_update (void)
 
       if (weather_info.mmhg > 1030 && number_bits (2) == 0)
 	{
-	  strcat (buf, "The {Bclouds{x disappear.\n\r");
+	  strcat (buf, "The `Bclouds`x disappear.\n\r");
 	  weather_info.sky = SKY_CLOUDLESS;
 	}
       break;
@@ -718,7 +718,7 @@ weather_update (void)
     case SKY_RAINING:
       if (weather_info.mmhg < 970 && number_bits (2) == 0)
 	{
-	  strcat (buf, "Lightning {Yflashes{x in the sky.\n\r");
+	  strcat (buf, "Lightning `Yflashes`x in the sky.\n\r");
 	  weather_info.sky = SKY_LIGHTNING;
 	}
 
@@ -852,9 +852,9 @@ char_update (void)
 		  ch->was_in_room = ch->in_room;
 		  if (ch->fighting != NULL)
 		    stop_fighting (ch, TRUE);
-		  act ("$n disappears into the {Dvoid{x.",
+		  act ("$n disappears into the `Dvoid`x.",
 		       ch, NULL, NULL, TO_ROOM);
-		  send_to_char ("You disappear into the {Dvoid{x.\n\r", ch);
+		  send_to_char ("You disappear into the `Dvoid`x.\n\r", ch);
 		  if (ch->level > 1)
 		    save_char_obj (ch);
 		  char_from_room (ch);
@@ -943,8 +943,8 @@ char_update (void)
 		  && !IS_IMMORTAL (vch)
 		  && !IS_AFFECTED (vch, AFF_PLAGUE) && number_bits (4) == 0)
 		{
-		  send_to_char ("You feel {Rhot{x and feverish.\n\r", vch);
-		  act ("$n shivers and looks very {gill{x.", vch, NULL, NULL,
+		  send_to_char ("You feel `Rhot`x and feverish.\n\r", vch);
+		  act ("$n shivers and looks very `gill`x.", vch, NULL, NULL,
 		       TO_ROOM);
 		  affect_join (vch, &plague);
 		}

@@ -143,7 +143,7 @@ do_throw( CHAR_DATA *ch, char *argument )
 
   if ( obj->item_type != ITEM_THROWING )
     {
-      send_to_char( "You can throw only a throwing {!weapon{x.\n\r", ch );
+      send_to_char( "You can throw only a throwing `!weapon`x.\n\r", ch );
       return;
     }
 
@@ -209,11 +209,11 @@ do_throw( CHAR_DATA *ch, char *argument )
 		       || ( IS_SET(victim->act, ACT_INDOORS)
 			    && IS_SET(ch->in_room->room_flags,ROOM_INDOORS)))
 		    { 
-		      act("$N {2avoids{x your deadly throw !!!",ch,obj,victim,TO_CHAR);
+		      act("$N `2avoids`x your deadly throw !!!",ch,obj,victim,TO_CHAR);
 		      was_in_room=ch->in_room;
 		      ch->in_room=victim->in_room;
-		      act("$N {2avoid{x $p thrown by $n.",ch,obj,victim,TO_NOTVICT);
-		      act("You {2avoid{x $p thrown by $n.",ch,obj,victim,TO_VICT);
+		      act("$N `2avoid`x $p thrown by $n.",ch,obj,victim,TO_NOTVICT);
+		      act("You `2avoid`x $p thrown by $n.",ch,obj,victim,TO_VICT);
 		      ch->in_room=was_in_room;
 		      extract_obj(obj);
 		      return;
@@ -240,7 +240,7 @@ do_throw( CHAR_DATA *ch, char *argument )
         {
 	  act( "$n throws $p at $N.", ch,   obj, victim, TO_NOTVICT );
 	  act( "You throw $p at $N.", ch,   obj, victim, TO_CHAR );
-	  act( "$n throws $p at {1you{x.",ch,   obj, victim, TO_VICT );
+	  act( "$n throws $p at `1you`x.",ch,   obj, victim, TO_VICT );
 	  if(outside)
 	    { was_in_room=ch->in_room;
 	      ch->in_room=victim->in_room;
@@ -256,9 +256,9 @@ do_throw( CHAR_DATA *ch, char *argument )
         {       
 	  /* it is a normal miss */
                      
-	  act( "You throw $p aimlessly on the ground and it {!broke{x.",
+	  act( "You throw $p aimlessly on the ground and it `!broke`x.",
 	       ch,  obj,NULL,TO_CHAR);
-	  act( "$n throw $p aimlessly on the ground and it {!broke{x.",
+	  act( "$n throw $p aimlessly on the ground and it `!broke`x.",
 	       ch,  obj,NULL,TO_ROOM);
             
           check_improve(ch,gsn_throw,FALSE,2);
@@ -356,26 +356,26 @@ do_throw( CHAR_DATA *ch, char *argument )
 
 	      (victim)->wait = UMAX((victim)->wait, (8));
 	      act("$N screams and attacks $n !!!",ch,NULL,victim,TO_NOTVICT);
-	      act("$N screams and attacks {!You{x!!!",ch,NULL,victim,TO_CHAR);
+	      act("$N screams and attacks `!You`x!!!",ch,NULL,victim,TO_CHAR);
 	      multi_hit( victim, ch, TYPE_UNDEFINED );
 	    }
 	}
       else 
 	{ 
 	  switch(door) 
-	    { case 0 : sprintf(buf,"The throw came from {6NORTH{x !!!\n\r");
+	    { case 0 : sprintf(buf,"The throw came from `6NORTH`x !!!\n\r");
 		break;
-	    case 1 : sprintf(buf,"The throw came from {6EAST{x !!!\n\r");
+	    case 1 : sprintf(buf,"The throw came from `6EAST`x !!!\n\r");
 	      break;
-	    case 2 : sprintf(buf,"The throw came from {6SOUTH{x !!!\n\r");
+	    case 2 : sprintf(buf,"The throw came from `6SOUTH`x !!!\n\r");
 	      break;
-	    case 3 : sprintf(buf,"The throw came from {6WEST{x !!!\n\r");
+	    case 3 : sprintf(buf,"The throw came from `6WEST`x !!!\n\r");
 	      break;
-	    case 4 : sprintf(buf,"The throw came from {6UP{x !!!\n\r");
+	    case 4 : sprintf(buf,"The throw came from `6UP`x !!!\n\r");
 	      break;
-	    case 5 : sprintf(buf,"The throw came from {6DOWN{n !!!\n\r");
+	    case 5 : sprintf(buf,"The throw came from `6DOWN`x !!!\n\r");
 	      break;
-	    default : sprintf(buf,"Throw {3ERROR{x tell an IMM\n\r");
+	    default : sprintf(buf,"Throw `3ERROR`x tell an IMM\n\r");
 	      break;
 	    }
 	  send_to_char(buf,victim);

@@ -83,14 +83,14 @@ song_update (void)
 	{
 	  if (channel_songs[0] < 0)
 	    {
-	      sprintf (buf, "Music: {N%s, %s{x",
+	      sprintf (buf, "Music: `N%s, %s`x",
 		       song_table[channel_songs[1]].group,
 		       song_table[channel_songs[1]].name);
 	      channel_songs[0] = 0;
 	    }
 	  else
 	    {
-	      sprintf (buf, "Music: '{N%s{x'",
+	      sprintf (buf, "Music: '`N%s`x'",
 		       song_table[channel_songs[1]].lyrics[channel_songs[0]]);
 	      channel_songs[0]++;
 	    }
@@ -121,7 +121,7 @@ song_update (void)
 
       if (obj->value[0] < 0)
 	{
-	  sprintf (buf, "$p starts playing {N%s, %s{x.",
+	  sprintf (buf, "$p starts playing `N%s, %s`x.",
 		   song_table[obj->value[1]].group,
 		   song_table[obj->value[1]].name);
 	  if (obj->in_room->people != NULL)
@@ -149,7 +149,7 @@ song_update (void)
 	  obj->value[0]++;
 	}
 
-      sprintf (buf, "$p bops: '{N%s{x'", line);
+      sprintf (buf, "$p bops: '`N%s`x'", line);
       if (obj->in_room->people != NULL)
 	act (buf, obj->in_room->people, obj, NULL, TO_ALL);
     }

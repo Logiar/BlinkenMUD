@@ -95,7 +95,7 @@ struct colour_map
 };
 
 struct colour_map mapping[] = {
-  {'z', BLINK}, {'{', "{"},
+  {'z', BLINK}, {COLOUR_MARKER, COLOUR_MARKER_STR},
   {'r', C_RED}, {'1', C_RED}, {'T', C_RED},
   {'g', C_GREEN}, {'2', C_GREEN}, {'Q', C_GREEN},
   {'y', C_YELLOW}, {'3', C_YELLOW}, {'J', C_YELLOW},
@@ -113,6 +113,78 @@ struct colour_map mapping[] = {
   {'W', C_B_WHITE}, {'&', C_B_WHITE}, {'L', C_B_WHITE},
   {'Y', C_B_YELLOW}, {'#', C_B_YELLOW}, {'P', C_B_YELLOW}, {'j', C_B_YELLOW},
 };
+
+static bool
+is_colour_code_token (char c)
+{
+  switch (c)
+    {
+    case 'x':
+    case 'X':
+    case '0':
+      return TRUE;
+    default:
+      break;
+    }
+
+  {
+    size_t i;
+    size_t size = sizeof (mapping) / sizeof (mapping[0]);
+
+    for (i = 0; i < size; i++)
+      {
+	if (mapping[i].code == c)
+	  return TRUE;
+      }
+  }
+
+  return FALSE;
+}
+
+static void
+normalize_colour_markers_for_www (char *txt)
+{
+  char *src;
+  char *dst;
+
+  if (txt == NULL)
+    return;
+
+  src = txt;
+  dst = txt;
+
+  while (*src)
+    {
+      if (*src == COLOUR_MARKER)
+	{
+	  if (*(src + 1) == '\0')
+	    {
+	      *dst++ = *src++;
+	      continue;
+	    }
+
+	  if (*(src + 1) == COLOUR_MARKER)
+	    {
+	      *dst++ = COLOUR_MARKER;
+	      src += 2;
+	      continue;
+	    }
+
+	  if (is_colour_code_token (*(src + 1)))
+	    {
+	      *dst++ = '{';
+	      *dst++ = *(src + 1);
+	      src += 2;
+	      continue;
+	    }
+	}
+
+      *dst++ = *src++;
+    }
+
+  *dst = '\0';
+}
+
 
 /* command procedures needed */
 DECLARE_DO_FUN (do_help);
@@ -912,7 +984,7 @@ init_descriptor_www (int wwwcontrol)
 	    }
 	}
       sprintf (buf2, "%s", IS_NPC (wch) ? "" : wch->pcdata->title);
-      str_replace (buf2, "{%", "{-");
+      normalize_colour_markers_for_www (buf2);
       sprintf (buf, "%3d,%s,%s,%s,%s%s\n\r", wch->level,
 	       wch->race <
 	       MAX_PC_RACE ? pc_race_table[wch->race].who_name : "      ",
@@ -1211,55 +1283,55 @@ process_output (DESCRIPTOR_DATA * d, bool fPrompt)
 	    percent = -1;
 
 	  if (percent >= 100)
-	    sprintf (wound, "[{c********************{x]");
+	    sprintf (wound, "[`c********************`x]");
 	  else if (percent >= 95)
-	    sprintf (wound, "[{@******************* {x]");
+	    sprintf (wound, "[`@******************* `x]");
 	  else if (percent >= 90)
-	    sprintf (wound, "[{@******************  {x]");
+	    sprintf (wound, "[`@******************  `x]");
 	  else if (percent >= 85)
-	    sprintf (wound, "[{@*****************   {x]");
+	    sprintf (wound, "[`@*****************   `x]");
 	  else if (percent >= 80)
-	    sprintf (wound, "[{@****************    {x]");
+	    sprintf (wound, "[`@****************    `x]");
 	  else if (percent >= 75)
-	    sprintf (wound, "%s", "[{@**********75%**     {x]");
+	    sprintf (wound, "%s", "[`@**********75%**     `x]");
 	  else if (percent >= 70)
-	    sprintf (wound, "[{2**************      {x]");
+	    sprintf (wound, "[`2**************      `x]");
 	  else if (percent >= 65)
-	    sprintf (wound, "[{2*************       {x]");
+	    sprintf (wound, "[`2*************       `x]");
 	  else if (percent >= 60)
-	    sprintf (wound, "[{#************        {x]");
+	    sprintf (wound, "[`#************        `x]");
 	  else if (percent >= 55)
-	    sprintf (wound, "[{#***********         {x]");
+	    sprintf (wound, "[`#***********         `x]");
 	  else if (percent >= 50)
-	    sprintf (wound, "%s", "[{3**********50%       {x]");
+	    sprintf (wound, "%s", "[`3**********50%       `x]");
 	  else if (percent >= 45)
-	    sprintf (wound, "%s", "[{3********* 45%       {x]");
+	    sprintf (wound, "%s", "[`3********* 45%       `x]");
 	  else if (percent >= 40)
-	    sprintf (wound, "%s", "[{%********  40%       {x]");
+	    sprintf (wound, "%s", "[`%********  40%       `x]");
 	  else if (percent >= 35)
-	    sprintf (wound, "%s", "[{%*******   35%       {x]");
+	    sprintf (wound, "%s", "[`%*******   35%       `x]");
 	  else if (percent >= 30)
-	    sprintf (wound, "%s", "[{5******    30%       {x]");
+	    sprintf (wound, "%s", "[`5******    30%       `x]");
 	  else if (percent >= 25)
-	    sprintf (wound, "%s", "[{5*****     25%       {x]");
+	    sprintf (wound, "%s", "[`5*****     25%       `x]");
 	  else if (percent >= 20)
-	    sprintf (wound, "%s", "[{!****      20%       {x]");
+	    sprintf (wound, "%s", "[`!****      20%       `x]");
 	  else if (percent >= 15)
-	    sprintf (wound, "%s", "[{!**        15%       {x]");
+	    sprintf (wound, "%s", "[`!**        15%       `x]");
 	  else if (percent >= 10)
-	    sprintf (wound, "%s", "[{1**        10%       {x]");
+	    sprintf (wound, "%s", "[`1**        10%       `x]");
 	  else if (percent >= 5)
-	    sprintf (wound, "%s", "[{1*          5%       {x]");
+	    sprintf (wound, "%s", "[`1*          5%       `x]");
 	  else if (percent >= 0)
-	    sprintf (wound, "[{r      CRITICAL      {x]");
-	  sprintf (buf, "%s{x: %s{x\n\r",
+	    sprintf (wound, "[`r      CRITICAL      `x]");
+	  sprintf (buf, "%s`x: %s`x\n\r",
 		   IS_NPC (victim) ? victim->short_descr : victim->name,
 		   wound);
 	  buf[0] = UPPER (buf[0]);
 	  send_to_char (buf, ch);
 	  if (victim->stunned)
 	    {
-	      sprintf (buf, "{f%s is stunned.{x\n\r",
+	      sprintf (buf, "`f%s is stunned.`x\n\r",
 		       IS_NPC (victim) ? victim->short_descr : victim->name);
 	      send_to_char (buf, ch);
 	    }
@@ -1268,47 +1340,47 @@ process_output (DESCRIPTOR_DATA * d, bool fPrompt)
 	  else
 	    percent = -1;
 	  if (percent >= 100)
-	    sprintf (wound, "[{c********************{x]");
+	    sprintf (wound, "[`c********************`x]");
 	  else if (percent >= 95)
-	    sprintf (wound, "[{@******************* {x]");
+	    sprintf (wound, "[`@******************* `x]");
 	  else if (percent >= 90)
-	    sprintf (wound, "[{@******************  {x]");
+	    sprintf (wound, "[`@******************  `x]");
 	  else if (percent >= 85)
-	    sprintf (wound, "[{@*****************   {x]");
+	    sprintf (wound, "[`@*****************   `x]");
 	  else if (percent >= 80)
-	    sprintf (wound, "[{@****************    {x]");
+	    sprintf (wound, "[`@****************    `x]");
 	  else if (percent >= 75)
-	    sprintf (wound, "%s", "[{@**********75%**     {x]");
+	    sprintf (wound, "%s", "[`@**********75%**     `x]");
 	  else if (percent >= 70)
-	    sprintf (wound, "[{2**************      {x]");
+	    sprintf (wound, "[`2**************      `x]");
 	  else if (percent >= 65)
-	    sprintf (wound, "[{2*************       {x]");
+	    sprintf (wound, "[`2*************       `x]");
 	  else if (percent >= 60)
-	    sprintf (wound, "[{#************        {x]");
+	    sprintf (wound, "[`#************        `x]");
 	  else if (percent >= 55)
-	    sprintf (wound, "[{#***********         {x]");
+	    sprintf (wound, "[`#***********         `x]");
 	  else if (percent >= 50)
-	    sprintf (wound, "%s", "[{3**********50%       {x]");
+	    sprintf (wound, "%s", "[`3**********50%       `x]");
 	  else if (percent >= 45)
-	    sprintf (wound, "%s", "[{3********* 45%       {x]");
+	    sprintf (wound, "%s", "[`3********* 45%       `x]");
 	  else if (percent >= 40)
-	    sprintf (wound, "%s", "[{%********  40%       {x]");
+	    sprintf (wound, "%s", "[`%********  40%       `x]");
 	  else if (percent >= 35)
-	    sprintf (wound, "%s", "[{%*******   35%       {x]");
+	    sprintf (wound, "%s", "[`%*******   35%       `x]");
 	  else if (percent >= 30)
-	    sprintf (wound, "%s", "[{5******    30%       {x]");
+	    sprintf (wound, "%s", "[`5******    30%       `x]");
 	  else if (percent >= 25)
-	    sprintf (wound, "%s", "[{5*****     25%       {x]");
+	    sprintf (wound, "%s", "[`5*****     25%       `x]");
 	  else if (percent >= 20)
-	    sprintf (wound, "%s", "[{!****      20%       {x]");
+	    sprintf (wound, "%s", "[`!****      20%       `x]");
 	  else if (percent >= 15)
-	    sprintf (wound, "%s", "[{!**        15%       {x]");
+	    sprintf (wound, "%s", "[`!**        15%       `x]");
 	  else if (percent >= 10)
-	    sprintf (wound, "%s", "[{1**        10%       {x]");
+	    sprintf (wound, "%s", "[`1**        10%       `x]");
 	  else if (percent >= 5)
-	    sprintf (wound, "%s", "[{1*          5%       {x]");
+	    sprintf (wound, "%s", "[`1*          5%       `x]");
 	  else if (percent >= 0)
-	    sprintf (wound, "[{r      CRITICAL      {x]");
+	    sprintf (wound, "[`r      CRITICAL      `x]");
 	  sprintf (buf, "You: %s\n\r", wound);
 	  buf[0] = UPPER (buf[0]);
 	  send_to_char (buf, ch);
@@ -1316,7 +1388,7 @@ process_output (DESCRIPTOR_DATA * d, bool fPrompt)
 
 	  if (victim->stunned)
 	    {
-	      sprintf (buf, "{f%s is stunned.{x\n\r",
+	      sprintf (buf, "`f%s is stunned.`x\n\r",
 		       IS_NPC (victim) ? victim->short_descr : victim->name);
 	      send_to_char (buf, ch);
 	    }
@@ -2461,7 +2533,7 @@ check_reconnect (DESCRIPTOR_DATA * d, char *name, bool fConn)
 	      if (ch->tells)
 		{
 		  sprintf (buf,
-			   "Reconnecting.  You have {R%d{x tells waiting.\n\r",
+			   "Reconnecting.  You have `R%d`x tells waiting.\n\r",
 			   ch->tells);
 		  send_to_char (buf, ch);
 		  send_to_char ("Type 'replay' to see tells.\n\r", ch);
@@ -2569,9 +2641,22 @@ send_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (*point == '{')
+	      if (IS_COLOUR_MARKER (*point))
 		{
+		  char marker = *point;
 		  point++;
+		  if (*point == '\0')
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      break;
+		    }
+		  if (*point == marker)
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      continue;
+		    }
 		  strcat (buf, colour (*point, ch));
 		  for (point2 = buf; *point2; point2++)
 		    ;
@@ -2587,10 +2672,17 @@ send_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (*point == '{')
+	      if (IS_COLOUR_MARKER (*point))
 		{
+		  char marker = *point;
 		  point++;
-		  if (*point != '{')
+		  if (*point == '\0')
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      break;
+		    }
+		  if (*point != marker)
 		    {
 		      continue;
 		    }
@@ -2645,9 +2737,22 @@ page_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (*point == '{')
+	      if (IS_COLOUR_MARKER (*point))
 		{
+		  char marker = *point;
 		  point++;
+		  if (*point == '\0')
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      break;
+		    }
+		  if (*point == marker)
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      continue;
+		    }
 		  strcat (buf, colour (*point, ch));
 		  for (point2 = buf; *point2; point2++)
 		    ;
@@ -2666,10 +2771,17 @@ page_to_char (const char *txt, CHAR_DATA * ch)
 	{
 	  for (point = txt; *point; point++)
 	    {
-	      if (*point == '{')
+	      if (IS_COLOUR_MARKER (*point))
 		{
+		  char marker = *point;
 		  point++;
-		  if (*point != '{')
+		  if (*point == '\0')
+		    {
+		      *point2 = marker;
+		      *++point2 = '\0';
+		      break;
+		    }
+		  if (*point != marker)
 		    {
 		      continue;
 		    }
@@ -2824,7 +2936,7 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
       str = format;
       while (*str)
 	{
-	  if (*str != '$' && *str != '{')
+	  if (*str != '$' && !IS_COLOUR_MARKER (*str))
 	    {
 	      *point++ = *str++;
 	      continue;
@@ -2932,14 +3044,27 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		}
 	      break;
 
-	    case '{':
+	    case COLOUR_MARKER:
 	      fColour = FALSE;
-	      ++str;
-	      i = NULL;
-	      if (IS_SET (to->act, PLR_COLOUR))
-		{
-		  i = colour (*str, to);
-		}
+	      {
+		char marker = *str;
+		++str;
+		if (*str == '\0')
+		  {
+		    i = COLOUR_MARKER_STR;
+		    break;
+		  }
+		if (*str == marker)
+		  {
+		    i = COLOUR_MARKER_STR;
+		    break;
+		  }
+		i = NULL;
+		if (IS_SET (to->act, PLR_COLOUR))
+		  {
+		    i = colour (*str, to);
+		  }
+	      }
 	      break;
 
 	    default:
@@ -2958,9 +3083,22 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		{
 		  for (i2 = fixed; *i; i++)
 		    {
-		      if (*i == '{')
+		      if (IS_COLOUR_MARKER (*i))
 			{
+			  char marker = *i;
 			  i++;
+			  if (*i == '\0')
+			    {
+			      *i2 = marker;
+			      *++i2 = '\0';
+			      break;
+			    }
+			  if (*i == marker)
+			    {
+			      *i2 = marker;
+			      *++i2 = '\0';
+			      continue;
+			    }
 			  strcat (fixed, colour (*i, to));
 			  for (i2 = fixed; *i2; i2++)
 			    ;
@@ -2976,10 +3114,17 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 		{
 		  for (i2 = fixed; *i; i++)
 		    {
-		      if (*i == '{')
+		      if (IS_COLOUR_MARKER (*i))
 			{
+			  char marker = *i;
 			  i++;
-			  if (*i != '{')
+			  if (*i == '\0')
+			    {
+			      *i2 = marker;
+			      *++i2 = '\0';
+			      break;
+			    }
+			  if (*i != marker)
 			    {
 			      continue;
 			    }
@@ -3175,4 +3320,3 @@ colour (char type, CHAR_DATA * ch)
     }
   return clcode;
 }
-
