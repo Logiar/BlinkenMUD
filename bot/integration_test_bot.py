@@ -20,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 AREA_DIR = ROOT / "area"
 PLAYER_DIR = ROOT / "player"
+WIZLIST_CGI = ROOT / "src" / "wizlist.cgi"
 PROMPT_RE = re.compile(r"<\s*\d+hp\s+\d+m\s+\d+mv\s*>", re.IGNORECASE)
 
 
@@ -133,6 +134,35 @@ def finish_login_banner(session: MudSession, timeout_s: float) -> None:
     raise RuntimeError(f"Failed to reach in-game prompt after login.\n{session.buffer[-2000:]}")
 
 
+
+def validate_cgi_output(timeout_s: float) -> None:
+    """Run a CGI script and ensure the returned payload looks like valid HTML."""
+
+    result = subprocess.run(
+        ["perl", str(WIZLIST_CGI)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=timeout_s,
+        check=False,
+    )
+
+    output = result.stdout
+    lowered = output.lower()
+    if result.returncode != 0:
+        raise RuntimeError(
+            "wizlist.cgi failed to execute.\n"
+            f"exit={result.returncode}\nstdout=\n{result.stdout[-2000:]}\nstderr=\n{result.stderr[-2000:]}"
+        )
+
+    required_tokens = ["content-type: text/html", "<html>", "</html>", "<body>"]
+    if not all(token in lowered for token in required_tokens):
+        raise RuntimeError(
+            "wizlist.cgi output did not look like valid HTML CGI output.\n"
+            f"stdout=\n{result.stdout[-3000:]}\nstderr=\n{result.stderr[-2000:]}"
+        )
+
+
 def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) -> None:
     session = MudSession(host=host, port=port, timeout_s=timeout_s)
     try:
@@ -189,6 +219,9 @@ def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) ->
         session.send_and_expect("help score", ["score"], timeout_s)
         session.send_and_expect("commands", ["command", "help"], timeout_s)
         session.send_and_expect("who", ["players", "[", name.lower()], timeout_s)
+
+        # Validate CGI script output while server is still running.
+        validate_cgi_output(timeout_s)
 
     finally:
         session.close()
