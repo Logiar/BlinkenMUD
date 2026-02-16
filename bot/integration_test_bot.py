@@ -2,8 +2,8 @@
 """Simple end-to-end MUD integration bot.
 
 This script starts a BlinkenMUD server process, connects via TCP, creates a
-throwaway character, executes a few in-game commands, validates responses, and
-then exits cleanly.
+throwaway character, executes in-game actions, validates responses, and then
+exits cleanly.
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 AREA_DIR = ROOT / "area"
 PLAYER_DIR = ROOT / "player"
+PROMPT_RE = re.compile(r"<\s*\d+hp\s+\d+m\s+\d+mv\s*>", re.IGNORECASE)
 
 
 class MudSession:
@@ -46,31 +47,29 @@ class MudSession:
         text = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", text)
         return text
 
+    def _recv_into_buffer(self) -> bool:
+        try:
+            chunk = self.sock.recv(8192)
+        except socket.timeout:
+            return False
+        if not chunk:
+            return False
+        self.buffer += self._clean(chunk)
+        return True
+
     def read_until(self, patterns: list[str], timeout_s: float) -> str:
         deadline = time.monotonic() + timeout_s
         lowered = [p.lower() for p in patterns]
 
         while time.monotonic() < deadline:
-            for pattern in lowered:
-                if pattern in self.buffer.lower():
-                    return self.buffer
-
-            try:
-                chunk = self.sock.recv(8192)
-            except socket.timeout:
-                continue
-
-            if not chunk:
-                break
-
-            self.buffer += self._clean(chunk)
+            if any(pattern in self.buffer.lower() for pattern in lowered):
+                return self.buffer
+            self._recv_into_buffer()
 
         raise RuntimeError(
             f"Timed out waiting for one of: {patterns}.\n"
-            f"Last output:\n{self.buffer[-2000:]}"
+            f"Last output:\n{self.buffer[-3000:]}"
         )
-
-
 
     def send_and_expect(self, command: str, expected_patterns: list[str], timeout_s: float) -> str:
         start = len(self.buffer)
@@ -78,15 +77,10 @@ class MudSession:
 
         deadline = time.monotonic() + timeout_s
         while time.monotonic() < deadline:
-            if "<" in self.buffer[start:].lower():
+            response = self.buffer[start:]
+            if PROMPT_RE.search(response):
                 break
-            try:
-                chunk = self.sock.recv(8192)
-            except socket.timeout:
-                continue
-            if not chunk:
-                break
-            self.buffer += self._clean(chunk)
+            self._recv_into_buffer()
         else:
             raise RuntimeError(f"Timed out waiting for prompt after command '{command}'.")
 
@@ -97,7 +91,10 @@ class MudSession:
                 f"Command '{command}' missing expected output {expected_patterns}.\n"
                 f"Response:\n{response[-2000:]}"
             )
+        if "huh?" in lowered:
+            raise RuntimeError(f"Command '{command}' appears to have been rejected.\nResponse:\n{response}")
         return response
+
 
 def wait_for_server_ready(process: subprocess.Popen[str], timeout_s: float) -> None:
     deadline = time.monotonic() + timeout_s
@@ -116,6 +113,24 @@ def wait_for_server_ready(process: subprocess.Popen[str], timeout_s: float) -> N
         "MUD process did not become ready in time.\n"
         f"Recent output:\n{output[-2000:]}"
     )
+
+
+def finish_login_banner(session: MudSession, timeout_s: float) -> None:
+    """Handle post-login MOTD pagination and settle at command prompt."""
+
+    # Some runs show a paged message that needs Enter.
+    if "hit return to continue" in session.buffer.lower():
+        session.send_line("")
+
+    deadline = time.monotonic() + timeout_s
+    while time.monotonic() < deadline:
+        if PROMPT_RE.search(session.buffer):
+            return
+        if "hit return to continue" in session.buffer.lower():
+            session.send_line("")
+        session._recv_into_buffer()
+
+    raise RuntimeError(f"Failed to reach in-game prompt after login.\n{session.buffer[-2000:]}")
 
 
 def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) -> None:
@@ -151,11 +166,29 @@ def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) ->
         session.read_until(["Your choice?"], timeout_s)
         session.send_line("sword")
 
-        # Enter the game and validate command/output behavior.
+        # Enter the game and validate a mini player-like session.
         time.sleep(1)
-        session.send_and_expect("score", ["You are", "Level"], timeout_s)
-        session.send_and_expect("look", ["Entrance", "School", "You see"], timeout_s)
-        session.send_and_expect("inventory", ["You are carrying", "nothing"], timeout_s)
+        finish_login_banner(session, timeout_s)
+
+        # Core info checks.
+        session.send_and_expect("score", ["you are", "level"], timeout_s)
+        session.send_and_expect("inventory", ["you are carrying", "survival pack", "map"], timeout_s)
+        session.send_and_expect("equipment", ["you are using"], timeout_s)
+
+        # Interactions in starting room.
+        session.send_and_expect("look", ["entrance to mud school"], timeout_s)
+        session.send_and_expect("look map", ["map", "thera", "midgaard"], timeout_s)
+        session.send_and_expect("say integration test online", ["you say"], timeout_s)
+
+        # Move around like a player.
+        session.send_and_expect("north", ["school"], timeout_s)
+        session.send_and_expect("look", ["school", "the"], timeout_s)
+        session.send_and_expect("south", ["entrance to mud school"], timeout_s)
+
+        # Basic utility commands players commonly use.
+        session.send_and_expect("help score", ["score"], timeout_s)
+        session.send_and_expect("commands", ["command", "help"], timeout_s)
+        session.send_and_expect("who", ["players", "[", name.lower()], timeout_s)
 
     finally:
         session.close()
@@ -177,7 +210,7 @@ def main() -> int:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=19000)
     parser.add_argument("--binary", default=str(ROOT / "bin" / "BlinkenMUD"))
-    parser.add_argument("--timeout", type=float, default=15.0)
+    parser.add_argument("--timeout", type=float, default=20.0)
     args = parser.parse_args()
 
     binary = Path(args.binary)
