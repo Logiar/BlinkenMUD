@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+"""Simple end-to-end MUD integration bot.
+
+This script starts a BlinkenMUD server process, connects via TCP, creates a
+throwaway character, executes a few in-game commands, validates responses, and
+then exits cleanly.
+"""
+
+from __future__ import annotations
+
+import argparse
+import random
+import re
+import string
+import socket
+import subprocess
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+AREA_DIR = ROOT / "area"
+PLAYER_DIR = ROOT / "player"
+
+
+class MudSession:
+    def __init__(self, host: str, port: int, timeout_s: float) -> None:
+        self.sock = socket.create_connection((host, port), timeout=timeout_s)
+        self.sock.settimeout(timeout_s)
+        self.buffer = ""
+
+    def close(self) -> None:
+        try:
+            self.sock.close()
+        except OSError:
+            pass
+
+    def send_line(self, line: str) -> None:
+        self.sock.sendall(line.encode("utf-8") + b"\n")
+
+    @staticmethod
+    def _clean(chunk: bytes) -> str:
+        text = chunk.decode("latin1", errors="ignore")
+        # Strip basic telnet command sequences (IAC + cmd + opt).
+        text = re.sub(r"\xff[\xfb\xfc\xfd\xfe].", "", text)
+        # Strip ANSI color codes.
+        text = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", text)
+        return text
+
+    def read_until(self, patterns: list[str], timeout_s: float) -> str:
+        deadline = time.monotonic() + timeout_s
+        lowered = [p.lower() for p in patterns]
+
+        while time.monotonic() < deadline:
+            for pattern in lowered:
+                if pattern in self.buffer.lower():
+                    return self.buffer
+
+            try:
+                chunk = self.sock.recv(8192)
+            except socket.timeout:
+                continue
+
+            if not chunk:
+                break
+
+            self.buffer += self._clean(chunk)
+
+        raise RuntimeError(
+            f"Timed out waiting for one of: {patterns}.\n"
+            f"Last output:\n{self.buffer[-2000:]}"
+        )
+
+
+
+    def send_and_expect(self, command: str, expected_patterns: list[str], timeout_s: float) -> str:
+        start = len(self.buffer)
+        self.send_line(command)
+
+        deadline = time.monotonic() + timeout_s
+        while time.monotonic() < deadline:
+            if "<" in self.buffer[start:].lower():
+                break
+            try:
+                chunk = self.sock.recv(8192)
+            except socket.timeout:
+                continue
+            if not chunk:
+                break
+            self.buffer += self._clean(chunk)
+        else:
+            raise RuntimeError(f"Timed out waiting for prompt after command '{command}'.")
+
+        response = self.buffer[start:]
+        lowered = response.lower()
+        if not any(p.lower() in lowered for p in expected_patterns):
+            raise RuntimeError(
+                f"Command '{command}' missing expected output {expected_patterns}.\n"
+                f"Response:\n{response[-2000:]}"
+            )
+        return response
+
+def wait_for_server_ready(process: subprocess.Popen[str], timeout_s: float) -> None:
+    deadline = time.monotonic() + timeout_s
+    output = ""
+
+    while time.monotonic() < deadline:
+        line = process.stdout.readline()
+        if line:
+            output += line
+            if "ready to rock" in line.lower():
+                return
+        elif process.poll() is not None:
+            break
+
+    raise RuntimeError(
+        "MUD process did not become ready in time.\n"
+        f"Recent output:\n{output[-2000:]}"
+    )
+
+
+def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) -> None:
+    session = MudSession(host=host, port=port, timeout_s=timeout_s)
+    try:
+        session.read_until(["What name do you wish to use?"], timeout_s)
+        session.send_line(name)
+
+        session.read_until(["Did I get that right"], timeout_s)
+        session.send_line("y")
+
+        session.read_until(["Give me a password"], timeout_s)
+        session.send_line(password)
+
+        session.read_until(["Please retype password"], timeout_s)
+        session.send_line(password)
+
+        session.read_until(["What is your race"], timeout_s)
+        session.send_line("human")
+
+        session.read_until(["What is your sex"], timeout_s)
+        session.send_line("m")
+
+        session.read_until(["Select a class"], timeout_s)
+        session.send_line("warrior")
+
+        session.read_until(["Which alignment"], timeout_s)
+        session.send_line("g")
+
+        session.read_until(["customize this character"], timeout_s)
+        session.send_line("n")
+
+        session.read_until(["Your choice?"], timeout_s)
+        session.send_line("sword")
+
+        # Enter the game and validate command/output behavior.
+        time.sleep(1)
+        session.send_and_expect("score", ["You are", "Level"], timeout_s)
+        session.send_and_expect("look", ["Entrance", "School", "You see"], timeout_s)
+        session.send_and_expect("inventory", ["You are carrying", "nothing"], timeout_s)
+
+    finally:
+        session.close()
+
+
+def delete_player(name: str) -> None:
+    candidates = {
+        PLAYER_DIR / name,
+        PLAYER_DIR / name.lower(),
+        PLAYER_DIR / name.capitalize(),
+    }
+    for path in candidates:
+        if path.exists():
+            path.unlink()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Run BlinkenMUD integration bot test")
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=19000)
+    parser.add_argument("--binary", default=str(ROOT / "bin" / "BlinkenMUD"))
+    parser.add_argument("--timeout", type=float, default=15.0)
+    args = parser.parse_args()
+
+    binary = Path(args.binary)
+    if not binary.exists():
+        raise SystemExit(f"MUD binary not found at {binary}. Build first with: make -C src all")
+
+    # Max name length is 12 chars.
+    name = "T" + "".join(random.choice(string.ascii_lowercase) for _ in range(7))
+    password = "pass123"
+
+    process = subprocess.Popen(
+        [str(binary), str(args.port)],
+        cwd=AREA_DIR,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+
+    try:
+        wait_for_server_ready(process, timeout_s=args.timeout)
+        run_bot(host=args.host, port=args.port, timeout_s=args.timeout, name=name, password=password)
+        print(f"Integration bot succeeded on port {args.port} using character {name}.")
+        return 0
+    finally:
+        delete_player(name)
+
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
