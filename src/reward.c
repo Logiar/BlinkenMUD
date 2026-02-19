@@ -230,7 +230,7 @@ bounty (CHAR_DATA * ch, CHAR_DATA * captain)
 
   if (!obj_found)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "Right now, %s, there are no rewards worthy of your talents.",
 	       ch->name);
       do_say (captain, buf);
@@ -249,26 +249,26 @@ bounty (CHAR_DATA * ch, CHAR_DATA * captain)
   switch (obj->item_type)
     {
     case ITEM_WEAPON:
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "%s, everyone knows %s stole %s. Find the thief and get %s, bring it to me, and I will see you are handsomely rewarded!",
 	       ch->name, victim->short_descr, obj->short_descr,
 	       obj->short_descr);
       break;
     case ITEM_ARMOR:
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "%s has been reported lost, %s, but we know who took it. Find %s and get %s, bring it to me, and I will tell you who will pay a generous reward for its return.",
 	       capitalize (obj->short_descr), ch->name, victim->short_descr,
 	       obj->short_descr);
       break;
     case ITEM_CONTAINER:
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "%s is gone! %s, rumor among the %s is that %s filched it. Slay %s and get %s, bring it to me, and I'll see to it you are rewarded!",
 	       capitalize (obj->short_descr), ch->name,
 	       race_table[victim->race].name, victim->short_descr,
 	       victim->short_descr, obj->short_descr);
       break;
     default:
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "%s is gone! %s, just before %s died, our %s informant said %s filched it. Slay %s and get %s, bring it to me, and I'll see to it you are rewarded!",
 	       capitalize (obj->short_descr), ch->name,
 	       victim->sex == 1 ? "he" : "she", race_table[victim->race].name,
@@ -315,7 +315,7 @@ bounty (CHAR_DATA * ch, CHAR_DATA * captain)
       where = victim->in_room->name;
     }
 
-  sprintf (buf, "I hear that %s was recently seen %s%s in %s.",
+  snprintf (buf, sizeof (buf), "I hear that %s was recently seen %s%s in %s.",
 	   victim->short_descr, prep, where, room->area->name);
   do_say (guard, buf);
 
@@ -348,7 +348,7 @@ do_reward (CHAR_DATA * ch, char *argument)
   /* Newbie's can't hunt bounties. */
   if (ch->level < 3)
     {
-      sprintf (buf, "Sorry, you must be level 3 to hunt for bounty.\n\r");
+      snprintf (buf, sizeof (buf), "Sorry, you must be level 3 to hunt for bounty.\n\r");
       send_to_char (buf, ch);
       return;
     }
@@ -356,7 +356,7 @@ do_reward (CHAR_DATA * ch, char *argument)
   /* Imms can't get bounties, either. */
   else if (ch->level > 101)
     {
-      sprintf (buf, "Sorry, you're too old to hunt for bounty.\n\r");
+      snprintf (buf, sizeof (buf), "Sorry, you're too old to hunt for bounty.\n\r");
       send_to_char (buf, ch);
       return;
     }
@@ -370,7 +370,7 @@ do_reward (CHAR_DATA * ch, char *argument)
   /* see if they're available for work */
   if (ch->pcdata->recovery > current_time)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "You have %ld minute%s until you may request another bounty.\n\r",
 	       ((ch->pcdata->recovery - current_time) / 60) + 1,
 	       (((ch->pcdata->recovery - current_time) / 60)) + 1 ==
@@ -408,19 +408,19 @@ do_reward (CHAR_DATA * ch, char *argument)
       switch (number_range (1, 3))
 	{
 	case 1:
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "Wonderful, %s! You have found %s that was stolen from me by %s! In appreciation, I grant you a bounty of %d.",
 		   ch->name, obj->pIndexData->short_descr,
 		   get_mob_index (ch->pcdata->bounty_mob)->short_descr,
 		   reward);
 	  break;
 	case 2:
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "%s, you have found %s! This is marvelous! Here, I'll give you %d for a bounty.",
 		   ch->name, obj->pIndexData->short_descr, reward);
 	  break;
 	case 3:
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "%s! %s, you have %s! To show my gratitude, you shall have a bounty of %d.",
 		   capitalize (obj->pIndexData->short_descr), ch->name,
 		   obj->pIndexData->short_descr, reward);
@@ -461,7 +461,7 @@ do_reward (CHAR_DATA * ch, char *argument)
 	  /* first make sure it's their first time asking */
 	  if (ch->pcdata->rewarder > 0)
 	    {
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "%s, you have %s that belongs to %s. Now, get going! You have %ld minute%s left.",
 		       ch->name,
 		       get_obj_index (ch->pcdata->bounty_obj)->short_descr,
@@ -518,7 +518,7 @@ do_reward (CHAR_DATA * ch, char *argument)
 	  else
 	    art = "at ";
 
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "Well done, %s, you have found %s! Now, take it to %s %s%s in %s and ask for a fat reward.",
 		   ch->name,
 		   get_obj_index (ch->pcdata->bounty_obj)->short_descr,
@@ -532,7 +532,7 @@ do_reward (CHAR_DATA * ch, char *argument)
       /* OK, no obj, let's give them a progress report */
       else
 	{
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "%s, you are hunting for %s that was stolen by %s. You have %ld minute%s left.",
 		   ch->name,
 		   get_obj_index (ch->pcdata->bounty_obj)->short_descr,
@@ -549,7 +549,7 @@ do_reward (CHAR_DATA * ch, char *argument)
 
   if (ch->pcdata->bounty_obj < 1)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "You are not bounty hunting at the moment.\n\rSee the Cityguard Captain for a chance at a reward.\n\r");
       send_to_char (buf, ch);
       return;
@@ -560,7 +560,7 @@ do_reward (CHAR_DATA * ch, char *argument)
       /* if they have a rewarder, send a reminder */
       if (ch->pcdata->rewarder != 0)
 	{
-	  sprintf (buf, "You have %ld minute%s left to return %s to %s!\n\r",
+	  snprintf (buf, sizeof (buf), "You have %ld minute%s left to return %s to %s!\n\r",
 		   (ch->pcdata->hunt_time - current_time) / 60 + 1,
 		   (((ch->pcdata->hunt_time - current_time) / 60)) + 1 ==
 		   1 ? "" : "s",
@@ -573,7 +573,7 @@ do_reward (CHAR_DATA * ch, char *argument)
       /* if they've just found the object, send them back to the captain */
       else
 	{
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "You have found %s with %ld minute%s left to go!\n\rReturn to the Captain for further intructions.\n\r",
 		   get_obj_index (ch->pcdata->bounty_obj)->short_descr,
 		   (ch->pcdata->hunt_time - current_time) / 60 + 1,
@@ -587,7 +587,7 @@ do_reward (CHAR_DATA * ch, char *argument)
   /* if they're still hunting, give them a progress report */
   if (ch->pcdata->bounty_obj > 0)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "You are hunting for %s that was stolen by %s.\n\rYou have %ld minute%s left.\n\r",
 	       get_obj_index (ch->pcdata->bounty_obj)->short_descr,
 	       get_mob_index (ch->pcdata->bounty_mob)->short_descr,

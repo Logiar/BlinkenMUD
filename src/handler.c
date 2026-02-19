@@ -1657,7 +1657,7 @@ affect_join (CHAR_DATA * ch, AFFECT_DATA * paf)
     {
       if (paf_old->type == paf->type)
 	{
-	  paf->level = (paf->level += paf_old->level) / 2;
+	  paf->level = (paf->level + paf_old->level) / 2;
 	  paf->duration += paf_old->duration;
 	  paf->modifier += paf_old->modifier;
 	  affect_remove (ch, paf_old);
@@ -2065,21 +2065,25 @@ unequip_char (CHAR_DATA * ch, OBJ_DATA * obj)
   obj->wear_loc = -1;
 
   if (!obj->enchanted)
-    for (paf = obj->pIndexData->affected; paf != NULL; paf = paf->next)
-      if (paf->location == APPLY_SPELL_AFFECT)
-	{
-	  for (lpaf = ch->affected; lpaf != NULL; lpaf = lpaf_next)
+    {
+      for (paf = obj->pIndexData->affected; paf != NULL; paf = paf->next)
+        {
+          if (paf->location == APPLY_SPELL_AFFECT)
 	    {
-	      lpaf_next = lpaf->next;
-	      if ((lpaf->type == paf->type) &&
-		  (lpaf->level == paf->level) &&
-		  (lpaf->location == APPLY_SPELL_AFFECT))
+	      for (lpaf = ch->affected; lpaf != NULL; lpaf = lpaf_next)
 		{
-		  affect_remove (ch, lpaf);
-		  lpaf_next = NULL;
+		  lpaf_next = lpaf->next;
+		  if ((lpaf->type == paf->type) &&
+		      (lpaf->level == paf->level) &&
+		      (lpaf->location == APPLY_SPELL_AFFECT))
+		    {
+		      affect_remove (ch, lpaf);
+		      lpaf_next = NULL;
+		    }
 		}
 	    }
-	}
+        }
+    }
       else
 	{
 	  affect_modify (ch, paf, FALSE);
@@ -2885,7 +2889,7 @@ create_money (int platinum, int gold, int silver)
   else if (gold == 0 && silver == 0)
     {
       obj = create_object (get_obj_index (OBJ_VNUM_PLATINUM_SOME), 0);
-      sprintf (buf, obj->short_descr, platinum);
+      snprintf (buf, sizeof (buf), obj->short_descr, platinum);
       free_string (obj->short_descr);
       obj->short_descr = str_dup (buf);
       obj->value[2] = platinum;
@@ -2895,7 +2899,7 @@ create_money (int platinum, int gold, int silver)
   else if (platinum == 0 && silver == 0)
     {
       obj = create_object (get_obj_index (OBJ_VNUM_GOLD_SOME), 0);
-      sprintf (buf, obj->short_descr, gold);
+      snprintf (buf, sizeof (buf), obj->short_descr, gold);
       free_string (obj->short_descr);
       obj->short_descr = str_dup (buf);
       obj->value[1] = gold;
@@ -2905,7 +2909,7 @@ create_money (int platinum, int gold, int silver)
   else if (platinum == 0 && gold == 0)
     {
       obj = create_object (get_obj_index (OBJ_VNUM_SILVER_SOME), 0);
-      sprintf (buf, obj->short_descr, silver);
+      snprintf (buf, sizeof (buf), obj->short_descr, silver);
       free_string (obj->short_descr);
       obj->short_descr = str_dup (buf);
       obj->value[0] = silver;

@@ -83,14 +83,14 @@ song_update (void)
 	{
 	  if (channel_songs[0] < 0)
 	    {
-	      sprintf (buf, "Music: `N%s, %s`x",
+	      snprintf (buf, sizeof (buf), "Music: `N%s, %s`x",
 		       song_table[channel_songs[1]].group,
 		       song_table[channel_songs[1]].name);
 	      channel_songs[0] = 0;
 	    }
 	  else
 	    {
-	      sprintf (buf, "Music: '`N%s`x'",
+	      snprintf (buf, sizeof (buf), "Music: '`N%s`x'",
 		       song_table[channel_songs[1]].lyrics[channel_songs[0]]);
 	      channel_songs[0]++;
 	    }
@@ -121,7 +121,7 @@ song_update (void)
 
       if (obj->value[0] < 0)
 	{
-	  sprintf (buf, "$p starts playing `N%s, %s`x.",
+	  snprintf (buf, sizeof (buf), "$p starts playing `N%s, %s`x.",
 		   song_table[obj->value[1]].group,
 		   song_table[obj->value[1]].name);
 	  if (obj->in_room->people != NULL)
@@ -149,7 +149,7 @@ song_update (void)
 	  obj->value[0]++;
 	}
 
-      sprintf (buf, "$p bops: '`N%s`x'", line);
+      snprintf (buf, sizeof (buf), "$p bops: '`N%s`x'", line);
       if (obj->in_room->people != NULL)
 	act (buf, obj->in_room->people, obj, NULL, TO_ALL);
     }
@@ -261,7 +261,7 @@ do_play (CHAR_DATA * ch, char *argument)
       if (argument[0] != '\0')
 	match = TRUE;
 
-      sprintf (buf, "%s has the following songs available:\n\r",
+      snprintf (buf, sizeof (buf), "%s has the following songs available:\n\r",
 	       juke->short_descr);
       add_buf (buffer, capitalize (buf));
 
@@ -272,11 +272,11 @@ do_play (CHAR_DATA * ch, char *argument)
 
 	  if (artist && (!match
 			 || !str_prefix (argument, song_table[i].group)))
-	    sprintf (buf, "%-39s %-39s\n\r",
+	    snprintf (buf, sizeof (buf), "%-39s %-39s\n\r",
 		     song_table[i].group, song_table[i].name);
 	  else if (!artist && (!match
 			       || !str_prefix (argument, song_table[i].name)))
-	    sprintf (buf, "%-35s ", song_table[i].name);
+	    snprintf (buf, sizeof (buf), "%-35s ", song_table[i].name);
 	  else
 	    continue;
 	  add_buf (buffer, buf);

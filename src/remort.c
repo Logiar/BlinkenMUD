@@ -58,7 +58,7 @@ do_remort (CHAR_DATA * ch, char *argument)
 
   if (ch->level < LEVEL_HERO && !IS_SET (ch->act, PLR_REMORT))
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "You must be level %d or already have remorted to remort.\n\r",
 	       LEVEL_HERO);
       send_to_char (buf, ch);
@@ -78,7 +78,7 @@ do_remort (CHAR_DATA * ch, char *argument)
 	  /*
 	   * Get ready to delete the pfile, send a nice informational message.
 	   */
-	  sprintf (strsave, "%s%s", PLAYER_DIR, capitalize (ch->name));
+	  snprintf (strsave, sizeof (strsave), "%s%s", PLAYER_DIR, capitalize (ch->name));
 	  stop_fighting (ch, TRUE);
 	  send_to_char
 	    ("`WYou have chosen to `rremort`W.  You will now be dropped in at the race\n\r",
@@ -103,8 +103,8 @@ do_remort (CHAR_DATA * ch, char *argument)
 	   * I quote:
 	   * "After extract_char the ch is no longer valid!"
 	   */
-	  sprintf (player_name, "%s", capitalize (ch->name));
-	  sprintf (player_pwd, "%s", ch->pcdata->pwd);
+	  snprintf (player_name, sizeof (player_name), "%s", capitalize (ch->name));
+	  snprintf (player_pwd, sizeof (player_pwd), "%s", ch->pcdata->pwd);
 	  player_incarnations = ++ch->pcdata->incarnations;
 	  extract_char (ch, TRUE);
 

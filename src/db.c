@@ -391,7 +391,7 @@ boot_db (void)
 
 
 
-	    sprintf (log_buf, "reading %s", strArea);
+	    snprintf (log_buf, sizeof (log_buf), "reading %s", strArea);
 	    log_string (log_buf);
 
 	    if ((fpArea = fopen (strArea, "r")) == NULL)
@@ -629,8 +629,7 @@ new_load_area (FILE * fp)
 	case 'E':
 	  if (!str_cmp (word, "End"))
 	    {
-	      fMatch = TRUE;
-	      if (area_first == NULL)
+		      if (area_first == NULL)
 		area_first = pArea;
 	      if (area_last != NULL)
 		area_last->next = pArea;
@@ -647,6 +646,8 @@ new_load_area (FILE * fp)
 	  SKEY ("Credits", pArea->credits);
 	  break;
 	}
+
+      (void) fMatch;
     }
 }
 
@@ -1600,7 +1601,7 @@ fix_exits (void)
                 &&   (pRoomIndex->vnum != 8705)
                 &&   (pRoomIndex->vnum != 8717))
 		{
-		    sprintf( buf, "Fix_exits: %d:%d -> %d:%d -> %d.",
+		    snprintf( buf, sizeof (buf), "Fix_exits: %d:%d -> %d:%d -> %d.",
 			pRoomIndex->vnum, door,
 			to_room->vnum,    rev_dir[door],
 			(pexit_rev->u1.to_room == NULL)
@@ -1642,7 +1643,7 @@ area_update (void)
 	  ROOM_INDEX_DATA *pRoomIndex;
 
 	  reset_area (pArea);
-	  sprintf (buf, "%s has just been reset.", pArea->name);
+	  snprintf (buf, sizeof (buf), "%s has just been reset.", pArea->name);
 	  wiznet (buf, NULL, NULL, WIZ_RESETS, 0, 0);
 
 	  pArea->age = number_range (0, 3);
@@ -1792,7 +1793,7 @@ reset_room (ROOM_INDEX_DATA * pRoom)
 	  if (!(pObjIndex = get_obj_index (pReset->arg1)))
 	    {
 	      bug ("Reset_room: 'O' 1 : bad vnum %d", pReset->arg1);
-	      sprintf (buf, "%d %d %d %d", pReset->arg1, pReset->arg2,
+	      snprintf (buf, sizeof (buf), "%d %d %d %d", pReset->arg1, pReset->arg2,
 		       pReset->arg3, pReset->arg4);
 	      bug (buf, 1);
 	      continue;
@@ -1802,7 +1803,7 @@ reset_room (ROOM_INDEX_DATA * pRoom)
 	  if (!(pRoomIndex = get_room_index (pReset->arg3)))
 	    {
 	      bug ("Reset_room: 'O' 2 : bad vnum %d.", pReset->arg3);
-	      sprintf (buf, "%d %d %d %d", pReset->arg1, pReset->arg2,
+	      snprintf (buf, sizeof (buf), "%d %d %d %d", pReset->arg1, pReset->arg2,
 		       pReset->arg3, pReset->arg4);
 	      bug (buf, 1);
 	      continue;
@@ -3376,7 +3377,7 @@ do_areas (CHAR_DATA * ch, char *argument)
 
   for (iArea = 0; iArea < iAreaHalf; iArea++)
     {
-      sprintf (buf, "%-39s%-39s\n\r",
+      snprintf (buf, sizeof (buf), "%-39s%-39s\n\r",
 	       pArea1->credits, (pArea2 != NULL) ? pArea2->credits : "");
       AreaStrLen = strlen (buf);
       for (AreaCnt = 0; AreaCnt < AreaStrLen; AreaCnt++)
@@ -3401,36 +3402,36 @@ do_memory (CHAR_DATA * ch, char *argument)
 {
   char buf[MAX_STRING_LENGTH];
 
-  sprintf (buf, "Affects %5d\n\r", top_affect);
+  snprintf (buf, sizeof (buf), "Affects %5d\n\r", top_affect);
   send_to_char (buf, ch);
-  sprintf (buf, "Areas   %5d\n\r", top_area);
+  snprintf (buf, sizeof (buf), "Areas   %5d\n\r", top_area);
   send_to_char (buf, ch);
-  sprintf (buf, "ExDes   %5d\n\r", top_ed);
+  snprintf (buf, sizeof (buf), "ExDes   %5d\n\r", top_ed);
   send_to_char (buf, ch);
-  sprintf (buf, "Exits   %5d\n\r", top_exit);
+  snprintf (buf, sizeof (buf), "Exits   %5d\n\r", top_exit);
   send_to_char (buf, ch);
-  sprintf (buf, "Helps   %5d\n\r", top_help);
+  snprintf (buf, sizeof (buf), "Helps   %5d\n\r", top_help);
   send_to_char (buf, ch);
-  sprintf (buf, "Socials %5d\n\r", social_count);
+  snprintf (buf, sizeof (buf), "Socials %5d\n\r", social_count);
   send_to_char (buf, ch);
-  sprintf (buf, "Mobs    %5d(%d new format)\n\r", top_mob_index, newmobs);
+  snprintf (buf, sizeof (buf), "Mobs    %5d(%d new format)\n\r", top_mob_index, newmobs);
   send_to_char (buf, ch);
-  sprintf (buf, "(in use)%5d\n\r", mobile_count);
+  snprintf (buf, sizeof (buf), "(in use)%5d\n\r", mobile_count);
   send_to_char (buf, ch);
-  sprintf (buf, "Objs    %5d(%d new format)\n\r", top_obj_index, newobjs);
+  snprintf (buf, sizeof (buf), "Objs    %5d(%d new format)\n\r", top_obj_index, newobjs);
   send_to_char (buf, ch);
-  sprintf (buf, "Resets  %5d\n\r", top_reset);
+  snprintf (buf, sizeof (buf), "Resets  %5d\n\r", top_reset);
   send_to_char (buf, ch);
-  sprintf (buf, "Rooms   %5d\n\r", top_room);
+  snprintf (buf, sizeof (buf), "Rooms   %5d\n\r", top_room);
   send_to_char (buf, ch);
-  sprintf (buf, "Shops   %5d\n\r", top_shop);
+  snprintf (buf, sizeof (buf), "Shops   %5d\n\r", top_shop);
   send_to_char (buf, ch);
 
-  sprintf (buf, "Strings %5d strings of %7d bytes (max %d).\n\r",
+  snprintf (buf, sizeof (buf), "Strings %5d strings of %7d bytes (max %d).\n\r",
 	   nAllocString, sAllocString, MAX_STRING);
   send_to_char (buf, ch);
 
-  sprintf (buf, "Perms   %5d blocks  of %7d bytes.\n\r",
+  snprintf (buf, sizeof (buf), "Perms   %5d blocks  of %7d bytes.\n\r",
 	   nAllocPerm, sAllocPerm);
   send_to_char (buf, ch);
 
@@ -3990,16 +3991,16 @@ str_replace (char *astr, char *bstr, char *cstr)
       buf[0] = '\0';
       for (ichar = 0; ichar < jchar; ichar++)
 	{
-	  sprintf (newstr, "%c", astr[ichar]);
+	  snprintf (newstr, sizeof (newstr), "%c", astr[ichar]);
 	  strcat (buf, newstr);
 	}
       strcat (buf, cstr);
       for (ichar = jchar + sstr2; ichar < sstr1; ichar++)
 	{
-	  sprintf (newstr, "%c", astr[ichar]);
+	  snprintf (newstr, sizeof (newstr), "%c", astr[ichar]);
 	  strcat (buf, newstr);
 	}
-      sprintf (astr, "%s", str_replace (buf, bstr, cstr));
+      strcpy (astr, str_replace (buf, bstr, cstr));
       return astr;
     }
   return astr;
@@ -4051,16 +4052,16 @@ str_replace_c (char *astr, char *bstr, char *cstr)
       buf[0] = '\0';
       for (ichar = 0; ichar < jchar; ichar++)
 	{
-	  sprintf (newstr, "%c", astr[ichar]);
+	  snprintf (newstr, sizeof (newstr), "%c", astr[ichar]);
 	  strcat (buf, newstr);
 	}
       strcat (buf, cstr);
       for (ichar = jchar + sstr2; ichar < sstr1; ichar++)
 	{
-	  sprintf (newstr, "%c", astr[ichar]);
+	  snprintf (newstr, sizeof (newstr), "%c", astr[ichar]);
 	  strcat (buf, newstr);
 	}
-      sprintf (astr, "%s", str_replace_c (buf, bstr, cstr));
+      strcpy (astr, str_replace_c (buf, bstr, cstr));
       return astr;
     }
   return astr;
@@ -4219,7 +4220,7 @@ bug (const char *str, int param)
 	  fseek (fpArea, iChar, 0);
 	}
 
-      sprintf (buf, "[*****] FILE: %s LINE: %d", strArea, iLine);
+      snprintf (buf, sizeof (buf), "[*****] FILE: %s LINE: %d", strArea, iLine);
       log_string (buf);
 /* RT removed because we don't want bugs shutting the mud 
 	if ( ( fp = fopen( "shutdown.txt", "a" ) ) != NULL )
@@ -4230,8 +4231,8 @@ bug (const char *str, int param)
 */
     }
 
-  strcpy (buf, "[*****] BUG: ");
-  sprintf (buf + strlen (buf), str, param);
+  snprintf (buf, sizeof (buf), "[*****] BUG: ");
+  snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), str, param);
   log_string (buf);
 /* RT removed due to bug-file spamming 
     fclose( fpReserve );
@@ -4389,7 +4390,7 @@ randomize_entrances (int code)
 			}
 		    }
 		  portal = create_object (get_obj_index (OBJ_VNUM_EXIT), 1);
-		  sprintf (buf, "exit %s", dir_name[door]);
+		  snprintf (buf, sizeof (buf), "exit %s", dir_name[door]);
 		  free_string (portal->name);
 		  portal->name = str_dup (buf);
 		  free_string (portal->short_descr);
@@ -4397,7 +4398,7 @@ randomize_entrances (int code)
 		  portal->value[0] = pToRoomIndex->vnum;
 		  obj_to_room (portal, pRoomIndex);
 		  toportal = create_object (get_obj_index (OBJ_VNUM_EXIT), 1);
-		  sprintf (buf, "exit %s", dir_name[todoor]);
+		  snprintf (buf, sizeof (buf), "exit %s", dir_name[todoor]);
 		  free_string (toportal->name);
 		  toportal->name = str_dup (buf);
 		  free_string (toportal->short_descr);
@@ -4477,12 +4478,12 @@ randomize_entrances (int code)
       else
 	todoor = door - 2;
 
-      sprintf (buf, "The chain drifts off to the %s.\n\r", dir_name[door]);
+      snprintf (buf, sizeof (buf), "The chain drifts off to the %s.\n\r", dir_name[door]);
       for (rch = pToRoomIndex->people; rch != NULL; rch = rch->next_in_room)
 	send_to_char (buf, rch);
 
       pToRoomIndex = get_room_index (toroom);
-      sprintf (buf, "A chain drifts in from the %s.\n\r", dir_name[todoor]);
+      snprintf (buf, sizeof (buf), "A chain drifts in from the %s.\n\r", dir_name[todoor]);
       for (rch = pToRoomIndex->people; rch != NULL; rch = rch->next_in_room)
 	send_to_char (buf, rch);
 
@@ -4490,7 +4491,7 @@ randomize_entrances (int code)
       door = 5;
       todoor = 4;
       portal = create_object (get_obj_index (OBJ_VNUM_EXIT), 1);
-      sprintf (buf, "exit %s", dir_name[door]);
+      snprintf (buf, sizeof (buf), "exit %s", dir_name[door]);
       free_string (portal->name);
       portal->name = str_dup (buf);
       free_string (portal->short_descr);

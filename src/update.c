@@ -87,7 +87,7 @@ advance_level (CHAR_DATA * ch)
   ch->pcdata->last_level =
     (ch->played + (int) (current_time - ch->logon)) / 3600;
 
-  sprintf (buf, "the %s",
+  snprintf (buf, sizeof (buf), "the %s",
 	   title_table[ch->class][ch->level][ch->sex == SEX_FEMALE ? 1 : 0]);
   set_title (ch, buf);
 
@@ -126,7 +126,7 @@ advance_level (CHAR_DATA * ch)
   ch->pcdata->perm_mana += add_mana;
   ch->pcdata->perm_move += add_move;
 
-  sprintf (buf,
+  snprintf (buf, sizeof (buf),
 	   "Your gain is: %d/%d hp, %d/%d m, %d/%d mv %d/%d prac.\n\r",
 	   add_hp, ch->max_hit,
 	   add_mana, ch->max_mana,
@@ -163,7 +163,7 @@ advance_level_quiet (CHAR_DATA * ch)
   ch->pcdata->last_level =
     (ch->played + (int) (current_time - ch->logon)) / 3600;
 
-  sprintf (buf, "the %s",
+  snprintf (buf, sizeof (buf), "the %s",
 	   title_table[ch->class][ch->level][ch->sex == SEX_FEMALE ? 1 : 0]);
   set_title (ch, buf);
 
@@ -234,7 +234,7 @@ gain_exp (CHAR_DATA * ch, int gain)
     {
       send_to_char ("You raise a level!!  ", ch);
       ch->level += 1;
-      sprintf (buf, "$N has attained level %d!", ch->level);
+      snprintf (buf, sizeof (buf), "$N has attained level %d!", ch->level);
       wiznet (buf, ch, NULL, WIZ_LEVELS, 0, 0);
       advance_level (ch);
 

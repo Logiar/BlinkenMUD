@@ -86,31 +86,31 @@ do_pathfind (CHAR_DATA * ch, char * argument)
     }
   else if ((RBegin = find_location (ch, arg)) == NULL)
     {
-      sprintf(buf, "From: No such location: '%s', using current position.\n\r",arg);
+      snprintf(buf, sizeof(buf), "From: No such location: '%s', using current position.\n\r",arg);
       send_to_char(buf,ch);
       RBegin = ch->in_room;
     }
 
-  sprintf(buf, "From: '%s'.\n\r", RBegin->name);
+  snprintf(buf, sizeof(buf), "From: '%s'.\n\r", RBegin->name);
   send_to_char(buf,ch);
   
   if ( (REnd = find_location (ch, arg2)) == NULL)
     {
-      sprintf(buf, "To: No such location: '%s'.\n\r",arg);
+      snprintf(buf, sizeof(buf), "To: No such location: '%s'.\n\r",arg);
       send_to_char(buf,ch);
       return;
     }
 
-  sprintf(buf, "To: '%s'.\n\r", REnd->name);
+  snprintf(buf, sizeof(buf), "To: '%s'.\n\r", REnd->name);
   send_to_char(buf,ch);
   
   if( (path = pathfind(RBegin, REnd)) == NULL)
     {
-      sprintf(buf, "No path found.\n\r");
+      snprintf(buf, sizeof(buf), "No path found.\n\r");
     }
   else
     {
-      sprintf(buf, "Path: '%s'.\n\r",path);
+      snprintf(buf, sizeof(buf), "Path: '%s'.\n\r",path);
     }
   send_to_char(buf, ch);
 }

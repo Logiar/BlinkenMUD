@@ -97,42 +97,42 @@ do_unread (CHAR_DATA * ch)
   if ((count = count_spool (ch, weddings_list)) > 0)
     {
       found = TRUE;
-      sprintf (buf, "There %s %d new wedding announcement%s waiting.\n\r",
+      snprintf (buf, sizeof (buf), "There %s %d new wedding announcement%s waiting.\n\r",
 	       count > 1 ? "are" : "is", count, count > 1 ? "s" : "");
       send_to_char (buf, ch);
     }
   if ((count = count_spool (ch, news_list)) > 0)
     {
       found = TRUE;
-      sprintf (buf, "There %s %d new news article%s waiting.\n\r",
+      snprintf (buf, sizeof (buf), "There %s %d new news article%s waiting.\n\r",
 	       count > 1 ? "are" : "is", count, count > 1 ? "s" : "");
       send_to_char (buf, ch);
     }
   if ((count = count_spool (ch, changes_list)) > 0)
     {
       found = TRUE;
-      sprintf (buf, "There %s %d change%s waiting to be read.\n\r",
+      snprintf (buf, sizeof (buf), "There %s %d change%s waiting to be read.\n\r",
 	       count > 1 ? "are" : "is", count, count > 1 ? "s" : "");
       send_to_char (buf, ch);
     }
   if ((count = count_spool (ch, note_list)) > 0)
     {
       found = TRUE;
-      sprintf (buf, "You have %d new note%s waiting.\n\r",
+      snprintf (buf, sizeof (buf), "You have %d new note%s waiting.\n\r",
 	       count, count > 1 ? "s" : "");
       send_to_char (buf, ch);
     }
   if ((count = count_spool (ch, idea_list)) > 0)
     {
       found = TRUE;
-      sprintf (buf, "You have %d unread idea%s to peruse.\n\r",
+      snprintf (buf, sizeof (buf), "You have %d unread idea%s to peruse.\n\r",
 	       count, count > 1 ? "s" : "");
       send_to_char (buf, ch);
     }
   if (IS_TRUSTED (ch, SQUIRE) && (count = count_spool (ch, penalty_list)) > 0)
     {
       found = TRUE;
-      sprintf (buf, "%d %s been added.\n\r",
+      snprintf (buf, sizeof (buf), "%d %s been added.\n\r",
 	       count, count > 1 ? "penalties have" : "penalty has");
       send_to_char (buf, ch);
     }
@@ -677,7 +677,7 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
 	    {
 	      if (!hide_note (ch, pnote))
 		{
-		  sprintf (buf, "[%3d] %s: %s\n\r%s\n\rTo: %s\n\r",
+		  snprintf (buf, sizeof (buf), "[%3d] %s: %s\n\r%s\n\rTo: %s\n\r",
 			   vnum,
 			   pnote->sender,
 			   pnote->subject, pnote->date, pnote->to_list);
@@ -689,7 +689,7 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
 	      else if (is_note_to (ch, pnote))
 		vnum++;
 	    }
-	  sprintf (buf, "You have no unread %s.\n\r", list_name);
+	  snprintf (buf, sizeof (buf), "You have no unread %s.\n\r", list_name);
 	  send_to_char (buf, ch);
 	  return;
 	}
@@ -710,7 +710,7 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
 	{
 	  if (is_note_to (ch, pnote) && (vnum++ == anum || fAll))
 	    {
-	      sprintf (buf, "[%3d] %s: %s\n\r%s\n\rTo: %s\n\r",
+	      snprintf (buf, sizeof (buf), "[%3d] %s: %s\n\r%s\n\rTo: %s\n\r",
 		       vnum - 1,
 		       pnote->sender,
 		       pnote->subject, pnote->date, pnote->to_list);
@@ -721,7 +721,7 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
 	    }
 	}
 
-      sprintf (buf, "There aren't that many %s.\n\r", list_name);
+      snprintf (buf, sizeof (buf), "There aren't that many %s.\n\r", list_name);
       send_to_char (buf, ch);
       return;
     }
@@ -735,7 +735,7 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
 	{
 	  if (is_note_to (ch, pnote))
 	    {
-	      sprintf (buf, "[%3d%s] %s: %s\n\r",
+	      snprintf (buf, sizeof (buf), "[%3d%s] %s: %s\n\r",
 		       vnum, hide_note (ch, pnote) ? " " : "N",
 		       pnote->sender, pnote->subject);
 	      add_buf (output, buf);
@@ -747,22 +747,22 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
 	  switch (type)
 	    {
 	    case NOTE_NOTE:
-	      sprintf (buf, "There are no notes for you.\n\r");
+	      snprintf (buf, sizeof (buf), "There are no notes for you.\n\r");
 	      break;
 	    case NOTE_IDEA:
-	      sprintf (buf, "There are no ideas for you.\n\r");
+	      snprintf (buf, sizeof (buf), "There are no ideas for you.\n\r");
 	      break;
 	    case NOTE_PENALTY:
-	      sprintf (buf, "There are no penalties for you.\n\r");
+	      snprintf (buf, sizeof (buf), "There are no penalties for you.\n\r");
 	      break;
 	    case NOTE_NEWS:
-	      sprintf (buf, "There are no news for you.\n\r");
+	      snprintf (buf, sizeof (buf), "There are no news for you.\n\r");
 	      break;
 	    case NOTE_CHANGES:
-	      sprintf (buf, "There are no changes for you.\n\r");
+	      snprintf (buf, sizeof (buf), "There are no changes for you.\n\r");
 	      break;
 	    case NOTE_WEDDINGS:
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "There are no wedding announcements for you.\n\r");
 	      break;
 	    }
@@ -793,7 +793,7 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
 	    }
 	}
 
-      sprintf (buf, "There aren't that many %s.", list_name);
+      snprintf (buf, sizeof (buf), "There aren't that many %s.", list_name);
       send_to_char (buf, ch);
       return;
     }
@@ -818,7 +818,7 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
 	    }
 	}
 
-      sprintf (buf, "There aren't that many %s.", list_name);
+      snprintf (buf, sizeof (buf), "There aren't that many %s.", list_name);
       send_to_char (buf, ch);
       return;
     }
@@ -854,7 +854,7 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
       || (type == NOTE_CHANGES && !IS_TRUSTED (ch, CREATOR))
       || (type == NOTE_WEDDINGS && !ch->wedpost && !IS_IMMORTAL (ch)))
     {
-      sprintf (buf, "You aren't authorized to write %s.", list_name);
+      snprintf (buf, sizeof (buf), "You aren't authorized to write %s.", list_name);
       send_to_char (buf, ch);
       return;
     }
@@ -990,7 +990,7 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
 	  return;
 	}
 
-      sprintf (buf, "%s: %s\n\rTo: %s\n\r",
+      snprintf (buf, sizeof (buf), "%s: %s\n\rTo: %s\n\r",
 	       ch->pnote->sender, ch->pnote->subject, ch->pnote->to_list);
       send_to_char (buf, ch);
       send_to_char (ch->pnote->text, ch);

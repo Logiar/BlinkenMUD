@@ -70,7 +70,7 @@ do_account (CHAR_DATA * ch, char *argument)
     }
   else if (ch->in_room == get_room_index (ROOM_VNUM_BANK))
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "You have Platinum: %10ld Gold: %10ld Silver: %10ld in your account.\n\r",
 	       plat, gold, silver);
       send_to_char (buf, ch);
@@ -142,7 +142,7 @@ do_deposit (CHAR_DATA * ch, char *argument)
 		      ch->platinum -= amount;
 		      act ("$n has deposited some platinum into $s account.",
 			   ch, NULL, NULL, TO_ROOM);
-		      sprintf (buf,
+		      snprintf (buf, sizeof (buf),
 			       "You have deposited %ld Platinum.\n\r   Account: %10ld.\n\r   You still hold %8ld platinum.\n\r",
 			       amount, ch->pcdata->plat_bank, ch->platinum);
 		      send_to_char (buf, ch);
@@ -165,7 +165,7 @@ do_deposit (CHAR_DATA * ch, char *argument)
 		      ch->gold -= amount;
 		      act ("$n has deposited some gold into $s account.", ch,
 			   NULL, NULL, TO_ROOM);
-		      sprintf (buf,
+		      snprintf (buf, sizeof (buf),
 			       "You have deposited %ld Gold.\n\r   Account: %10ld.\n\r   You still hold %8ld gold.\n\r",
 			       amount, ch->pcdata->gold_bank, ch->gold);
 		      send_to_char (buf, ch);
@@ -188,7 +188,7 @@ do_deposit (CHAR_DATA * ch, char *argument)
 		      ch->silver -= amount;
 		      act ("$n has deposited some silver into $s account.",
 			   ch, NULL, NULL, TO_ROOM);
-		      sprintf (buf,
+		      snprintf (buf, sizeof (buf),
 			       "You have deposited %ld Silver.\n\r   Account: %10ld silver.\n\r   You still hold %8ld silver.\n\r",
 			       amount, ch->pcdata->silver_bank, ch->silver);
 		      send_to_char (buf, ch);
@@ -266,7 +266,7 @@ do_withdraw (CHAR_DATA * ch, char *argument)
 		      ch->platinum += amount;
 		      act ("$n withdraws platinum from $s account.\n\r", ch,
 			   NULL, NULL, TO_ROOM);
-		      sprintf (buf,
+		      snprintf (buf, sizeof (buf),
 			       "You have withdrawn %ld Platinum.\n\r   Account: %10ld platunum.\n\r   You now hold: %8ld platinum.\n\r",
 			       amount, ch->pcdata->plat_bank, ch->platinum);
 		      send_to_char (buf, ch);
@@ -290,7 +290,7 @@ do_withdraw (CHAR_DATA * ch, char *argument)
 		      ch->gold += amount;
 		      act ("$n withdraws gold from $s account.\n\r", ch, NULL,
 			   NULL, TO_ROOM);
-		      sprintf (buf,
+		      snprintf (buf, sizeof (buf),
 			       "You have withdrawn %ld Gold.\n\r   Account: %10ld gold.\n\r   You now hold: %8ld gold.\n\r",
 			       amount, ch->pcdata->gold_bank, ch->gold);
 		      send_to_char (buf, ch);
@@ -314,7 +314,7 @@ do_withdraw (CHAR_DATA * ch, char *argument)
 		      ch->silver += amount;
 		      act ("$n withdraws silver from $s account.\n\r", ch,
 			   NULL, NULL, TO_ROOM);
-		      sprintf (buf,
+		      snprintf (buf, sizeof (buf),
 			       "You have withdrawn %ld Silver.\n\r   Account: %10ld silver.\n\r   You now hold: %8ld silver.\n\r",
 			       amount, ch->pcdata->silver_bank, ch->silver);
 		      send_to_char (buf, ch);

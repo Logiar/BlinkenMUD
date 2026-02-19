@@ -168,7 +168,7 @@ do_clead (CHAR_DATA * ch, char *argument)
 
   if (clan_table[victim->clan].independent)
     {
-      sprintf (buf, "This person is a %s.\n\r",
+      snprintf (buf, sizeof (buf), "This person is a %s.\n\r",
 	       clan_table[victim->clan].name);
       send_to_char (buf, ch);
       return;
@@ -176,10 +176,10 @@ do_clead (CHAR_DATA * ch, char *argument)
 
   if (is_clead (victim))
     {
-      sprintf (buf, "They are no longer leader of clan %s.\n\r",
+      snprintf (buf, sizeof (buf), "They are no longer leader of clan %s.\n\r",
 	       capitalize (clan_table[victim->clan].name));
       send_to_char (buf, ch);
-      sprintf (buf, "You are no longer leader of clan %s.\n\r",
+      snprintf (buf, sizeof (buf), "You are no longer leader of clan %s.\n\r",
 	       capitalize (clan_table[victim->clan].name));
       send_to_char (buf, victim);
       update_clanlist (victim, victim->clan, FALSE, TRUE);
@@ -187,10 +187,10 @@ do_clead (CHAR_DATA * ch, char *argument)
     }
   else
     {
-      sprintf (buf, "They are now leader of clan %s.\n\r",
+      snprintf (buf, sizeof (buf), "They are now leader of clan %s.\n\r",
 	       capitalize (clan_table[victim->clan].name));
       send_to_char (buf, ch);
-      sprintf (buf, "You are now leader of clan %s.\n\r",
+      snprintf (buf, sizeof (buf), "You are now leader of clan %s.\n\r",
 	       capitalize (clan_table[victim->clan].name));
       send_to_char (buf, victim);
       update_clanlist (victim, victim->clan, TRUE, TRUE);
@@ -249,17 +249,17 @@ do_guild (CHAR_DATA * ch, char *argument)
 
   if (clan_table[clan].independent)
     {
-      sprintf (buf, "They are now a %s.\n\r", clan_table[clan].name);
+      snprintf (buf, sizeof (buf), "They are now a %s.\n\r", clan_table[clan].name);
       send_to_char (buf, ch);
-      sprintf (buf, "You are now a %s.\n\r", clan_table[clan].name);
+      snprintf (buf, sizeof (buf), "You are now a %s.\n\r", clan_table[clan].name);
       send_to_char (buf, victim);
     }
   else
     {
-      sprintf (buf, "They are now a member of clan %s.\n\r",
+      snprintf (buf, sizeof (buf), "They are now a member of clan %s.\n\r",
 	       capitalize (clan_table[clan].name));
       send_to_char (buf, ch);
-      sprintf (buf, "You are now a member of clan %s.\n\r",
+      snprintf (buf, sizeof (buf), "You are now a member of clan %s.\n\r",
 	       capitalize (clan_table[clan].name));
       send_to_char (buf, victim);
     }
@@ -306,7 +306,7 @@ do_member (CHAR_DATA * ch, char *argument)
 	}
       if (!str_cmp (arg1, "accept"))
 	{
-	  sprintf (buf, "`RYou are now a member of clan `x[`%s%s`x]\n\r",
+	  snprintf (buf, sizeof (buf), "`RYou are now a member of clan `x[`%s%s`x]\n\r",
 		   clan_table[ch->invited].pkill ? "B" : "M",
 		   clan_table[ch->invited].who_name);
 	  send_to_char (buf, ch);
@@ -386,9 +386,9 @@ do_member (CHAR_DATA * ch, char *argument)
       send_to_char ("They must be between levels 15 -> 70.\n\r", ch);
       return;
     }
-  sprintf (buf, "%s has been invited to join your clan.\n\r", victim->name);
+  snprintf (buf, sizeof (buf), "%s has been invited to join your clan.\n\r", victim->name);
   send_to_char (buf, ch);
-  sprintf (buf, "`RYou have been invited to join clan `x[`%s%s`x]\n\r",
+  snprintf (buf, sizeof (buf), "`RYou have been invited to join clan `x[`%s%s`x]\n\r",
 	   clan_table[ch->clan].pkill ? "B" : "M",
 	   clan_table[ch->clan].who_name);
   send_to_char (buf, victim);
@@ -466,7 +466,7 @@ do_cgossip (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOCGOSSIP);
 
-      sprintf (buf, "You cgossip '`E%s`x'\n\r", argument);
+      snprintf (buf, sizeof (buf), "You cgossip '`E%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -543,9 +543,9 @@ do_clantalk (CHAR_DATA * ch, char *argument)
 
   REMOVE_BIT (ch->comm, COMM_NOCLAN);
 
-  sprintf (buf, "You clan '`F%s`x'\n\r", argument);
+  snprintf (buf, sizeof (buf), "You clan '`F%s`x'\n\r", argument);
   send_to_char (buf, ch);
-  sprintf (buf, "$n clans '`F%s`x'", argument);
+  snprintf (buf, sizeof (buf), "$n clans '`F%s`x'", argument);
   for (d = descriptor_list; d != NULL; d = d->next)
     {
       int pos;
@@ -585,15 +585,15 @@ do_clanlist (CHAR_DATA * ch, char *argument)
   CLN_DATA *pcln;
 
   output = new_buf ();
-  sprintf (buf, "`x\n\r`B* = Pkill Clans    `M = Non-Pkill Clans`x\n\r");
+  snprintf (buf, sizeof (buf), "`x\n\r`B* = Pkill Clans    `M = Non-Pkill Clans`x\n\r");
   add_buf (output, buf);
   for (e = 0; e < MAX_CLAN; e++)
     {
       if (str_cmp (clan_table[e].exname, "Unused"))
 	{
-	  sprintf (buf, "`x-------------------------------------");
+	  snprintf (buf, sizeof (buf), "`x-------------------------------------");
 	  add_buf (output, buf);
-	  sprintf (buf, "--------------------------------------\n\r");
+	  snprintf (buf, sizeof (buf), "--------------------------------------\n\r");
 	  add_buf (output, buf);
 	  members = 0;
 	  for (pcln = cln_list; pcln != NULL; pcln = pcln->next)
@@ -605,7 +605,7 @@ do_clanlist (CHAR_DATA * ch, char *argument)
 	    }
 	  if (IS_IMMORTAL (ch))
 	    {
-	      sprintf (buf, "`xName: `Y%s`x", clan_table[e].name);
+	      snprintf (buf, sizeof (buf), "`xName: `Y%s`x", clan_table[e].name);
 	      for (;;)
 		{
 		  if (strlen (buf) > 29)
@@ -614,17 +614,17 @@ do_clanlist (CHAR_DATA * ch, char *argument)
 		  strcat (buf, " ");
 		}
 	      add_buf (output, buf);
-	      sprintf (buf, "`xVnum: `Y%d`x\n\r", clan_table[e].hall);
+	      snprintf (buf, sizeof (buf), "`xVnum: `Y%d`x\n\r", clan_table[e].hall);
 	      add_buf (output, buf);
 	    }
 	  if (clan_table[e].pkill)
-	    sprintf (buf, "*[`B%s`x]\tMembers: `G%d`x\n\rDesc: `c%s`x\n\r",
+	    snprintf (buf, sizeof (buf), "*[`B%s`x]\tMembers: `G%d`x\n\rDesc: `c%s`x\n\r",
 		     clan_table[e].who_name, members, clan_table[e].exname);
 	  else
-	    sprintf (buf, " [`M%s`x]\tMembers: `G%d`x\n\rDesc: `c%s`x\n\r",
+	    snprintf (buf, sizeof (buf), " [`M%s`x]\tMembers: `G%d`x\n\rDesc: `c%s`x\n\r",
 		     clan_table[e].who_name, members, clan_table[e].exname);
 	  add_buf (output, buf);
-	  sprintf (buf, "Leaders:`R");
+	  snprintf (buf, sizeof (buf), "Leaders:`R");
 	  add_buf (output, buf);
 	  for (pcln = cln_list; pcln != NULL; pcln = pcln->next)
 	    {
@@ -632,18 +632,18 @@ do_clanlist (CHAR_DATA * ch, char *argument)
 		{
 		  for (pmbr = pcln->list; pmbr != NULL; pmbr = pmbr->next)
 		    {
-		      sprintf (buf, "  %s", pmbr->name);
+		      snprintf (buf, sizeof (buf), "  %s", pmbr->name);
 		      add_buf (output, buf);
 		    }
 		}
 	    }
-	  sprintf (buf, "`x\n\r");
+	  snprintf (buf, sizeof (buf), "`x\n\r");
 	  add_buf (output, buf);
 	}
     }
-  sprintf (buf, "`x----------------------------------------");
+  snprintf (buf, sizeof (buf), "`x----------------------------------------");
   add_buf (output, buf);
-  sprintf (buf, "-----------------------------------\n\r\n\r");
+  snprintf (buf, sizeof (buf), "-----------------------------------\n\r\n\r");
   add_buf (output, buf);
   page_to_char (buf_string (output), ch);
   free_buf (output);
@@ -686,7 +686,7 @@ do_noclan (CHAR_DATA * ch, char *argument)
     {
       REMOVE_BIT (victim->act, PLR_NOCLAN);
       send_to_char ("NOCLAN removed.\n\r", ch);
-      sprintf (buf, "$N allows %s to join pkill clans.", victim->name);
+      snprintf (buf, sizeof (buf), "$N allows %s to join pkill clans.", victim->name);
       wiznet (buf, ch, NULL, WIZ_PENALTIES, WIZ_SECURE, 0);
     }
   else
@@ -699,7 +699,7 @@ do_noclan (CHAR_DATA * ch, char *argument)
       victim->clan = 0;
       victim->clead = 0;
       send_to_char ("NOCLAN set.\n\r", ch);
-      sprintf (buf, "$N forbids %s to join pkill clans.", victim->name);
+      snprintf (buf, sizeof (buf), "$N forbids %s to join pkill clans.", victim->name);
       wiznet (buf, ch, NULL, WIZ_PENALTIES, WIZ_SECURE, 0);
     }
 
@@ -721,7 +721,7 @@ save_clanlist (int clannum)
     {
       return;
     }
-  sprintf (buf, "%s.cln", clan_table[clannum].name);
+  snprintf (buf, sizeof (buf), "%s.cln", clan_table[clannum].name);
   fclose (fpReserve);
   if ((fp = fopen (buf, "w")) == NULL)
     {
@@ -765,7 +765,7 @@ load_clanlist (void)
 	  pcln = new_cln ();
 	  pcln->clan = clannum;
 	  pcln->name = str_dup (clan_table[clannum].name);
-	  sprintf (buf, "%s.cln", clan_table[clannum].name);
+	  snprintf (buf, sizeof (buf), "%s.cln", clan_table[clannum].name);
 	  if ((fp = fopen (buf, "r")) == NULL)
 	    {
 	      pcln->members = 0;

@@ -1358,7 +1358,7 @@ damage (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, int dam_type,
 
       if (!IS_NPC (victim))
 	{
-	  sprintf (log_buf, "%s killed by %s at %d",
+	  snprintf (log_buf, MAX_STRING_LENGTH, "%s killed by %s at %d",
 		   victim->name,
 		   (IS_NPC (ch) ? ch->short_descr : ch->name),
 		   ch->in_room->vnum);
@@ -1376,7 +1376,7 @@ damage (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, int dam_type,
 			victim->level - victim->exp) / 6) + 50);
 	}
 
-      sprintf (log_buf, "%s got toasted by %s at %s [room %d]",
+      snprintf (log_buf, MAX_STRING_LENGTH, "%s got toasted by %s at %s [room %d]",
 	       (IS_NPC (victim) ? victim->short_descr : victim->name),
 	       (IS_NPC (ch) ? ch->short_descr : ch->name),
 	       ch->in_room->name, ch->in_room->vnum);
@@ -1542,10 +1542,10 @@ damage_mock (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt,
     }
   if (ch == victim)
     {
-      sprintf (buf1,
+      snprintf (buf1, sizeof (buf1),
 	       "`y$n's `gmock `B%s`g would have done `R%d hp`g damage to `y$mself`g.`x",
 	       attack, dam);
-      sprintf (buf2,
+      snprintf (buf2, sizeof (buf2),
 	       "`yYour `gmock `B%s`g would have done `R%d hp`g damage to `yyourself`g.`x",
 	       attack, dam);
       act (buf1, ch, NULL, NULL, TO_ROOM);
@@ -1553,13 +1553,13 @@ damage_mock (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt,
     }
   else if (ch->level < MAX_LEVEL)
     {
-      sprintf (buf1,
+      snprintf (buf1, sizeof (buf1),
 	       "`y$n's `gmock `B%s`g would have done `R%d hp`g damage to `y$N`g.`x",
 	       attack, dam);
-      sprintf (buf2,
+      snprintf (buf2, sizeof (buf2),
 	       "`yYour `gmock `B%s`g would have done `R%d hp`g damage to `y$N`g.`x",
 	       attack, dam);
-      sprintf (buf3,
+      snprintf (buf3, sizeof (buf3),
 	       "`y$n's `gmock `B%s`g would have done `R%d hp`g damage to `yyou`g.`x",
 	       attack, dam);
       act (buf1, ch, NULL, victim, TO_NOTVICT);
@@ -1568,13 +1568,13 @@ damage_mock (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt,
     }
   else
     {
-      sprintf (buf1,
+      snprintf (buf1, sizeof (buf1),
 	       "`y$n's `gmock `B%s`g would have done `R%lu hp`g damage to `y$N`g.`x",
 	       attack, immdam);
-      sprintf (buf2,
+      snprintf (buf2, sizeof (buf2),
 	       "`yYour `gmock `B%s`g would have done `R%lu hp`g damage to `y$N`g.`x",
 	       attack, immdam);
-      sprintf (buf3,
+      snprintf (buf3, sizeof (buf3),
 	       "`y$n's `gmock `B%s`g would have done `R%lu hp`g damage to `yyou`g.`x",
 	       attack, immdam);
       act (buf1, ch, NULL, victim, TO_NOTVICT);
@@ -1812,7 +1812,7 @@ damage_old (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, int
 
       if (!IS_NPC (victim))
 	{
-	  sprintf (log_buf, "%s killed by %s at %d",
+	  snprintf (log_buf, MAX_STRING_LENGTH, "%s killed by %s at %d",
 		   victim->name,
 		   (IS_NPC (ch) ? ch->short_descr : ch->name),
 		   victim->in_room->vnum);
@@ -1830,7 +1830,7 @@ damage_old (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, int
 			victim->level - victim->exp) / 3) + 50);
 	}
 
-      sprintf (log_buf, "%s got toasted by %s at %s [room %d]",
+      snprintf (log_buf, MAX_STRING_LENGTH, "%s got toasted by %s at %s [room %d]",
 	       (IS_NPC (victim) ? victim->short_descr : victim->name),
 	       (IS_NPC (ch) ? ch->short_descr : ch->name),
 	       ch->in_room->name, ch->in_room->vnum);
@@ -2442,7 +2442,7 @@ stop_fighting (CHAR_DATA * ch, bool fBoth)
 	  if (IS_SET (fch->comm, COMM_STORE))
 	    if (fch->tells)
 	      {
-		sprintf (buf, "You have `R%d`x tells waiting.\n\r",
+		snprintf (buf, sizeof (buf), "You have `R%d`x tells waiting.\n\r",
 			 fch->tells);
 		send_to_char (buf, fch);
 		send_to_char ("Type 'replay' to see tells.\n\r", fch);
@@ -2542,11 +2542,11 @@ make_corpse (CHAR_DATA * ch, CHAR_DATA * killer)
 
   corpse->level = ch->level;
 
-  sprintf (buf, corpse->short_descr, name);
+  snprintf (buf, sizeof (buf), corpse->short_descr, name);
   free_string (corpse->short_descr);
   corpse->short_descr = str_dup (buf);
 
-  sprintf (buf, corpse->description, name);
+  snprintf (buf, sizeof (buf), corpse->description, name);
   free_string (corpse->description);
   corpse->description = str_dup (buf);
 
@@ -2841,15 +2841,15 @@ death_cry (CHAR_DATA * ch)
 	  obj->timer = number_range (1, 4);
 	}
 
-      sprintf (buf, obj->short_descr, name);
+      snprintf (buf, sizeof (buf), obj->short_descr, name);
       free_string (obj->short_descr);
       obj->short_descr = str_dup (buf);
 
-      sprintf (buf, obj->description, name);
+      snprintf (buf, sizeof (buf), obj->description, name);
       free_string (obj->description);
       obj->description = str_dup (buf);
 
-      sprintf (buf, obj->name, name);
+      snprintf (buf, sizeof (buf), obj->name, name);
       free_string (obj->name);
       obj->name = str_dup (buf);
 
@@ -2991,7 +2991,7 @@ group_gain (CHAR_DATA * ch, CHAR_DATA * victim)
 
 
       xp = xp_compute (gch, victim, group_levels);
-      sprintf (buf, "`BYou receive `W%d`B experience points.`x\n\r", xp);
+      snprintf (buf, sizeof (buf), "`BYou receive `W%d`B experience points.`x\n\r", xp);
       send_to_char (buf, gch);
       gain_exp (gch, xp);
 
@@ -3395,14 +3395,14 @@ dam_message (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, bool immune)
     {
       if (ch == victim)
 	{
-	  sprintf (buf1, "`k$n %s $melf%c`x", vp, punct);
-	  sprintf (buf2, "`hYou %s yourself%c`x", vs, punct);
+	  snprintf (buf1, sizeof (buf1), "`k$n %s $melf%c`x", vp, punct);
+	  snprintf (buf2, sizeof (buf2), "`hYou %s yourself%c`x", vs, punct);
 	}
       else
 	{
-	  sprintf (buf1, "`k$n %s $N%c`x", vp, punct);
-	  sprintf (buf2, "`hYou %s $N%c`x", vs, punct);
-	  sprintf (buf3, "`i$n %s you%c`x", vp, punct);
+	  snprintf (buf1, sizeof (buf1), "`k$n %s $N%c`x", vp, punct);
+	  snprintf (buf2, sizeof (buf2), "`hYou %s $N%c`x", vs, punct);
+	  snprintf (buf3, sizeof (buf3), "`i$n %s you%c`x", vp, punct);
 	}
     }
   else
@@ -3422,28 +3422,28 @@ dam_message (CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt, bool immune)
 	{
 	  if (ch == victim)
 	    {
-	      sprintf (buf1, "`k$n is unaffected by $s own %s.`x", attack);
-	      sprintf (buf2, "`hLuckily, you are immune to that.`x");
+	      snprintf (buf1, sizeof (buf1), "`k$n is unaffected by $s own %s.`x", attack);
+	      snprintf (buf2, sizeof (buf2), "`hLuckily, you are immune to that.`x");
 	    }
 	  else
 	    {
-	      sprintf (buf1, "`k$N is unaffected by $n's %s!`x", attack);
-	      sprintf (buf2, "`h$N is unaffected by your %s!`x", attack);
-	      sprintf (buf3, "`i$n's %s is powerless against you.`x", attack);
+	      snprintf (buf1, sizeof (buf1), "`k$N is unaffected by $n's %s!`x", attack);
+	      snprintf (buf2, sizeof (buf2), "`h$N is unaffected by your %s!`x", attack);
+	      snprintf (buf3, sizeof (buf3), "`i$n's %s is powerless against you.`x", attack);
 	    }
 	}
       else
 	{
 	  if (ch == victim)
 	    {
-	      sprintf (buf1, "`k$n's %s %s $m%c`x", attack, vp, punct);
-	      sprintf (buf2, "`hYour %s %s you%c`x", attack, vp, punct);
+	      snprintf (buf1, sizeof (buf1), "`k$n's %s %s $m%c`x", attack, vp, punct);
+	      snprintf (buf2, sizeof (buf2), "`hYour %s %s you%c`x", attack, vp, punct);
 	    }
 	  else
 	    {
-	      sprintf (buf1, "`k$n's %s %s $N%c`x", attack, vp, punct);
-	      sprintf (buf2, "`hYour %s %s $N%c`x", attack, vp, punct);
-	      sprintf (buf3, "`i$n's %s %s you%c`x", attack, vp, punct);
+	      snprintf (buf1, sizeof (buf1), "`k$n's %s %s $N%c`x", attack, vp, punct);
+	      snprintf (buf2, sizeof (buf2), "`hYour %s %s $N%c`x", attack, vp, punct);
+	      snprintf (buf3, sizeof (buf3), "`i$n's %s %s you%c`x", attack, vp, punct);
 	    }
 	}
     }
@@ -3879,7 +3879,7 @@ do_vdth (CHAR_DATA * ch, char *argument)
 		continue;
 
 	      wch->in_room = was_in;
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "A sudden gust of wind picks up $n and throws $m to the %s.",
 		       dir_name[door]);
 	      act (buf, wch, NULL, NULL, TO_ROOM);
@@ -4664,9 +4664,9 @@ do_murder (CHAR_DATA * ch, char *argument)
 
   WAIT_STATE (ch, 1 * PULSE_VIOLENCE);
   if (IS_NPC (ch))
-    sprintf (buf, "Help! I am being attacked by %s!", ch->short_descr);
+    snprintf (buf, sizeof (buf), "Help! I am being attacked by %s!", ch->short_descr);
   else
-    sprintf (buf, "Help!  I am being attacked by %s!", ch->name);
+    snprintf (buf, sizeof (buf), "Help!  I am being attacked by %s!", ch->name);
   do_yell (victim, buf);
   multi_hit (ch, victim, TYPE_UNDEFINED);
   return;

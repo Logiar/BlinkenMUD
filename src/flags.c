@@ -305,9 +305,9 @@ do_flag (CHAR_DATA * ch, char *argument)
 	  if (flag_table[sn].name == NULL)
 	    break;
 	  if (flag_table[sn].settable)
-	    sprintf (buf, "`B%-20s ", flag_table[sn].name);
+	    snprintf (buf, sizeof (buf), "`B%-20s ", flag_table[sn].name);
 	  else
-	    sprintf (buf, "`R%-20s ", flag_table[sn].name);
+	    snprintf (buf, sizeof (buf), "`R%-20s ", flag_table[sn].name);
 	  send_to_char (buf, ch);
 	  if (++col % 3 == 0)
 	    send_to_char ("`x\n\r", ch);

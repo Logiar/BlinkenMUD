@@ -227,7 +227,7 @@ do_throw( CHAR_DATA *ch, char *argument )
 
   WAIT_STATE( ch, 2 * PULSE_VIOLENCE ); 
 
-  sprintf(buf,"That was your last %s.\n\r",obj->short_descr);
+  snprintf(buf,sizeof(buf),"That was your last %s.\n\r",obj->short_descr);
 
   /* ITEM THROWING */
 
@@ -363,19 +363,19 @@ do_throw( CHAR_DATA *ch, char *argument )
       else 
 	{ 
 	  switch(door) 
-	    { case 0 : sprintf(buf,"The throw came from `6NORTH`x !!!\n\r");
+	    { case 0 : snprintf(buf,sizeof(buf),"The throw came from `6NORTH`x !!!\n\r");
 		break;
-	    case 1 : sprintf(buf,"The throw came from `6EAST`x !!!\n\r");
+	    case 1 : snprintf(buf,sizeof(buf),"The throw came from `6EAST`x !!!\n\r");
 	      break;
-	    case 2 : sprintf(buf,"The throw came from `6SOUTH`x !!!\n\r");
+	    case 2 : snprintf(buf,sizeof(buf),"The throw came from `6SOUTH`x !!!\n\r");
 	      break;
-	    case 3 : sprintf(buf,"The throw came from `6WEST`x !!!\n\r");
+	    case 3 : snprintf(buf,sizeof(buf),"The throw came from `6WEST`x !!!\n\r");
 	      break;
-	    case 4 : sprintf(buf,"The throw came from `6UP`x !!!\n\r");
+	    case 4 : snprintf(buf,sizeof(buf),"The throw came from `6UP`x !!!\n\r");
 	      break;
-	    case 5 : sprintf(buf,"The throw came from `6DOWN`x !!!\n\r");
+	    case 5 : snprintf(buf,sizeof(buf),"The throw came from `6DOWN`x !!!\n\r");
 	      break;
-	    default : sprintf(buf,"Throw `3ERROR`x tell an IMM\n\r");
+	    default : snprintf(buf,sizeof(buf),"Throw `3ERROR`x tell an IMM\n\r");
 	      break;
 	    }
 	  send_to_char(buf,victim);

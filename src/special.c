@@ -1292,7 +1292,7 @@ spec_executioner (CHAR_DATA * ch)
   if (victim == NULL)
     return FALSE;
 
-  sprintf (buf, "`a%s is a %s!  PROTECT THE INNOCENT!  MORE BLOOOOD!!!`x",
+  snprintf (buf, sizeof (buf), "`a%s is a %s!  PROTECT THE INNOCENT!  MORE BLOOOOD!!!`x",
 	   victim->name, crime);
   REMOVE_BIT (ch->comm, COMM_NOSHOUT);
   do_yell (ch, buf);
@@ -1373,7 +1373,7 @@ spec_guard (CHAR_DATA * ch)
 
   if (victim != NULL)
     {
-      sprintf (buf, "`a%s is a %s!  PROTECT THE INNOCENT!!  BANZAI!!`x",
+      snprintf (buf, sizeof (buf), "`a%s is a %s!  PROTECT THE INNOCENT!!  BANZAI!!`x",
 	       victim->name, crime);
       REMOVE_BIT (ch->comm, COMM_NOSHOUT);
       do_yell (ch, buf);

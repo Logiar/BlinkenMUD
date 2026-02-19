@@ -571,7 +571,7 @@ interpret (CHAR_DATA * ch, char *argument)
       || fLogAll
       || (cmd_table[cmd].log == LOG_ALWAYS && ch->level != MAX_LEVEL))
     {
-      sprintf (log_buf, "Log %s: %s", ch->name, logline);
+      snprintf (log_buf, MAX_STRING_LENGTH, "Log %s: %s", ch->name, logline);
       wiznet (log_buf, ch, NULL, WIZ_SECURE, 0, get_trust (ch));
       log_string (log_buf);
     }
@@ -886,21 +886,21 @@ do_commands (CHAR_DATA * ch, char *argument)
 	{
 	  if (cmd_table[cmd].tier == 1)
 	    {
-	      sprintf (buf, "%-12s", cmd_table[cmd].name);
+	      snprintf (buf, sizeof (buf), "%-12s", cmd_table[cmd].name);
 	      send_to_char (buf, ch);
 	      if (++col % 6 == 0)
 		send_to_char ("\n\r", ch);
 	    }
 	  else if (ch->class >= MAX_CLASS / 2)
 	    {
-	      sprintf (buf, "%-12s", cmd_table[cmd].name);
+	      snprintf (buf, sizeof (buf), "%-12s", cmd_table[cmd].name);
 	      send_to_char (buf, ch);
 	      if (++col % 6 == 0)
 		send_to_char ("\n\r", ch);
 	    }
 	  else if (ch->level >= LEVEL_HERO)
 	    {
-	      sprintf (buf, "%-12s", cmd_table[cmd].name);
+	      snprintf (buf, sizeof (buf), "%-12s", cmd_table[cmd].name);
 	      send_to_char (buf, ch);
 	      if (++col % 6 == 0)
 		send_to_char ("\n\r", ch);
@@ -935,7 +935,7 @@ do_wizhelp (CHAR_DATA * ch, char *argument)
 	      && cmd_table[cmd].show))
 
 	{
-	  sprintf (buf, "%-12s", cmd_table[cmd].name);
+	  snprintf (buf, sizeof (buf), "%-12s", cmd_table[cmd].name);
 	  send_to_char (buf, ch);
 	  if (++col % 6 == 0)
 	    send_to_char ("\n\r", ch);

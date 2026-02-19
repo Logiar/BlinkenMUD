@@ -644,7 +644,7 @@ display_map (CHAR_DATA * ch)
   /* --------------- */
   if (IS_IMMORTAL (ch))
     {
-      sprintf (buf, "%5d", ch->in_room->vnum);
+      snprintf (buf, sizeof (buf), "%5d", ch->in_room->vnum);
       strcat (map_buf, "\n\r`W+`D------- `C");
       strcat (map_buf, buf);
       strcat (map_buf, "`D -`W+`x\n\r");
@@ -670,7 +670,7 @@ display_map (CHAR_DATA * ch)
 
 	  if (y == min_y && y_pos == 0)
 	    {
-	      sprintf (buf, "`D| `C %s", ch->in_room->name);
+	      snprintf (buf, sizeof (buf), "`D| `C %s", ch->in_room->name);
 	      strcat (map_buf, buf);
 	    }
 

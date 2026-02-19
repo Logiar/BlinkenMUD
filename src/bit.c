@@ -193,13 +193,21 @@ flag_string (const struct flag_type *flag_table, int bits)
     {
       if (!is_stat (flag_table) && IS_SET (bits, flag_table[flag].bit))
 	{
-	  strcat (buf, " ");
-	  strcat (buf, flag_table[flag].name);
+	  size_t buf_len = strlen (buf);
+	  if (buf_len < sizeof (buf) - 1)
+	    {
+	      snprintf (buf + buf_len, sizeof (buf) - buf_len, " %s",
+			flag_table[flag].name);
+	    }
 	}
       else if (flag_table[flag].bit == bits)
 	{
-	  strcat (buf, " ");
-	  strcat (buf, flag_table[flag].name);
+	  size_t buf_len = strlen (buf);
+	  if (buf_len < sizeof (buf) - 1)
+	    {
+	      snprintf (buf + buf_len, sizeof (buf) - buf_len, " %s",
+			flag_table[flag].name);
+	    }
 	  break;
 	}
     }

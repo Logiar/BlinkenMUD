@@ -85,7 +85,7 @@ do_forget (CHAR_DATA * ch, char *argument)
 	  if (rch->pcdata->forget[pos] == NULL)
 	    break;
 
-	  sprintf (buf, "    %s\n\r", rch->pcdata->forget[pos]);
+	  snprintf (buf, sizeof (buf), "    %s\n\r", rch->pcdata->forget[pos]);
 	  send_to_char (buf, ch);
 	}
       return;
@@ -152,7 +152,7 @@ do_forget (CHAR_DATA * ch, char *argument)
 
   /* make a new forget */
   rch->pcdata->forget[pos] = str_dup (arg);
-  sprintf (buf, "You are now deaf to %s.\n\r", arg);
+  snprintf (buf, sizeof (buf), "You are now deaf to %s.\n\r", arg);
   send_to_char (buf, ch);
 }
 
@@ -195,7 +195,7 @@ do_remember (CHAR_DATA * ch, char *argument)
 	  if (rch->pcdata->forget[pos] == NULL)
 	    break;
 
-	  sprintf (buf, "    %s\n\r", rch->pcdata->forget[pos]);
+	  snprintf (buf, sizeof (buf), "    %s\n\r", rch->pcdata->forget[pos]);
 	  send_to_char (buf, ch);
 	}
       return;

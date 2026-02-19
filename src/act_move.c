@@ -328,7 +328,7 @@ move_char (CHAR_DATA * ch, int door, bool follow, bool quiet)
 void
 enter_exit (CHAR_DATA * ch, char *arg)
 {
-  ROOM_INDEX_DATA *location;
+  ROOM_INDEX_DATA *location = NULL;
   int track;
 
   if (ch->fighting != NULL)
@@ -1871,7 +1871,7 @@ do_recall (CHAR_DATA * ch, char *argument)
 {
   char buf[MAX_STRING_LENGTH];
   CHAR_DATA *victim;
-  ROOM_INDEX_DATA *location;
+  ROOM_INDEX_DATA *location = NULL;
   int track;
 
   if (IS_NPC (ch) && !IS_SET (ch->act, ACT_PET))
@@ -1919,7 +1919,7 @@ do_recall (CHAR_DATA * ch, char *argument)
 	{
 	  check_improve (ch, gsn_recall, FALSE, 6);
 	  WAIT_STATE (ch, 4);
-	  sprintf (buf, "You failed!.\n\r");
+	  snprintf (buf, sizeof (buf), "You failed!.\n\r");
 	  send_to_char (buf, ch);
 	  return;
 	}
@@ -1927,7 +1927,7 @@ do_recall (CHAR_DATA * ch, char *argument)
       lose = (ch->desc != NULL) ? 25 : 50;
       gain_exp (ch, 0 - lose);
       check_improve (ch, gsn_recall, TRUE, 4);
-      sprintf (buf, "You recall from combat!  You lose %d exps.\n\r", lose);
+      snprintf (buf, sizeof (buf), "You recall from combat!  You lose %d exps.\n\r", lose);
       send_to_char (buf, ch);
       if (!IS_NPC (ch))
 	{
@@ -1977,7 +1977,7 @@ do_crecall (CHAR_DATA * ch, char *argument)
 {
   char buf[MAX_STRING_LENGTH];
   CHAR_DATA *victim;
-  ROOM_INDEX_DATA *location;
+  ROOM_INDEX_DATA *location = NULL;
   int track;
 
   if (IS_NPC (ch) && !IS_SET (ch->act, ACT_PET))
@@ -2011,7 +2011,7 @@ do_crecall (CHAR_DATA * ch, char *argument)
 	{
 	  check_improve (ch, gsn_recall, FALSE, 6);
 	  WAIT_STATE (ch, 4);
-	  sprintf (buf, "You failed!.\n\r");
+	  snprintf (buf, sizeof (buf), "You failed!.\n\r");
 	  send_to_char (buf, ch);
 	  return;
 	}
@@ -2019,7 +2019,7 @@ do_crecall (CHAR_DATA * ch, char *argument)
       lose = (ch->desc != NULL) ? 25 : 50;
       gain_exp (ch, 0 - lose);
       check_improve (ch, gsn_recall, TRUE, 4);
-      sprintf (buf, "You recall from combat!  You lose %d exps.\n\r", lose);
+      snprintf (buf, sizeof (buf), "You recall from combat!  You lose %d exps.\n\r", lose);
       send_to_char (buf, ch);
       if (!IS_NPC (ch))
 	{
@@ -2043,6 +2043,12 @@ do_crecall (CHAR_DATA * ch, char *argument)
   if (IS_NPC (ch) && IS_SET (ch->act, ACT_PET)
       && is_clan (ch->master) && !IS_SET (ch->master->act, PLR_TWIT))
     location = get_room_index (clan_table[ch->master->clan].hall);
+
+  if (location == NULL)
+    {
+      send_to_char ("You cannot recall right now.\n\r", ch);
+      return;
+    }
 
   ch->move *= .75;
   act ("$n disappears.", ch, NULL, NULL, TO_ROOM);
@@ -2099,7 +2105,7 @@ do_train (CHAR_DATA * ch, char *argument)
 
   if (argument[0] == '\0')
     {
-      sprintf (buf, "You have %d training sessions.\n\r", ch->train);
+      snprintf (buf, sizeof (buf), "You have %d training sessions.\n\r", ch->train);
       send_to_char (buf, ch);
       argument = "foo";
     }
@@ -2157,22 +2163,62 @@ do_train (CHAR_DATA * ch, char *argument)
 
   else
     {
-      strcpy (buf, "You can train:");
+      snprintf (buf, sizeof (buf), "%s", "You can train:");
       if (ch->perm_stat[STAT_STR] < get_max_train (ch, STAT_STR))
-	strcat (buf, " str");
+	{
+	  size_t buf_len = strlen (buf);
+	  if (buf_len < sizeof (buf) - 1)
+	    {
+	      snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", " str");
+	    }
+	}
       if (ch->perm_stat[STAT_INT] < get_max_train (ch, STAT_INT))
-	strcat (buf, " int");
+	{
+	  size_t buf_len = strlen (buf);
+	  if (buf_len < sizeof (buf) - 1)
+	    {
+	      snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", " int");
+	    }
+	}
       if (ch->perm_stat[STAT_WIS] < get_max_train (ch, STAT_WIS))
-	strcat (buf, " wis");
+	{
+	  size_t buf_len = strlen (buf);
+	  if (buf_len < sizeof (buf) - 1)
+	    {
+	      snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", " wis");
+	    }
+	}
       if (ch->perm_stat[STAT_DEX] < get_max_train (ch, STAT_DEX))
-	strcat (buf, " dex");
+	{
+	  size_t buf_len = strlen (buf);
+	  if (buf_len < sizeof (buf) - 1)
+	    {
+	      snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", " dex");
+	    }
+	}
       if (ch->perm_stat[STAT_CON] < get_max_train (ch, STAT_CON))
-	strcat (buf, " con");
-      strcat (buf, " hp mana move");
+	{
+	  size_t buf_len = strlen (buf);
+	  if (buf_len < sizeof (buf) - 1)
+	    {
+	      snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", " con");
+	    }
+	}
+      {
+	size_t buf_len = strlen (buf);
+	if (buf_len < sizeof (buf) - 1)
+	  {
+	    snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", " hp mana move");
+	  }
+      }
 
       if (buf[strlen (buf) - 1] != ':')
 	{
-	  strcat (buf, ".\n\r");
+	  size_t buf_len = strlen (buf);
+	  if (buf_len < sizeof (buf) - 1)
+	    {
+	      snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", ".\n\r");
+	    }
 	  send_to_char (buf, ch);
 	}
       else

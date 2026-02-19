@@ -82,7 +82,7 @@ do_delete (CHAR_DATA * ch, char *argument)
 	    update_clanlist (ch, ch->clead, FALSE, TRUE);
 	  if (is_clan (ch))
 	    update_clanlist (ch, ch->clead, FALSE, FALSE);
-	  sprintf (strsave, "%s%s", PLAYER_DIR, capitalize (ch->name));
+	  snprintf (strsave, sizeof (strsave), "%s%s", PLAYER_DIR, capitalize (ch->name));
 	  wiznet ("$N turns $Mself into line noise.", ch, NULL, 0, 0, 0);
 	  stop_fighting (ch, TRUE);
 	  if (ch->level > HERO)
@@ -209,7 +209,7 @@ do_channels (CHAR_DATA * ch, char *argument)
     {
       if (ch->lines)
 	{
-	  sprintf (buf, "You display %d lines of scroll.\n\r", ch->lines + 2);
+	  snprintf (buf, sizeof (buf), "You display %d lines of scroll.\n\r", ch->lines + 2);
 	  send_to_char (buf, ch);
 	}
       else
@@ -218,7 +218,7 @@ do_channels (CHAR_DATA * ch, char *argument)
 
   if (ch->prompt != NULL)
     {
-      sprintf (buf, "Your current prompt is: %s\n\r", ch->prompt);
+      snprintf (buf, sizeof (buf), "Your current prompt is: %s\n\r", ch->prompt);
       send_to_char (buf, ch);
     }
 
@@ -283,7 +283,7 @@ do_afk (CHAR_DATA * ch, char *argument)
     {
       if (ch->tells)
 	{
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "AFK mode removed.  You have `R%d`x tells waiting.\n\r",
 		   ch->tells);
 	  send_to_char (buf, ch);
@@ -384,7 +384,7 @@ do_ooc (CHAR_DATA * ch, char *argument)
 	  return;
 	}
 
-      sprintf (buf, "You OOC '`A%s`x'\n\r", argument);
+      snprintf (buf, sizeof (buf), "You OOC '`A%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -464,7 +464,7 @@ do_gossip (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOGOSSIP);
 
-      sprintf (buf, "You `bgo`Bs`Ws`Bi`bp`x '`m%s`x'\n\r", argument);
+      snprintf (buf, sizeof (buf), "You `bgo`Bs`Ws`Bi`bp`x '`m%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -549,7 +549,7 @@ do_qgossip (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOQGOSSIP);
 
-      sprintf (buf, "You qgossip '`l%s`x'\n\r", argument);
+      snprintf (buf, sizeof (buf), "You qgossip '`l%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -635,7 +635,7 @@ do_grats (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOGRATS);
 
-      sprintf (buf, "You grats '`J%s`x'\n\r", argument);
+      snprintf (buf, sizeof (buf), "You grats '`J%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -714,7 +714,7 @@ do_quote (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOQUOTE);
 
-      sprintf (buf, "You quote '`Q%s`x'\n\r", argument);
+      snprintf (buf, sizeof (buf), "You quote '`Q%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -831,7 +831,7 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
       if (IS_SET (to->comm, COMM_NOSOCIAL) || IS_SET (to->comm, COMM_QUIET))
 	continue;
       point = buf;
-      sprintf (buf, "[*SOC*] ");
+      snprintf (buf, sizeof (buf), "[*SOC*] ");
       point += 8;
       str = format;
       while (*str)
@@ -959,7 +959,14 @@ social_channel (const char *format, CHAR_DATA * ch, const void *arg2,
 			      *++i2 = '\0';
 			      continue;
 			    }
-			  strcat (fixed, colour (*i, to));
+			  {
+			    size_t fixed_len = strlen (fixed);
+			    if (fixed_len < sizeof (fixed) - 1)
+			      {
+				snprintf (fixed + fixed_len, sizeof (fixed) - fixed_len,
+					  "%s", colour (*i, to));
+			      }
+			  }
 			  for (i2 = fixed; *i2; i2++)
 			    ;
 			  if (*i == '\0')
@@ -1200,7 +1207,7 @@ do_ask (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOASK);
 
-      sprintf (buf, "You ask '`P%s`x'\n\r", argument);
+      snprintf (buf, sizeof (buf), "You ask '`P%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -1280,7 +1287,7 @@ do_answer (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOASK);
 
-      sprintf (buf, "You answer '`P%s`x'\n\r", argument);
+      snprintf (buf, sizeof (buf), "You answer '`P%s`x'\n\r", argument);
       send_to_char (buf, ch);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
@@ -1360,9 +1367,9 @@ do_music (CHAR_DATA * ch, char *argument)
 
       REMOVE_BIT (ch->comm, COMM_NOMUSIC);
 
-      sprintf (buf, "You MUSIC: '`N%s`x'\n\r", argument);
+      snprintf (buf, sizeof (buf), "You MUSIC: '`N%s`x'\n\r", argument);
       send_to_char (buf, ch);
-      sprintf (buf, "$n MUSIC: '`N%s`x'", argument);
+      snprintf (buf, sizeof (buf), "$n MUSIC: '`N%s`x'", argument);
       for (d = descriptor_list; d != NULL; d = d->next)
 	{
 	  CHAR_DATA *victim;
@@ -1418,7 +1425,7 @@ do_announce (CHAR_DATA * ch, char *argument)
 
   REMOVE_BIT (ch->comm, COMM_NOANNOUNCE);
 
-  sprintf (buf, "`D[`RINFO`D] `C$n `L%s`x", argument);
+  snprintf (buf, sizeof (buf), "`D[`RINFO`D] `C$n `L%s`x", argument);
   act_new ("`D[`RINFO`D] `C$n `L$t`x", ch, argument, NULL, TO_CHAR, POS_DEAD);
   for (d = descriptor_list; d != NULL; d = d->next)
     {
@@ -1456,7 +1463,7 @@ do_immtalk (CHAR_DATA * ch, char *argument)
 
   REMOVE_BIT (ch->comm, COMM_NOWIZ);
 
-  sprintf (buf, "`M[ `r$n `M] `C%s`x", argument);
+  snprintf (buf, sizeof (buf), "`M[ `r$n `M] `C%s`x", argument);
   act_new ("`M[ `r$n `M] `C$t`x", ch, argument, NULL, TO_CHAR, POS_DEAD);
   for (d = descriptor_list; d != NULL; d = d->next)
     {
@@ -1630,7 +1637,7 @@ do_tell (CHAR_DATA * ch, char *argument)
     {
       act ("$N seems to have misplaced $S link...try again later.",
 	   ch, NULL, victim, TO_CHAR);
-      sprintf (buf, "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
+      snprintf (buf, sizeof (buf), "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
       buf[0] = UPPER (buf[0]);
       add_buf (victim->pcdata->buffer, buf);
       victim->tells++;
@@ -1681,7 +1688,7 @@ do_tell (CHAR_DATA * ch, char *argument)
 
       act ("$E is AFK, but your tell will go through when $E returns.",
 	   ch, NULL, victim, TO_CHAR);
-      sprintf (buf, "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
+      snprintf (buf, sizeof (buf), "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
       buf[0] = UPPER (buf[0]);
       add_buf (victim->pcdata->buffer, buf);
       victim->tells++;
@@ -1699,7 +1706,7 @@ do_tell (CHAR_DATA * ch, char *argument)
 
       act ("$E is fighting, but your tell will go through when $E finishes.",
 	   ch, NULL, victim, TO_CHAR);
-      sprintf (buf, "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
+      snprintf (buf, sizeof (buf), "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
       buf[0] = UPPER (buf[0]);
       add_buf (victim->pcdata->buffer, buf);
       victim->tells++;
@@ -1755,7 +1762,7 @@ do_reply (CHAR_DATA * ch, char *argument)
     {
       act ("$N seems to have misplaced $S link...try again later.",
 	   ch, NULL, victim, TO_CHAR);
-      sprintf (buf, "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
+      snprintf (buf, sizeof (buf), "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
       buf[0] = UPPER (buf[0]);
       add_buf (victim->pcdata->buffer, buf);
       victim->tells++;
@@ -1816,7 +1823,7 @@ do_reply (CHAR_DATA * ch, char *argument)
 
       act_new ("$E is AFK, but your tell will go through when $E returns.",
 	       ch, NULL, victim, TO_CHAR, POS_DEAD);
-      sprintf (buf, "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
+      snprintf (buf, sizeof (buf), "%s tells you '`U%s`x'\n\r", PERS (ch, victim), argument);
       buf[0] = UPPER (buf[0]);
       add_buf (victim->pcdata->buffer, buf);
       victim->tells++;
@@ -1950,7 +1957,7 @@ do_pmote (CHAR_DATA * ch, char *argument)
 	  continue;
 	}
 
-      strcpy (temp, argument);
+      snprintf (temp, sizeof (temp), "%s", argument);
       temp[strlen (argument) - strlen (letter)] = '\0';
       last[0] = '\0';
       name = vch->name;
@@ -1959,7 +1966,14 @@ do_pmote (CHAR_DATA * ch, char *argument)
 	{
 	  if (*letter == '\'' && matches == strlen (vch->name))
 	    {
-	      strcat (temp, "r");
+	      {
+		size_t temp_len = strlen (temp);
+		if (temp_len < sizeof (temp) - 1)
+		  {
+		    temp[temp_len] = 'r';
+		    temp[temp_len + 1] = '\0';
+		  }
+	      }
 	      continue;
 	    }
 
@@ -1980,7 +1994,14 @@ do_pmote (CHAR_DATA * ch, char *argument)
 	      name++;
 	      if (matches == strlen (vch->name))
 		{
-		  strcat (temp, "you");
+		  {
+		    size_t temp_len = strlen (temp);
+		    if (temp_len < sizeof (temp) - 1)
+		      {
+			snprintf (temp + temp_len, sizeof (temp) - temp_len, "%s",
+				  "you");
+		      }
+		  }
 		  last[0] = '\0';
 		  name = vch->name;
 		  continue;
@@ -1990,7 +2011,13 @@ do_pmote (CHAR_DATA * ch, char *argument)
 	    }
 
 	  matches = 0;
-	  strcat (temp, last);
+	  {
+	    size_t temp_len = strlen (temp);
+	    if (temp_len < sizeof (temp) - 1)
+	      {
+		snprintf (temp + temp_len, sizeof (temp) - temp_len, "%s", last);
+	      }
+	  }
 	  strncat (temp, letter, 1);
 	  last[0] = '\0';
 	  name = vch->name;
@@ -2413,7 +2440,7 @@ do_quit (CHAR_DATA * ch, char *argument)
 		ch);
   WAIT_STATE (ch, 25 * PULSE_VIOLENCE);
   act ("$n has left the game.", ch, NULL, NULL, TO_ROOM);
-  sprintf (log_buf, "%s has quit.", ch->name);
+  snprintf (log_buf, MAX_STRING_LENGTH, "%s has quit.", ch->name);
   log_string (log_buf);
   wiznet ("$N rejoins the real world.", ch, NULL, WIZ_LOGINS, 0,
 	  get_trust (ch));
@@ -2477,7 +2504,7 @@ force_quit (CHAR_DATA * ch, char *argument)
 		ch);
   WAIT_STATE (ch, 25 * PULSE_VIOLENCE);
   act ("$n has left the game.", ch, NULL, NULL, TO_ROOM);
-  sprintf (log_buf, "%s has quit.", ch->name);
+  snprintf (log_buf, MAX_STRING_LENGTH, "%s has quit.", ch->name);
   log_string (log_buf);
   wiznet ("$N rejoins the real world.", ch, NULL, WIZ_LOGINS, 0,
 	  get_trust (ch));
@@ -2751,7 +2778,7 @@ do_order (CHAR_DATA * ch, char *argument)
 	  && och->master == ch && (fAll || och == victim))
 	{
 	  found = TRUE;
-	  sprintf (buf, "$n orders you to '%s'.", argument);
+	  snprintf (buf, sizeof (buf), "$n orders you to '%s'.", argument);
 	  act (buf, ch, NULL, och, TO_VICT);
 	  interpret (och, argument);
 	}
@@ -2782,14 +2809,14 @@ do_group (CHAR_DATA * ch, char *argument)
       CHAR_DATA *leader;
 
       leader = (ch->leader != NULL) ? ch->leader : ch;
-      sprintf (buf, "%s's group:\n\r", PERS (leader, ch));
+      snprintf (buf, sizeof (buf), "%s's group:\n\r", PERS (leader, ch));
       send_to_char (buf, ch);
 
       for (gch = char_list; gch != NULL; gch = gch->next)
 	{
 	  if (is_same_group (gch, ch))
 	    {
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "[%2d %s] %-16s %4d/%4d hp %4d/%4d mana %4d/%4d mv %5ld xp\n\r",
 		       gch->level,
 		       IS_NPC (gch) ? "Mob" : class_table[gch->class].
@@ -2956,21 +2983,21 @@ do_split (CHAR_DATA * ch, char *argument)
 
   if (share_platinum > 0)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "You split %d platinum coins. Your share is %d platinum.\n\r",
 	       amount_platinum - extra_platinum, share_platinum);
       send_to_char (buf, ch);
     }
   if (share_gold > 0)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "You split %d gold coins. Your share is %d gold.\n\r",
 	       amount_gold - extra_gold, share_gold);
       send_to_char (buf, ch);
     }
   if (share_silver > 0)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "You split %d silver coins. Your share is %d silver.\n\r",
 	       amount_silver, share_silver + extra_silver);
       send_to_char (buf, ch);
@@ -2978,43 +3005,43 @@ do_split (CHAR_DATA * ch, char *argument)
 
   if (share_gold == 0 && share_silver == 0)
     {
-      sprintf (buf, "$n splits %d platinum coins. Your share is %d platinum.",
+      snprintf (buf, sizeof (buf), "$n splits %d platinum coins. Your share is %d platinum.",
 	       amount_platinum - extra_platinum, share_platinum);
     }
   else if (share_platinum == 0 && share_silver == 0)
     {
-      sprintf (buf, "$n splits %d gold coins. Your share is %d gold.",
+      snprintf (buf, sizeof (buf), "$n splits %d gold coins. Your share is %d gold.",
 	       amount_gold - extra_gold, share_gold);
     }
   else if (share_platinum == 0 && share_gold == 0)
     {
-      sprintf (buf, "$n splits %d silver coins. Your share is %d silver.",
+      snprintf (buf, sizeof (buf), "$n splits %d silver coins. Your share is %d silver.",
 	       amount_silver, share_silver);
     }
   else if (share_silver == 0)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "$n splits %d platinum and %d gold coins. giving you %d platinum and %d gold.\n\r",
 	       amount_platinum - extra_platinum, amount_gold - extra_gold,
 	       share_platinum, share_gold);
     }
   else if (share_gold == 0)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "$n splits %d platinum and %d silver coins. giving you %d platinum and %d silver.\n\r",
 	       amount_platinum - extra_platinum, amount_silver,
 	       share_platinum, share_silver);
     }
   else if (share_platinum == 0)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "$n splits %d gold and %d silver coins. giving you %d gold and %d silver.\n\r",
 	       amount_gold - extra_gold, amount_silver,
 	       share_gold, share_silver);
     }
   else
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "$n splits %d platinum, %d gold and %d silver coins. giving you %d platinum, %d gold and %d silver.\n\r",
 	       amount_platinum - extra_platinum, amount_gold - extra_gold,
 	       amount_silver, share_platinum, share_gold, share_silver);
@@ -3066,7 +3093,7 @@ do_gtell (CHAR_DATA * ch, char *argument)
   /*
    * Note use of send_to_char, so gtell works on sleepers.
    */
-  sprintf (buf, "%s tells the group '`K%s`x'\n\r", ch->name, argument);
+  snprintf (buf, sizeof (buf), "%s tells the group '`K%s`x'\n\r", ch->name, argument);
   for (gch = char_list; gch != NULL; gch = gch->next)
     {
       if (is_same_group (gch, ch))

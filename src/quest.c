@@ -142,7 +142,7 @@ do_quest (CHAR_DATA * ch, char *argument)
 	{
 	  if (ch->questmob == -1 && ch->questgiver->short_descr != NULL)
 	    {
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "Your quest is ALMOST complete!\n\rGet back to %s before your time runs out!\n\r",
 		       ch->questgiver->short_descr);
 	      send_to_char (buf, ch);
@@ -152,7 +152,7 @@ do_quest (CHAR_DATA * ch, char *argument)
 	      questinfoobj = get_obj_index (ch->questobj);
 	      if (questinfoobj != NULL)
 		{
-		  sprintf (buf,
+		  snprintf (buf, sizeof (buf),
 			   "You are on a quest to recover the fabled %s!\n\r",
 			   questinfoobj->name);
 		  send_to_char (buf, ch);
@@ -166,7 +166,7 @@ do_quest (CHAR_DATA * ch, char *argument)
 	      questinfo = get_mob_index (ch->questmob);
 	      if (questinfo != NULL)
 		{
-		  sprintf (buf,
+		  snprintf (buf, sizeof (buf),
 			   "You are on a quest to slay the dreaded %s!\n\r",
 			   questinfo->short_descr);
 		  send_to_char (buf, ch);
@@ -177,7 +177,7 @@ do_quest (CHAR_DATA * ch, char *argument)
 	    }
 	  else			/* This probably happens when the mud crashes before a save. Questbit got set but quest[mob|obj] didnt. */
 	    {
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "Well this ain't supposed to happen, you'll be reset to normal state but please report to admin!\n\r");
 	      send_to_char (buf, ch);
 	      ch->nextquest = 0;
@@ -193,7 +193,7 @@ do_quest (CHAR_DATA * ch, char *argument)
     }
   if (!strcmp (arg1, "points"))
     {
-      sprintf (buf, "You have %d quest points.\n\r", ch->questpoints);
+      snprintf (buf, sizeof (buf), "You have %d quest points.\n\r", ch->questpoints);
       send_to_char (buf, ch);
       return;
     }
@@ -204,21 +204,21 @@ do_quest (CHAR_DATA * ch, char *argument)
 	  send_to_char ("You aren't currently on a quest.\n\r", ch);
 	  if (ch->nextquest > 1)
 	    {
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "There are %d minutes remaining until you can go on another quest.\n\r",
 		       ch->nextquest);
 	      send_to_char (buf, ch);
 	    }
 	  else if (ch->nextquest == 1)
 	    {
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "There is less than a minute remaining until you can go on another quest.\n\r");
 	      send_to_char (buf, ch);
 	    }
 	}
       else if (ch->countdown > 0)
 	{
-	  sprintf (buf, "Time left for current quest: %d\n\r", ch->countdown);
+	  snprintf (buf, sizeof (buf), "Time left for current quest: %d\n\r", ch->countdown);
 	  send_to_char (buf, ch);
 	}
       return;
@@ -266,7 +266,7 @@ do_quest (CHAR_DATA * ch, char *argument)
 	   TO_CHAR);
       while (quest_item_list[i].name != NULL)
 	{
-	  sprintf (buf, "%s.......%d qp\n", quest_item_list[i].name,
+	  snprintf (buf, sizeof (buf), "%s.......%d qp\n", quest_item_list[i].name,
 		   quest_item_list[i].cost);
 	  send_to_char (buf, ch);
 	  i++;
@@ -300,30 +300,30 @@ do_quest (CHAR_DATA * ch, char *argument)
 		      break;
 		    case QUEST_GOLD_T:
 		      ch->gold += quest_item_list[i].id;
-		      sprintf (buf, "$N gives %d pieces of gold to $n.",
+		      snprintf (buf, sizeof (buf), "$N gives %d pieces of gold to $n.",
 			       quest_item_list[i].id);
 		      act (buf, ch, NULL, questman, TO_ROOM);
-		      sprintf (buf,
+		      snprintf (buf, sizeof (buf),
 			       "$N has %d in gold transfered from $s Swiss account to your balance.",
 			       quest_item_list[i].id);
 		      act (buf, ch, NULL, questman, TO_CHAR);
 		      break;
 		    case QUEST_PRAC_T:
 		      ch->practice += quest_item_list[i].id;
-		      sprintf (buf, "$N gives %d practices to $n.",
+		      snprintf (buf, sizeof (buf), "$N gives %d practices to $n.",
 			       quest_item_list[i].id);
 		      act (buf, ch, NULL, questman, TO_ROOM);
-		      sprintf (buf, "$N gives you %d practices.",
+		      snprintf (buf, sizeof (buf), "$N gives you %d practices.",
 			       quest_item_list[i].id);
 		      act ("$N gives you 30 practices.", ch, NULL, questman,
 			   TO_CHAR);
 		      break;
 		    case QUEST_TRAIN_T:
 		      ch->train += quest_item_list[i].id;
-		      sprintf (buf, "$N gives %d trainings to $n.",
+		      snprintf (buf, sizeof (buf), "$N gives %d trainings to $n.",
 			       quest_item_list[i].id);
 		      act (buf, ch, NULL, questman, TO_ROOM);
-		      sprintf (buf, "$N gives you %d trainings.",
+		      snprintf (buf, sizeof (buf), "$N gives you %d trainings.",
 			       quest_item_list[i].id);
 		      act (buf, ch, NULL, questman, TO_CHAR);
 		      break;
@@ -332,7 +332,7 @@ do_quest (CHAR_DATA * ch, char *argument)
 		}
 	      else
 		{
-		  sprintf (buf,
+		  snprintf (buf, sizeof (buf),
 			   "Sorry, %s, but you don't have enough quest points for that.",
 			   ch->name);
 		  do_say (questman, buf);
@@ -341,7 +341,7 @@ do_quest (CHAR_DATA * ch, char *argument)
 	    }
 	  i++;
 	}
-      sprintf (buf, "I don't have that item, %s.", ch->name);
+      snprintf (buf, sizeof (buf), "I don't have that item, %s.", ch->name);
       do_say (questman, buf);
       return;
     }
@@ -351,30 +351,30 @@ do_quest (CHAR_DATA * ch, char *argument)
       act ("You ask $N for a quest.", ch, NULL, questman, TO_CHAR);
       if (IS_SET (ch->act, PLR_QUESTOR))
 	{
-	  sprintf (buf, "But you're already on a quest!");
+	  snprintf (buf, sizeof (buf), "But you're already on a quest!");
 	  do_say (questman, buf);
 	  return;
 	}
 
       if (ch->level < 10)
 	{
-	  sprintf (buf, "You're very brave young %s, but you're not skilled enough. Please come back when you're level 10 or higher.\n\r", ch->name);
+	  snprintf (buf, sizeof (buf), "You're very brave young %s, but you're not skilled enough. Please come back when you're level 10 or higher.\n\r", ch->name);
 	  do_say(questman,buf);
 	  return;
 	}
       
       if (ch->nextquest > 0)
 	{
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "You're very brave, %s, but let someone else have a chance.",
 		   ch->name);
 	  do_say (questman, buf);
-	  sprintf (buf, "Come back later.");
+	  snprintf (buf, sizeof (buf), "Come back later.");
 	  do_say (questman, buf);
 	  return;
 	}
 
-      sprintf (buf, "Thank you, brave %s!", ch->name);
+      snprintf (buf, sizeof (buf), "Thank you, brave %s!", ch->name);
       do_say (questman, buf);
 
       generate_quest (ch, questman);
@@ -383,10 +383,10 @@ do_quest (CHAR_DATA * ch, char *argument)
 	{
 	  ch->countdown = number_range (15, 35);
 	  SET_BIT (ch->act, PLR_QUESTOR);
-	  sprintf (buf, "You have %d minutes to complete this quest.",
+	  snprintf (buf, sizeof (buf), "You have %d minutes to complete this quest.",
 		   ch->countdown);
 	  do_say (questman, buf);
-	  sprintf (buf, "May the gods go with you!");
+	  snprintf (buf, sizeof (buf), "May the gods go with you!");
 	  do_say (questman, buf);
 	}
       return;
@@ -399,7 +399,7 @@ do_quest (CHAR_DATA * ch, char *argument)
 	   TO_CHAR);
       if (ch->questgiver != questman)
 	{
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "I never sent you on a quest! Perhaps you're thinking of someone else.");
 	  do_say (questman, buf);
 	  return;
@@ -415,7 +415,7 @@ do_quest (CHAR_DATA * ch, char *argument)
 	  if (chance (15))
 	    {
 	      pracreward = number_range (1, 6);
-	      sprintf (buf, "You gain %d practices!\n\r", pracreward);
+	      snprintf (buf, sizeof (buf), "You gain %d practices!\n\r", pracreward);
 	      send_to_char (buf, ch);
 	      ch->practice += pracreward;
 	    }
@@ -423,9 +423,9 @@ do_quest (CHAR_DATA * ch, char *argument)
 	      
 	  if (ch->questmob == -1 && ch->countdown > 0)	/* Mob quest */
 	    {
-	      sprintf (buf, "Congratulations on completing your quest!");
+	      snprintf (buf, sizeof (buf), "Congratulations on completing your quest!");
 	      do_say (questman, buf);
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "As a reward, I am giving you %d quest points, and %d gold.",
 		       pointreward, reward);
 	      do_say (questman, buf);
@@ -459,9 +459,9 @@ do_quest (CHAR_DATA * ch, char *argument)
 		  act ("You hand $p to $N.", ch, obj, questman, TO_CHAR);
 		  act ("$n hands $p to $N.", ch, obj, questman, TO_ROOM);
 
-		  sprintf (buf, "Congratulations on completing your quest!");
+		  snprintf (buf, sizeof (buf), "Congratulations on completing your quest!");
 		  do_say (questman, buf);
-		  sprintf (buf,
+		  snprintf (buf, sizeof (buf),
 			   "As a reward, I am giving you %d quest points, and %d gold.",
 			   pointreward, reward);
 		  do_say (questman, buf);
@@ -478,7 +478,7 @@ do_quest (CHAR_DATA * ch, char *argument)
 		}
 	      else
 		{
-		  sprintf (buf, "You haven't completed the quest yet, but there is still time!");
+		  snprintf (buf, sizeof (buf), "You haven't completed the quest yet, but there is still time!");
 		  do_say (questman, buf);
 		  return;
 		}
@@ -487,16 +487,16 @@ do_quest (CHAR_DATA * ch, char *argument)
 	  else if ((ch->questmob > 0 || ch->questobj > 0)
 		   && ch->countdown > 0)
 	    {
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "You haven't completed the quest yet, but there is still time!");
 	      do_say (questman, buf);
 	      return;
 	    }
 	}
       if (ch->nextquest > 0)
-	sprintf (buf, "But you didn't complete your quest in time!");
+	snprintf (buf, sizeof (buf), "But you didn't complete your quest in time!");
       else
-	sprintf (buf, "You have to REQUEST a quest first, %s.", ch->name);
+	snprintf (buf, sizeof (buf), "You have to REQUEST a quest first, %s.", ch->name);
       do_say (questman, buf);
       return;
     }
@@ -556,10 +556,10 @@ generate_quest (CHAR_DATA * ch, CHAR_DATA * questman)
 
   if (vsearch == NULL || (victim = get_char_world (ch, vsearch->player_name)) == NULL)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "I'm sorry, but I don't have any quests for you at this time.");
       do_say (questman, buf);
-      sprintf (buf, "Try again later.");
+      snprintf (buf, sizeof (buf), "Try again later.");
       do_say (questman, buf);
       ch->nextquest = QUEST_WAIT_BETWEEN;
       return;
@@ -567,10 +567,10 @@ generate_quest (CHAR_DATA * ch, CHAR_DATA * questman)
 
   if ((room = find_location (ch, victim->name)) == NULL)
     {
-      sprintf (buf,
+      snprintf (buf, sizeof (buf),
 	       "I'm sorry, but I don't have any quests for you at this time.");
       do_say (questman, buf);
-      sprintf (buf, "Try again later.");
+      snprintf (buf, sizeof (buf), "Try again later.");
       do_say (questman, buf);
       ch->nextquest = QUEST_WAIT_BETWEEN;
       return;
@@ -605,7 +605,7 @@ generate_quest (CHAR_DATA * ch, CHAR_DATA * questman)
       questitem = create_object (get_obj_index (objvnum), ch->level);
       obj_to_room (questitem, room);
       ch->questobj = questitem->pIndexData->vnum;
-      sprintf (buf, "Vile pilferers have stolen %s from the royal treasury!",
+      snprintf (buf, sizeof (buf), "Vile pilferers have stolen %s from the royal treasury!",
 	       questitem->short_descr);
       do_say (questman, buf);
       do_say (questman,
@@ -614,7 +614,7 @@ generate_quest (CHAR_DATA * ch, CHAR_DATA * questman)
       /* I changed my area names so that they have just the name of the area
          and none of the level stuff. You may want to comment these next two
          lines. - Vassago */
-      sprintf (buf, "Look in the general area of %s for %s!",
+      snprintf (buf, sizeof (buf), "Look in the general area of %s for %s!",
 	       room->area->name, room->name);
       do_say (questman, buf);
       return;
@@ -626,20 +626,20 @@ generate_quest (CHAR_DATA * ch, CHAR_DATA * questman)
       switch (number_range (0, 1))
 	{
 	case 0:
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "An enemy of mine, %s, is making vile threats against the crown.",
 		   victim->short_descr);
 	  do_say (questman, buf);
-	  sprintf (buf, "This threat must be eliminated!");
+	  snprintf (buf, sizeof (buf), "This threat must be eliminated!");
 	  do_say (questman, buf);
 	  break;
 
 	case 1:
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "Rune's most heinous criminal, %s, has escaped from the dungeon!",
 		   victim->short_descr);
 	  do_say (questman, buf);
-	  sprintf (buf, "Since the escape, %s has murdered %d civillians!",
+	  snprintf (buf, sizeof (buf), "Since the escape, %s has murdered %d civillians!",
 		   victim->short_descr, number_range (2, 20));
 	  do_say (questman, buf);
 	  do_say (questman,
@@ -649,7 +649,7 @@ generate_quest (CHAR_DATA * ch, CHAR_DATA * questman)
 
       if (room->name != NULL)
 	{
-	  sprintf (buf, "Seek %s out somewhere in the vicinity of %s!",
+	  snprintf (buf, sizeof (buf), "Seek %s out somewhere in the vicinity of %s!",
 		   victim->short_descr, room->name);
 	  do_say (questman, buf);
 
@@ -657,7 +657,7 @@ generate_quest (CHAR_DATA * ch, CHAR_DATA * questman)
 	     and none of the level stuff. You may want to comment these next two
 	     lines. - Vassago */
 
-	  sprintf (buf, "That location is in the general area of %s.",
+	  snprintf (buf, sizeof (buf), "That location is in the general area of %s.",
 		   room->area->name);
 	  do_say (questman, buf);
 	}
@@ -697,7 +697,7 @@ quest_update (void)
 	      char buf[MAX_STRING_LENGTH];
 
 	      ch->nextquest = 5;
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "You have run out of time for your quest!\n\rYou may quest again in %d minutes.\n\r",
 		       ch->nextquest);
 	      send_to_char (buf, ch);

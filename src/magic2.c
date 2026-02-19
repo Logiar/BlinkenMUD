@@ -267,22 +267,22 @@ spell_empower (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   object->value[1] = new_sn;
   object->level = ch->level - 5;
 
-  sprintf (buf, "%s%s", object->short_descr, name);
+  snprintf (buf, sizeof (buf), "%s%s", object->short_descr, name);
   free_string (object->short_descr);
   object->short_descr = str_dup (buf);
 
   if ((newtarget == TAR_CHAR_DEFENSIVE) || (newtarget == TAR_CHAR_SELF))
     {
-      sprintf (buf, "$n has created a potion of %s!", name);
+      snprintf (buf, sizeof (buf), "$n has created a potion of %s!", name);
       act (buf, ch, object, NULL, TO_ROOM);
-      sprintf (buf, "You create a potion of %s!\n\r", name);
+      snprintf (buf, sizeof (buf), "You create a potion of %s!\n\r", name);
       send_to_char (buf, ch);
     }
   else
     {
-      sprintf (buf, "$n has created a scroll of %s!", name);
+      snprintf (buf, sizeof (buf), "$n has created a scroll of %s!", name);
       act (buf, ch, object, NULL, TO_ROOM);
-      sprintf (buf, "You create a scroll of %s!\n\r", name);
+      snprintf (buf, sizeof (buf), "You create a scroll of %s!\n\r", name);
       send_to_char (buf, ch);
     }
   obj_to_char (object, ch);
@@ -318,18 +318,19 @@ spell_resurrect (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   if (!IS_SET (pet->affected_by, AFF_CHARM))
     SET_BIT (pet->affected_by, AFF_CHARM);
   pet->comm = COMM_NOTELL | COMM_NOSHOUT | COMM_NOCHANNELS;
-  sprintf (buf, "%s`GThe mark of %s is on it's forehead.`x.\n\r",
-	   pet->description, ch->name);
+  snprintf (buf, sizeof (buf), "%.3800s`GThe mark of %.200s is on it's forehead.`x.\n\r",
+	    pet->description, ch->name);
   free_string (pet->description);
   pet->description = str_dup (buf);
   free_string (pet->short_descr);
   pet->short_descr =
     str_dup (str_replace (obj->short_descr, "corpse", "zombie"));
-  sprintf (buf, "%s", str_replace (obj->description, "corpse", "zombie"));
+  snprintf (buf, sizeof (buf), "%.4000s",
+	    str_replace (obj->description, "corpse", "zombie"));
   length = strlen (buf) - 12;
   strncpy (arg, buf, length);
   arg[length] = '\0';
-  sprintf (buf, "%s standing here.\n\r", arg);
+  snprintf (buf, sizeof (buf), "%.4000s standing here.\n\r", arg);
   free_string (pet->long_descr);
   pet->long_descr = str_dup (buf);
   char_to_room (pet, ch->in_room);
@@ -351,10 +352,10 @@ spell_resurrect (int sn, int level, CHAR_DATA * ch, void *vo, int target)
       obj_to_room (cobj, ch->in_room);
     }
   extract_obj (obj);
-  sprintf (buf, "%s stands up and starts following you.\n\r",
+  snprintf (buf, sizeof (buf), "%s stands up and starts following you.\n\r",
 	   pet->short_descr);
   send_to_char (buf, ch);
-  sprintf (buf, "%s stands up and starts following $n.", pet->short_descr);
+  snprintf (buf, sizeof (buf), "%s stands up and starts following $n.", pet->short_descr);
   act (buf, ch, NULL, NULL, TO_ROOM);
   return;
 }
@@ -406,8 +407,8 @@ spell_conjure (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   if (!IS_SET (pet->affected_by, AFF_CHARM))
     SET_BIT (pet->affected_by, AFF_CHARM);
   pet->comm = COMM_NOTELL | COMM_NOSHOUT | COMM_NOCHANNELS;
-  sprintf (buf, "%s`GThe mark of %s is on it's forehead.`x.\n\r",
-	   pet->description, ch->name);
+  snprintf (buf, sizeof (buf), "%.3800s`GThe mark of %.200s is on it's forehead.`x.\n\r",
+	    pet->description, ch->name);
   free_string (pet->description);
   pet->description = str_dup (buf);
   char_to_room (pet, ch->in_room);
@@ -461,29 +462,30 @@ spell_animate (int sn, int level, CHAR_DATA * ch, void *vo, int target)
   pet = create_mobile (pMobIndex);
   SET_BIT (pet->affected_by, AFF_CHARM);
   pet->comm = COMM_NOTELL | COMM_NOSHOUT | COMM_NOCHANNELS;
-  sprintf (buf, "%s`GIt's branded with the mark of %s.`x.\n\r",
-	   obj->description, ch->name);
+  snprintf (buf, sizeof (buf), "%.3800s`GIt's branded with the mark of %.200s.`x.\n\r",
+	    obj->description, ch->name);
   free_string (pet->description);
   pet->description = str_dup (buf);
   free_string (pet->short_descr);
   pet->short_descr = str_dup (obj->short_descr);
   free_string (pet->name);
   pet->name = str_dup (obj->name);
-  sprintf (buf, "%s", obj->description);
+  snprintf (buf, sizeof (buf), "%.4000s", obj->description);
   length = strlen (buf) - 12;
   strncpy (arg, buf, length);
   arg[length] = '\0';
-  sprintf (buf, "%s floating here.\n\r", arg);
+  snprintf (buf, sizeof (buf), "%.4000s floating here.\n\r", arg);
   free_string (pet->long_descr);
   pet->long_descr = str_dup (buf);
   char_to_room (pet, ch->in_room);
   add_follower (pet, ch);
   pet->leader = ch;
   obj_from_char (obj);
-  sprintf (buf, "%s floats up and starts following you.\n\r",
-	   pet->short_descr);
+  snprintf (buf, sizeof (buf), "%.4000s floats up and starts following you.\n\r",
+	    pet->short_descr);
   send_to_char (buf, ch);
-  sprintf (buf, "%s floats up and starts following $n.", pet->short_descr);
+  snprintf (buf, sizeof (buf), "%.4000s floats up and starts following $n.",
+	    pet->short_descr);
   act (buf, ch, NULL, NULL, TO_ROOM);
   return;
 }
@@ -677,13 +679,13 @@ spell_voodoo (int sn, int level, CHAR_DATA * ch, void *vo, int target)
     }
   one_argument (bpart->name, name);
   doll = create_object (get_obj_index (OBJ_VNUM_VOODOO), 0);
-  sprintf (buf, doll->short_descr, name);
+  snprintf (buf, sizeof (buf), doll->short_descr, name);
   free_string (doll->short_descr);
   doll->short_descr = str_dup (buf);
-  sprintf (buf, doll->description, name);
+  snprintf (buf, sizeof (buf), doll->description, name);
   free_string (doll->description);
   doll->description = str_dup (buf);
-  sprintf (buf, doll->name, name);
+  snprintf (buf, sizeof (buf), doll->name, name);
   free_string (doll->name);
   doll->name = str_dup (buf);
   act ("$p morphs into a voodoo doll", ch, bpart, NULL, TO_CHAR);
