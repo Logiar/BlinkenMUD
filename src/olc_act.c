@@ -30,6 +30,7 @@
 #include "lookup.h"
 
 char *mprog_type_to_name (int type);
+static void append_to_buf (char *buf, size_t buf_size, const char *text);
 
 /* Return TRUE if area changed, FALSE if not. */
 #define REDIT( fun )		bool fun( CHAR_DATA *ch, char *argument )
@@ -38,6 +39,22 @@ char *mprog_type_to_name (int type);
 #define AEDIT( fun )		bool fun( CHAR_DATA *ch, char *argument )
 
 
+
+
+static void
+append_to_buf (char *buf, size_t buf_size, const char *text)
+{
+  size_t buf_len;
+
+  if (buf_size == 0 || text == NULL)
+    return;
+
+  buf_len = strlen (buf);
+  if (buf_len >= buf_size - 1)
+    return;
+
+  snprintf (buf + buf_len, buf_size - buf_len, "%s", text);
+}
 
 struct olc_help_type
 {
@@ -130,14 +147,14 @@ show_flag_cmds (CHAR_DATA * ch, const struct flag_type *flag_table)
       if (flag_table[flag].settable)
 	{
 	  snprintf (buf, sizeof (buf), "%-19.18s", flag_table[flag].name);
-	  strcat (buf1, buf);
+	  append_to_buf (buf1, sizeof (buf1), buf);
 	  if (++col % 4 == 0)
-	    strcat (buf1, "\n\r");
+	    append_to_buf (buf1, sizeof (buf1), "\n\r");
 	}
     }
 
   if (col % 4 != 0)
-    strcat (buf1, "\n\r");
+    append_to_buf (buf1, sizeof (buf1), "\n\r");
 
   send_to_char (buf1, ch);
   return;
@@ -175,14 +192,14 @@ show_skill_cmds (CHAR_DATA * ch, int tar)
       if (tar == -1 || skill_table[sn].target == tar)
 	{
 	  snprintf (buf, sizeof (buf), "%-19.18s", skill_table[sn].name);
-	  strcat (buf1, buf);
+	  append_to_buf (buf1, sizeof (buf1), buf);
 	  if (++col % 4 == 0)
-	    strcat (buf1, "\n\r");
+	    append_to_buf (buf1, sizeof (buf1), "\n\r");
 	}
     }
 
   if (col % 4 != 0)
-    strcat (buf1, "\n\r");
+    append_to_buf (buf1, sizeof (buf1), "\n\r");
 
   send_to_char (buf1, ch);
   return;
@@ -209,13 +226,13 @@ show_spec_cmds (CHAR_DATA * ch)
   for (spec = 0; spec_table[spec].function != NULL; spec++)
     {
       snprintf (buf, sizeof (buf), "%-19.18s", &spec_table[spec].name[5]);
-      strcat (buf1, buf);
+      append_to_buf (buf1, sizeof (buf1), buf);
       if (++col % 4 == 0)
-	strcat (buf1, "\n\r");
+	append_to_buf (buf1, sizeof (buf1), "\n\r");
     }
 
   if (col % 4 != 0)
-    strcat (buf1, "\n\r");
+    append_to_buf (buf1, sizeof (buf1), "\n\r");
 
   send_to_char (buf1, ch);
   return;
@@ -754,7 +771,7 @@ AEDIT (aedit_file)
     }
 
   free_string (pArea->file_name);
-  strcat (file, ".are");
+  append_to_buf (file, sizeof (file), ".are");
   pArea->file_name = str_dup (file);
 
   send_to_char ("Filename set.\n\r", ch);
@@ -900,10 +917,10 @@ AEDIT (aedit_builder)
 
       if (pArea->builders[0] != '\0')
 	{
-	  strcat (buf, pArea->builders);
-	  strcat (buf, " ");
+	  append_to_buf (buf, sizeof (buf), pArea->builders);
+	  append_to_buf (buf, sizeof (buf), " ");
 	}
-      strcat (buf, name);
+      append_to_buf (buf, sizeof (buf), name);
       free_string (pArea->builders);
       pArea->builders = string_proper (str_dup (buf));
 
@@ -1075,19 +1092,19 @@ REDIT (redit_show)
   buf1[0] = '\0';
 
   snprintf (buf, sizeof (buf), "Description:\n\r%s", pRoom->description);
-  strcat (buf1, buf);
+  append_to_buf (buf1, sizeof (buf1), buf);
 
   snprintf (buf, sizeof (buf), "Name:       [%s]\n\rArea:       [%5d] %s\n\r",
 	   pRoom->name, pRoom->area->vnum, pRoom->area->name);
-  strcat (buf1, buf);
+  append_to_buf (buf1, sizeof (buf1), buf);
 
   snprintf (buf, sizeof (buf), "Vnum:       [%5d]\n\rSector:     [%s]\n\r",
 	   pRoom->vnum, flag_string (sector_flags, pRoom->sector_type));
-  strcat (buf1, buf);
+  append_to_buf (buf1, sizeof (buf1), buf);
 
   snprintf (buf, sizeof (buf), "Room flags: [%s]\n\r",
 	   flag_string (room_flags, pRoom->room_flags));
-  strcat (buf1, buf);
+  append_to_buf (buf1, sizeof (buf1), buf);
 
   if ( IS_SET(pRoom->room_flags, ROOM_TELEPORT))
     {
@@ -1095,41 +1112,41 @@ REDIT (redit_show)
 	snprintf(buf, sizeof(buf), "Room teleport location: RANDOM \n\r");
       else
 	snprintf(buf, sizeof(buf), "Room teleport location: %d\n\r", pRoom->tele_dest);
-      strcat(buf1,buf);
+      append_to_buf (buf1, sizeof (buf1), buf);
     }
 
   snprintf (buf, sizeof (buf), "Health recovery:[%d]\n\rMana recovery  :[%d]\n\r",
 	   pRoom->heal_rate, pRoom->mana_rate);
-  strcat (buf1, buf);
+  append_to_buf (buf1, sizeof (buf1), buf);
 
   snprintf (buf, sizeof (buf), "Clan : [%d] %s\n\r", pRoom->clan,
 	   ((pRoom->clan > 0) ? clan_table[pRoom->clan].name : "none"));
-  strcat (buf1, buf);
+  append_to_buf (buf1, sizeof (buf1), buf);
 
   snprintf (buf, sizeof (buf), "Owner     : [%s]\n\r", pRoom->owner);
-  strcat (buf1, buf);
+  append_to_buf (buf1, sizeof (buf1), buf);
 
   if (pRoom->extra_descr)
     {
       EXTRA_DESCR_DATA *ed;
 
-      strcat (buf1, "Desc Kwds:  [");
+      append_to_buf (buf1, sizeof (buf1), "Desc Kwds:  [");
       for (ed = pRoom->extra_descr; ed; ed = ed->next)
 	{
-	  strcat (buf1, ed->keyword);
+	  append_to_buf (buf1, sizeof (buf1), ed->keyword);
 	  if (ed->next)
-	    strcat (buf1, " ");
+	    append_to_buf (buf1, sizeof (buf1), " ");
 	}
-      strcat (buf1, "]\n\r");
+      append_to_buf (buf1, sizeof (buf1), "]\n\r");
     }
 
-  strcat (buf1, "Characters: [");
+  append_to_buf (buf1, sizeof (buf1), "Characters: [");
   fcnt = FALSE;
   for (rch = pRoom->people; rch; rch = rch->next_in_room)
     {
       one_argument (rch->name, buf);
-      strcat (buf1, buf);
-      strcat (buf1, " ");
+      append_to_buf (buf1, sizeof (buf1), buf);
+      append_to_buf (buf1, sizeof (buf1), " ");
       fcnt = TRUE;
     }
 
@@ -1139,18 +1156,18 @@ REDIT (redit_show)
 
       end = strlen (buf1) - 1;
       buf1[end] = ']';
-      strcat (buf1, "\n\r");
+      append_to_buf (buf1, sizeof (buf1), "\n\r");
     }
   else
-    strcat (buf1, "none]\n\r");
+    append_to_buf (buf1, sizeof (buf1), "none]\n\r");
 
-  strcat (buf1, "Objects:    [");
+  append_to_buf (buf1, sizeof (buf1), "Objects:    [");
   fcnt = FALSE;
   for (obj = pRoom->contents; obj; obj = obj->next_content)
     {
       one_argument (obj->name, buf);
-      strcat (buf1, buf);
-      strcat (buf1, " ");
+      append_to_buf (buf1, sizeof (buf1), buf);
+      append_to_buf (buf1, sizeof (buf1), " ");
       fcnt = TRUE;
     }
 
@@ -1160,10 +1177,10 @@ REDIT (redit_show)
 
       end = strlen (buf1) - 1;
       buf1[end] = ']';
-      strcat (buf1, "\n\r");
+      append_to_buf (buf1, sizeof (buf1), "\n\r");
     }
   else
-    strcat (buf1, "none]\n\r");
+    append_to_buf (buf1, sizeof (buf1), "none]\n\r");
 
   for (door = 0; door < MAX_DIR; door++)
     {
@@ -1178,15 +1195,15 @@ REDIT (redit_show)
 
 	  snprintf (buf, sizeof (buf), "-%-5s to [%5d] Key: [%5d] ", capitalize (dir_name[door]), pexit->u1.to_room ? pexit->u1.to_room->vnum : 0,	/* ROM OLC */
 		   pexit->key);
-	  strcat (buf1, buf);
+	  append_to_buf (buf1, sizeof (buf1), buf);
 
 	  /*
 	   * Format up the exit info.
 	   * Capitalize all flags that are not part of the reset info.
 	   */
-	  strcpy (reset_state, flag_string (exit_flags, pexit->rs_flags));
+	  snprintf (reset_state, sizeof (reset_state), "%s", flag_string (exit_flags, pexit->rs_flags));
 	  state = flag_string (exit_flags, pexit->exit_info);
-	  strcat (buf1, " Exit flags: [");
+	  append_to_buf (buf1, sizeof (buf1), " Exit flags: [");
 	  for (;;)
 	    {
 	      state = one_argument (state, word);
@@ -1197,7 +1214,7 @@ REDIT (redit_show)
 
 		  end = strlen (buf1) - 1;
 		  buf1[end] = ']';
-		  strcat (buf1, "\n\r");
+		  append_to_buf (buf1, sizeof (buf1), "\n\r");
 		  break;
 		}
 
@@ -1207,19 +1224,19 @@ REDIT (redit_show)
 		  for (i = 0; i < length; i++)
 		    word[i] = UPPER (word[i]);
 		}
-	      strcat (buf1, word);
-	      strcat (buf1, " ");
+	      append_to_buf (buf1, sizeof (buf1), word);
+	      append_to_buf (buf1, sizeof (buf1), " ");
 	    }
 
 	  if (pexit->keyword && pexit->keyword[0] != '\0')
 	    {
 	      snprintf (buf, sizeof (buf), "Kwds: [%s]\n\r", pexit->keyword);
-	      strcat (buf1, buf);
+	      append_to_buf (buf1, sizeof (buf1), buf);
 	    }
 	  if (pexit->description && pexit->description[0] != '\0')
 	    {
 	      snprintf (buf, sizeof (buf), "%s", pexit->description);
-	      strcat (buf1, buf);
+	      append_to_buf (buf1, sizeof (buf1), buf);
 	    }
 	}
     }
@@ -4016,8 +4033,12 @@ MEDIT (medit_long)
     }
 
   free_string (pMob->long_descr);
-  strcat (argument, "\n\r");
-  pMob->long_descr = str_dup (argument);
+  {
+    char long_descr[MAX_STRING_LENGTH];
+
+    snprintf (long_descr, sizeof (long_descr), "%s\n\r", argument);
+    pMob->long_descr = str_dup (long_descr);
+  }
   pMob->long_descr[0] = UPPER (pMob->long_descr[0]);
 
   send_to_char ("Long description set.\n\r", ch);

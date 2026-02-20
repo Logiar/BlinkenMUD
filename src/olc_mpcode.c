@@ -40,7 +40,7 @@ mpedit (CHAR_DATA * ch, char *argument)
   int cmd;
 
   smash_tilde (argument);
-  strcpy (arg, argument);
+  snprintf (arg, sizeof (arg), "%s", argument);
   argument = one_argument (argument, command);
 
   //  EDIT_MPCODE (ch, pMcode);

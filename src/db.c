@@ -260,6 +260,23 @@ void load_clanlist args ((void));
 void fix_exits args ((void));
 void fix_mobprogs args ((void));
 void reset_area args ((AREA_DATA * pArea));
+static void append_to_buf (char *buf, size_t buf_size, const char *text);
+
+
+static void
+append_to_buf (char *buf, size_t buf_size, const char *text)
+{
+  size_t buf_len;
+
+  if (buf_size == 0 || text == NULL)
+    return;
+
+  buf_len = strlen (buf);
+  if (buf_len >= buf_size - 1)
+    return;
+
+  snprintf (buf + buf_len, buf_size - buf_len, "%s", text);
+}
 
 /*
  * Big mama top level function.
@@ -289,9 +306,9 @@ boot_db (void)
    * Init random number generator.
    */
   {
-    strcat (boot_buf, "The ");
+    append_to_buf (boot_buf, sizeof (boot_buf), "The ");
     init_mm ();
-    strcat (boot_buf, "says:\n\r\n\r");
+    append_to_buf (boot_buf, sizeof (boot_buf), "says:\n\r\n\r");
   }
 
   /*
@@ -305,11 +322,11 @@ boot_db (void)
 
     lhour = (current_time - 650336715) / (PULSE_TICK / PULSE_PER_SECOND);
     time_info.hour = lhour % 24;
-    strcat (boot_buf, "  Loy");
+    append_to_buf (boot_buf, sizeof (boot_buf), "  Loy");
     lday = lhour / 24;
     time_info.day = lday % 35;
     lmonth = lday / 35;
-    strcat (boot_buf, "al citize");
+    append_to_buf (boot_buf, sizeof (boot_buf), "al citize");
     time_info.month = lmonth % 17;
     time_info.year = lmonth / 17;
 
@@ -323,14 +340,14 @@ boot_db (void)
       weather_info.sunlight = SUN_SET;
     else
       weather_info.sunlight = SUN_DARK;
-    strcat (boot_buf, "ns of Mi");
+    append_to_buf (boot_buf, sizeof (boot_buf), "ns of Mi");
     weather_info.change = 0;
     weather_info.mmhg = 960;
     if (time_info.month >= 7 && time_info.month <= 12)
       weather_info.mmhg += number_range (1, 50);
     else
       weather_info.mmhg += number_range (1, 80);
-    strcat (boot_buf, "dgaard.  ");
+    append_to_buf (boot_buf, sizeof (boot_buf), "dgaard.  ");
     if (weather_info.mmhg <= 980)
       weather_info.sky = SKY_LIGHTNING;
     else if (weather_info.mmhg <= 1000)
@@ -339,7 +356,7 @@ boot_db (void)
       weather_info.sky = SKY_CLOUDY;
     else
       weather_info.sky = SKY_CLOUDLESS;
-    strcat (boot_buf, "These are ");
+    append_to_buf (boot_buf, sizeof (boot_buf), "These are ");
   }
 
   /* reboot counter */
@@ -353,13 +370,13 @@ boot_db (void)
     int sn;
 
     log_string ("Assigning GSN's.");
-    strcat (boot_buf, "the eart");
+    append_to_buf (boot_buf, sizeof (boot_buf), "the eart");
     for (sn = 0; sn < MAX_SKILL; sn++)
       {
 	if (skill_table[sn].pgsn != NULL)
 	  *skill_table[sn].pgsn = sn;
       }
-    strcat (boot_buf, "hly remai");
+    append_to_buf (boot_buf, sizeof (boot_buf), "hly remai");
   }
 
   /*
@@ -369,16 +386,16 @@ boot_db (void)
     FILE *fpList;
 
     log_string ("Reading Area List.");
-    strcat (boot_buf, "ns of the\n\r  thre");
+    append_to_buf (boot_buf, sizeof (boot_buf), "ns of the\n\r  thre");
     if ((fpList = fopen (AREA_LIST, "r")) == NULL)
       {
 	perror (AREA_LIST);
 	exit (1);
       }
-    strcat (boot_buf, "e heret");
+    append_to_buf (boot_buf, sizeof (boot_buf), "e heret");
     for (;;)
       {
-	strcpy (strArea, fread_word (fpList));
+	snprintf (strArea, sizeof (strArea), "%s", fread_word (fpList));
 	if (strArea[0] == '$')
 	  break;
 
@@ -455,7 +472,7 @@ boot_db (void)
       }
     fclose (fpList);
   }
-  strcat (boot_buf, "ics 'Tab");
+  append_to_buf (boot_buf, sizeof (boot_buf), "ics 'Tab");
   /*
    * Fix up exits.
    * Declare db booting over.
@@ -463,31 +480,31 @@ boot_db (void)
    * Load up the songs, notes and ban files.
    */
   {
-    strcat (boot_buf, "or', 'Wya");
+    append_to_buf (boot_buf, sizeof (boot_buf), "or', 'Wya");
     log_string ("Fixing exits.");
     fix_exits ();
     fix_mobprogs ();
     fBootDb = FALSE;
     convert_objects ();		/* ROM OLC */
-    strcat (boot_buf, "ng forge");
+    append_to_buf (boot_buf, sizeof (boot_buf), "ng forge");
     log_string ("Area Update.");
     area_update ();
-    strcat (boot_buf, "d themsel");
+    append_to_buf (boot_buf, sizeof (boot_buf), "d themsel");
     log_string ("Loading Moveable Exits.");
     randomize_entrances (0);
-    strcat (boot_buf, "ves to imm");
+    append_to_buf (boot_buf, sizeof (boot_buf), "ves to imm");
     log_string ("Loading Notes.");
     load_notes ();
-    strcat (boot_buf, "e implement");
+    append_to_buf (boot_buf, sizeof (boot_buf), "e implement");
     log_string ("Loading Bans.");
     load_bans ();
-    strcat (boot_buf, "t this be a le");
+    append_to_buf (boot_buf, sizeof (boot_buf), "t this be a le");
     log_string ("Loading Wizlist.");
     load_wizlist ();
-    strcat (boot_buf, "                -");
+    append_to_buf (boot_buf, sizeof (boot_buf), "                -");
     log_string ("Loading Clanlists.");
     load_clanlist ();
-    strcat (boot_buf, "\n\r");
+    append_to_buf (boot_buf, sizeof (boot_buf), "\n\r");
     log_string ("Loading Songs.");
     load_songs ();
   }
@@ -1555,7 +1572,7 @@ fix_exits (void)
   int iHash;
   int door;
 
-  strcat (boot_buf, "tt' and 'Fun");
+  append_to_buf (boot_buf, sizeof (boot_buf), "tt' and 'Fun");
   for (iHash = 0; iHash < MAX_KEY_HASH; iHash++)
     {
       for (pRoomIndex = room_index_hash[iHash];
@@ -1582,7 +1599,7 @@ fix_exits (void)
 	    SET_BIT (pRoomIndex->room_flags, ROOM_NO_MOB);
 	}
     }
-  strcat (boot_buf, "ky' of thi");
+  append_to_buf (boot_buf, sizeof (boot_buf), "ky' of thi");
 /*
     for ( iHash = 0; iHash < MAX_KEY_HASH; iHash++ )
     {
@@ -1612,7 +1629,7 @@ fix_exits (void)
 	}
     }
 */
-  strcat (boot_buf, "s world.\n\r  Havi");
+  append_to_buf (boot_buf, sizeof (boot_buf), "s world.\n\r  Havi");
   return;
 }
 
@@ -3327,7 +3344,7 @@ str_dup (const char *str)
     return (char *) str;
 
   str_new = alloc_mem (strlen (str) + 1);
-  strcpy (str_new, str);
+  memcpy (str_new, str, strlen (str) + 1);
   return str_new;
 }
 
@@ -3711,7 +3728,7 @@ init_mm ()
 #else
   srandom (time (NULL) ^ getpid ());
 #endif
-  strcat (boot_buf, "sign ");
+  append_to_buf (boot_buf, sizeof (boot_buf), "sign ");
   return;
 }
 
@@ -3992,15 +4009,19 @@ str_replace (char *astr, char *bstr, char *cstr)
       for (ichar = 0; ichar < jchar; ichar++)
 	{
 	  snprintf (newstr, sizeof (newstr), "%c", astr[ichar]);
-	  strcat (buf, newstr);
+	  append_to_buf (buf, sizeof (buf), newstr);
 	}
-      strcat (buf, cstr);
+      append_to_buf (buf, sizeof (buf), cstr);
       for (ichar = jchar + sstr2; ichar < sstr1; ichar++)
 	{
 	  snprintf (newstr, sizeof (newstr), "%c", astr[ichar]);
-	  strcat (buf, newstr);
+	  append_to_buf (buf, sizeof (buf), newstr);
 	}
-      strcpy (astr, str_replace (buf, bstr, cstr));
+      {
+        char *replaced = str_replace (buf, bstr, cstr);
+
+        memmove (astr, replaced, strlen (replaced) + 1);
+      }
       return astr;
     }
   return astr;
@@ -4053,15 +4074,19 @@ str_replace_c (char *astr, char *bstr, char *cstr)
       for (ichar = 0; ichar < jchar; ichar++)
 	{
 	  snprintf (newstr, sizeof (newstr), "%c", astr[ichar]);
-	  strcat (buf, newstr);
+	  append_to_buf (buf, sizeof (buf), newstr);
 	}
-      strcat (buf, cstr);
+      append_to_buf (buf, sizeof (buf), cstr);
       for (ichar = jchar + sstr2; ichar < sstr1; ichar++)
 	{
 	  snprintf (newstr, sizeof (newstr), "%c", astr[ichar]);
-	  strcat (buf, newstr);
+	  append_to_buf (buf, sizeof (buf), newstr);
 	}
-      strcpy (astr, str_replace_c (buf, bstr, cstr));
+      {
+        char *replaced = str_replace_c (buf, bstr, cstr);
+
+        memmove (astr, replaced, strlen (replaced) + 1);
+      }
       return astr;
     }
   return astr;
