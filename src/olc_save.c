@@ -129,7 +129,7 @@ fwrite_flag (long flags, char buf[])
 
   if (flags == 0)
     {
-      strcpy (buf, "0");
+      snprintf (buf, MAX_STRING_LENGTH, "%s", "0");
       return buf;
     }
 
@@ -994,7 +994,7 @@ do_asave (CHAR_DATA * ch, char *argument)
       return;
     }
   smash_tilde (argument);
-  strcpy (arg1, argument);
+  snprintf (arg1, sizeof (arg1), "%s", argument);
   if (arg1[0] == '\0')
     {
       send_to_char ("Syntax:\n\r", ch);

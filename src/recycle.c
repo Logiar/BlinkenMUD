@@ -774,11 +774,11 @@ add_buf (BUFFER * buffer, char *string)
     {
       buffer->string = alloc_mem (buffer->size);
 
-      strcpy (buffer->string, oldstr);
+      snprintf (buffer->string, buffer->size, "%s", oldstr);
       free_mem (oldstr, oldsize);
     }
 
-  strcat (buffer->string, string);
+  { size_t bl = strlen (buffer->string); if (bl < (size_t) buffer->size - 1) snprintf (buffer->string + bl, buffer->size - bl, "%s", string); }
   return TRUE;
 }
 

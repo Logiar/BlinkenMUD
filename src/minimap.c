@@ -119,6 +119,23 @@ int center_x = 3;
 int center_y = 2;
 
 char *format_map_desc (char *oldstring);
+static void append_to_buf (char *buf, size_t buf_size, const char *text);
+
+
+static void
+append_to_buf (char *buf, size_t buf_size, const char *text)
+{
+  size_t buf_len;
+
+  if (buf_size == 0 || text == NULL)
+    return;
+
+  buf_len = strlen (buf);
+  if (buf_len >= buf_size - 1)
+    return;
+
+  snprintf (buf + buf_len, buf_size - buf_len, "%s", text);
+}
 
 char *
 get_ascii (ROOM_INDEX_DATA * pRoom, bool fWall)
@@ -636,7 +653,7 @@ display_map (CHAR_DATA * ch)
 
   bzero (map, sizeof (map));
   create_map (ch);
-  strcpy (desc, format_map_desc (ch->in_room->description));
+  snprintf (desc, sizeof (desc), "%s", format_map_desc (ch->in_room->description));
 
   map_buf[0] = '\0';
 
@@ -645,12 +662,12 @@ display_map (CHAR_DATA * ch)
   if (IS_IMMORTAL (ch))
     {
       snprintf (buf, sizeof (buf), "%5d", ch->in_room->vnum);
-      strcat (map_buf, "\n\r`W+`D------- `C");
-      strcat (map_buf, buf);
-      strcat (map_buf, "`D -`W+`x\n\r");
+      append_to_buf (map_buf, sizeof (map_buf), "\n\r`W+`D------- `C");
+      append_to_buf (map_buf, sizeof (map_buf), buf);
+      append_to_buf (map_buf, sizeof (map_buf), "`D -`W+`x\n\r");
     }
   else
-    strcat (map_buf, "\n\r`W+`D---------------`W+`x\n\r");
+    append_to_buf (map_buf, sizeof (map_buf), "\n\r`W+`D---------------`W+`x\n\r");
 
 
 
@@ -658,20 +675,20 @@ display_map (CHAR_DATA * ch)
     {
       for (y_pos = 0; y_pos < 3; y_pos++)
 	{
-	  strcat (map_buf, "`D|`x");
+	  append_to_buf (map_buf, sizeof (map_buf), "`D|`x");
 
 	  for (x = min_x; x < max_x; ++x)
 	    {
 	      room_wall = get_ascii (get_room_index (map[x][y]), TRUE);
 	      room_floor = get_ascii (get_room_index (map[x][y]), FALSE);
 	      for (x_pos = 0; x_pos < 3; x_pos++)
-		strcat (map_buf, add_map_char (ch, x, y, x_pos, y_pos));
+		append_to_buf (map_buf, sizeof (map_buf), add_map_char (ch, x, y, x_pos, y_pos));
 	    }
 
 	  if (y == min_y && y_pos == 0)
 	    {
 	      snprintf (buf, sizeof (buf), "`D| `C %s", ch->in_room->name);
-	      strcat (map_buf, buf);
+	      append_to_buf (map_buf, sizeof (map_buf), buf);
 	    }
 
 
@@ -699,20 +716,20 @@ display_map (CHAR_DATA * ch)
 		      str_pos += 1;
 		    }
 		}
-	      strcat (map_buf, "`D|`x ");
+	      append_to_buf (map_buf, sizeof (map_buf), "`D|`x ");
 	      line[str_pos - start] = '\0';
 
 	      if (y == min_y && y_pos == 1)
-		strcat (map_buf, "  ");
+		append_to_buf (map_buf, sizeof (map_buf), "  ");
 
-	      strcat (map_buf, "   `x");
-	      strcat (map_buf, line);
-	      strcat (map_buf, "`x");
+	      append_to_buf (map_buf, sizeof (map_buf), "   `x");
+	      append_to_buf (map_buf, sizeof (map_buf), line);
+	      append_to_buf (map_buf, sizeof (map_buf), "`x");
 	    }
-	  strcat (map_buf, "\n\r");
+	  append_to_buf (map_buf, sizeof (map_buf), "\n\r");
 	}
     }
-  strcat (map_buf, "`W+`D---------------`W+`x    ");
+  append_to_buf (map_buf, sizeof (map_buf), "`W+`D---------------`W+`x    ");
 
 
   while (desc[desc_pos] != '\0')
@@ -742,12 +759,12 @@ display_map (CHAR_DATA * ch)
 
       line[str_pos - start] = '\0';
       if (linum > 0)
-	strcat (map_buf, "`x                     ");
-      strcat (map_buf, line);
-      strcat (map_buf, "\n\r");
+	append_to_buf (map_buf, sizeof (map_buf), "`x                     ");
+      append_to_buf (map_buf, sizeof (map_buf), line);
+      append_to_buf (map_buf, sizeof (map_buf), "\n\r");
       linum++;
     }
-  strcat (map_buf, "`x\n\r\n\r");
+  append_to_buf (map_buf, sizeof (map_buf), "`x\n\r\n\r");
   send_to_char (map_buf, ch);
   return;
 }
@@ -856,7 +873,7 @@ format_map_desc (char *oldstring)
 	}
     }
   xbuf[i] = 0;
-  strcpy (xbuf2, xbuf);
+  snprintf (xbuf2, sizeof (xbuf2), "%s", xbuf);
 
   rdesc = xbuf2;
 
@@ -881,8 +898,8 @@ format_map_desc (char *oldstring)
       if (i)
 	{
 	  *(rdesc + i) = 0;
-	  strcat (xbuf, rdesc);
-	  strcat (xbuf, "\n\r");
+	  append_to_buf (xbuf, sizeof (xbuf), rdesc);
+	  append_to_buf (xbuf, sizeof (xbuf), "\n\r");
 	  rdesc += i + 1;
 	  while (*rdesc == ' ')
 	    rdesc++;
@@ -891,8 +908,8 @@ format_map_desc (char *oldstring)
 	{
 	  bug ("No spaces", 0);
 	  *(rdesc + 45) = 0;
-	  strcat (xbuf, rdesc);
-	  strcat (xbuf, "-\n\r");
+	  append_to_buf (xbuf, sizeof (xbuf), rdesc);
+	  append_to_buf (xbuf, sizeof (xbuf), "-\n\r");
 	  rdesc += 46;
 	}
     }
@@ -900,9 +917,9 @@ format_map_desc (char *oldstring)
 			  *(rdesc + i) == '\n' || *(rdesc + i) == '\r'))
     i--;
   *(rdesc + i + 1) = 0;
-  strcat (xbuf, rdesc);
+  append_to_buf (xbuf, sizeof (xbuf), rdesc);
   if (xbuf[strlen (xbuf) - 2] != '\n')
-    strcat (xbuf, "\n\r");
+    append_to_buf (xbuf, sizeof (xbuf), "\n\r");
 
   free_string (oldstring);
   return (str_dup (xbuf));

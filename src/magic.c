@@ -203,7 +203,7 @@ say_spell (CHAR_DATA * ch, int sn)
 	{
 	  if (!str_prefix (syl_table[iSyl].old, pName))
 	    {
-	      strcat (buf, syl_table[iSyl].new);
+	      { size_t bl = strlen (buf); if (bl < sizeof (buf) - 1) snprintf (buf + bl, sizeof (buf) - bl, "%s", syl_table[iSyl].new); }
 	      break;
 	    }
 	}
@@ -342,7 +342,7 @@ do_cast (CHAR_DATA * ch, char *argument)
 
   target_name = one_argument (argument, arg1);
   third_name = one_argument (target_name, arg2);
-  strcpy (target_name, arg2);
+  memmove (target_name, arg2, strlen (arg2) + 1);
   one_argument (third_name, arg3);
 
   if (arg1[0] == '\0')

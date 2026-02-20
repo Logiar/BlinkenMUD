@@ -76,6 +76,23 @@ DECLARE_DO_FUN (do_allpeace);
 /*
  * Local functions.
  */
+static void append_to_buf (char *buf, size_t buf_size, const char *text);
+
+
+static void
+append_to_buf (char *buf, size_t buf_size, const char *text)
+{
+  size_t buf_len;
+
+  if (buf_size == 0 || text == NULL)
+    return;
+
+  buf_len = strlen (buf);
+  if (buf_len >= buf_size - 1)
+    return;
+
+  snprintf (buf + buf_len, buf_size - buf_len, "%s", text);
+}
 
 void
 do_wiznet (CHAR_DATA * ch, char *argument)
@@ -118,16 +135,16 @@ do_wiznet (CHAR_DATA * ch, char *argument)
       buf[0] = '\0';
 
       if (!IS_SET (ch->wiznet, WIZ_ON))
-	strcat (buf, "off ");
+	append_to_buf (buf, sizeof (buf), "off ");
 
       for (flag = 0; wiznet_table[flag].name != NULL; flag++)
 	if (IS_SET (ch->wiznet, wiznet_table[flag].flag))
 	  {
-	    strcat (buf, wiznet_table[flag].name);
-	    strcat (buf, " ");
+	    append_to_buf (buf, sizeof (buf), wiznet_table[flag].name);
+	    append_to_buf (buf, sizeof (buf), " ");
 	  }
 
-      strcat (buf, "\n\r");
+      append_to_buf (buf, sizeof (buf), "\n\r");
 
       send_to_char ("Wiznet status:\n\r", ch);
       send_to_char (buf, ch);
@@ -143,12 +160,12 @@ do_wiznet (CHAR_DATA * ch, char *argument)
 	{
 	  if (wiznet_table[flag].level <= get_trust (ch))
 	    {
-	      strcat (buf, wiznet_table[flag].name);
-	      strcat (buf, " ");
+	      append_to_buf (buf, sizeof (buf), wiznet_table[flag].name);
+	      append_to_buf (buf, sizeof (buf), " ");
 	    }
 	}
 
-      strcat (buf, "\n\r");
+      append_to_buf (buf, sizeof (buf), "\n\r");
 
       send_to_char ("Wiznet options available to you are:\n\r", ch);
       send_to_char (buf, ch);
@@ -390,7 +407,7 @@ do_smote (CHAR_DATA * ch, char *argument)
 	  continue;
 	}
 
-      strcpy (temp, argument);
+      snprintf (temp, sizeof (temp), "%s", argument);
       temp[strlen (argument) - strlen (letter)] = '\0';
       last[0] = '\0';
       name = vch->name;
@@ -399,7 +416,7 @@ do_smote (CHAR_DATA * ch, char *argument)
 	{
 	  if (*letter == '\'' && matches == strlen (vch->name))
 	    {
-	      strcat (temp, "r");
+	      append_to_buf (temp, sizeof (temp), "r");
 	      continue;
 	    }
 
@@ -420,7 +437,7 @@ do_smote (CHAR_DATA * ch, char *argument)
 	      name++;
 	      if (matches == strlen (vch->name))
 		{
-		  strcat (temp, "you");
+		  append_to_buf (temp, sizeof (temp), "you");
 		  last[0] = '\0';
 		  name = vch->name;
 		  continue;
@@ -430,7 +447,7 @@ do_smote (CHAR_DATA * ch, char *argument)
 	    }
 
 	  matches = 0;
-	  strcat (temp, last);
+	  append_to_buf (temp, sizeof (temp), last);
 	  strncat (temp, letter, 1);
 	  last[0] = '\0';
 	  name = vch->name;
@@ -2572,7 +2589,7 @@ do_shutdown (CHAR_DATA * ch, char *argument)
   if (ch->invis_level < LEVEL_HERO)
     snprintf (buf, sizeof (buf), "Shutdown by %s.", ch->name);
   append_file (ch, SHUTDOWN_FILE, buf);
-  strcat (buf, "\n\r");
+  append_to_buf (buf, sizeof (buf), "\n\r");
   if (ch->invis_level < LEVEL_HERO)
     do_echo (ch, buf);
   do_force (ch, "all save");
@@ -4317,7 +4334,7 @@ do_mset (CHAR_DATA * ch, char *argument)
   smash_tilde (argument);
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
-  strcpy (arg3, argument);
+  snprintf (arg3, sizeof (arg3), "%s", argument);
 
   if (arg1[0] == '\0' || arg2[0] == '\0' || arg3[0] == '\0')
     {
@@ -4478,14 +4495,14 @@ do_mset (CHAR_DATA * ch, char *argument)
 	{
 	  char buf[MAX_STRING_LENGTH];
 
-	  strcpy (buf, "Possible classes are: ");
+	  snprintf (buf, sizeof (buf), "%s", "Possible classes are: ");
 	  for (class = 0; class < MAX_CLASS; class++)
 	    {
 	      if (class > 0)
-		strcat (buf, " ");
-	      strcat (buf, class_table[class].name);
+		append_to_buf (buf, sizeof (buf), " ");
+	      append_to_buf (buf, sizeof (buf), class_table[class].name);
 	    }
-	  strcat (buf, ".\n\r");
+	  append_to_buf (buf, sizeof (buf), ".\n\r");
 
 	  send_to_char (buf, ch);
 	  return;
@@ -4748,7 +4765,7 @@ do_string (CHAR_DATA * ch, char *argument)
   argument = one_argument (argument, type);
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
-  strcpy (arg3, argument);
+  snprintf (arg3, sizeof (arg3), "%s", argument);
 
   if (type[0] == '\0' || arg1[0] == '\0' || arg2[0] == '\0')
     {
@@ -4888,9 +4905,13 @@ do_string (CHAR_DATA * ch, char *argument)
 
       if (!str_prefix (arg2, "long"))
 	{
+	  char long_descr[MAX_STRING_LENGTH];
+
 	  free_string (victim->long_descr);
-	  strcat (arg3, "\n\r");
-	  victim->long_descr = str_dup (arg3);
+	  long_descr[0] = '\0';
+	  append_to_buf (long_descr, sizeof (long_descr), arg3);
+	  append_to_buf (long_descr, sizeof (long_descr), "\n\r");
+	  victim->long_descr = str_dup (long_descr);
 	  return;
 	}
 
@@ -4976,14 +4997,20 @@ do_string (CHAR_DATA * ch, char *argument)
 	      return;
 	    }
 
-	  strcat (argument, "\n\r");
+	  {
+	    char edesc[MAX_STRING_LENGTH];
 
-	  ed = new_extra_descr ();
+	    edesc[0] = '\0';
+	    append_to_buf (edesc, sizeof (edesc), argument);
+	    append_to_buf (edesc, sizeof (edesc), "\n\r");
 
-	  ed->keyword = str_dup (arg3);
-	  ed->description = str_dup (argument);
-	  ed->next = obj->extra_descr;
-	  obj->extra_descr = ed;
+	    ed = new_extra_descr ();
+
+	    ed->keyword = str_dup (arg3);
+	    ed->description = str_dup (edesc);
+	    ed->next = obj->extra_descr;
+	    obj->extra_descr = ed;
+	  }
 	  return;
 	}
     }
@@ -5009,7 +5036,7 @@ do_oset (CHAR_DATA * ch, char *argument)
   smash_tilde (argument);
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
-  strcpy (arg3, argument);
+  snprintf (arg3, sizeof (arg3), "%s", argument);
 
   if (arg1[0] == '\0' || arg2[0] == '\0' || arg3[0] == '\0')
     {
@@ -5201,7 +5228,7 @@ do_rset (CHAR_DATA * ch, char *argument)
   smash_tilde (argument);
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
-  strcpy (arg3, argument);
+  snprintf (arg3, sizeof (arg3), "%s", argument);
 
   if (arg1[0] == '\0' || arg2[0] == '\0' || arg3[0] == '\0')
     {
@@ -5294,7 +5321,7 @@ do_sockets (CHAR_DATA * ch, char *argument)
     }
 
   snprintf (buf2, sizeof (buf2), "%d user%s\n\r", count, count == 1 ? "" : "s");
-  strcat (buf, buf2);
+  append_to_buf (buf, sizeof (buf), buf2);
   page_to_char (buf, ch);
   return;
 }

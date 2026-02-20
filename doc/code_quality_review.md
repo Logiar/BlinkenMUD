@@ -34,6 +34,30 @@ This review used lightweight static signals that are already available in the re
 
 **Expected outcome:** materially lower overflow risk and cleaner compiler diagnostics.
 
+#### P0 mitigation chosen and progress update
+
+The ongoing mitigation strategy is to replace unbounded string concatenation
+with bounded appends built on `snprintf`, while preserving existing buffer
+sizes and output formats.
+
+P0 mitigation is now complete for `src/`: unbounded `sprintf`, `strcat`,
+and `strcpy` usage has been migrated to bounded patterns (`snprintf`,
+capacity-checked append helpers, and overlap-safe copy operations where
+needed) while preserving existing behavior.
+
+Current rough counts in `src/` after these changes:
+
+- `sprintf`: **0** (down from 1111 at review time)
+- `strcat`: **0** (down from 575 at review time)
+- `strcpy`: **0** (down from 61 at review time)
+
+**Forward policy (required for new and modified code):**
+- Do not introduce new `sprintf`/`strcat`/`strcpy` callsites.
+- Prefer bounded `snprintf` or a capacity-checked append helper for string
+  building.
+- Use `memmove` when source/destination can overlap; otherwise use bounded
+  copies sized to the destination buffer.
+
 ### P1 — Eliminate existing compiler warnings and enforce warning budget
 
 **Why:** Existing warnings hide real regressions and reduce trust in builds.
@@ -98,4 +122,3 @@ This review used lightweight static signals that are already available in the re
 2. **Week 2:** introduce safe string helper layer and migrate top-risk callsites.
 3. **Week 3:** add sanitizer CI job and begin warning-to-error rollout.
 4. **Week 4:** split one large file as a template refactor and add two focused regression integration tests.
-

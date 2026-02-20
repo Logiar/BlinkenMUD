@@ -518,7 +518,7 @@ interpret (CHAR_DATA * ch, char *argument)
    * Special parsing so ' can be a command,
    *   also no spaces needed after punctuation.
    */
-  strcpy (logline, argument);
+  snprintf (logline, sizeof (logline), "%s", argument);
   if (!isalpha (argument[0]) && !isdigit (argument[0]))
     {
       command[0] = argument[0];
@@ -565,7 +565,7 @@ interpret (CHAR_DATA * ch, char *argument)
    * Log and snoop.
    */
   if (cmd_table[cmd].log == LOG_NEVER)
-    strcpy (logline, "");
+    snprintf (logline, sizeof (logline), "%s", "");
 
   if ((!IS_NPC (ch) && IS_SET (ch->act, PLR_LOG))
       || fLogAll
@@ -800,12 +800,12 @@ number_argument (char *argument, char *arg)
 	  *pdot = '\0';
 	  number = atoi (argument);
 	  *pdot = '.';
-	  strcpy (arg, pdot + 1);
+	  snprintf (arg, MAX_INPUT_LENGTH, "%s", pdot + 1);
 	  return number;
 	}
     }
 
-  strcpy (arg, argument);
+  snprintf (arg, MAX_INPUT_LENGTH, "%s", argument);
   return 1;
 }
 
@@ -825,12 +825,12 @@ mult_argument (char *argument, char *arg)
 	  *pdot = '\0';
 	  number = atoi (argument);
 	  *pdot = '*';
-	  strcpy (arg, pdot + 1);
+	  snprintf (arg, MAX_INPUT_LENGTH, "%s", pdot + 1);
 	  return number;
 	}
     }
 
-  strcpy (arg, argument);
+  snprintf (arg, MAX_INPUT_LENGTH, "%s", argument);
   return 1;
 }
 

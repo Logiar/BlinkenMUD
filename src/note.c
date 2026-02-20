@@ -240,15 +240,15 @@ void
 load_notes (void)
 {
   load_thread (NOTE_FILE, &note_list, NOTE_NOTE, 14 * 24 * 60 * 60);
-  strcat (boot_buf, "ortality, th");
+  { size_t bl = strlen (boot_buf); if (bl < sizeof (boot_buf) - 1) snprintf (boot_buf + bl, sizeof (boot_buf) - bl, "%s", "ortality, th"); }
   load_thread (IDEA_FILE, &idea_list, NOTE_IDEA, 28 * 24 * 60 * 60);
-  strcat (boot_buf, "ey called up");
+  { size_t bl = strlen (boot_buf); if (bl < sizeof (boot_buf) - 1) snprintf (boot_buf + bl, sizeof (boot_buf) - bl, "%s", "ey called up"); }
   load_thread (PENALTY_FILE, &penalty_list, NOTE_PENALTY, 0);
-  strcat (boot_buf, "on themsel");
+  { size_t bl = strlen (boot_buf); if (bl < sizeof (boot_buf) - 1) snprintf (boot_buf + bl, sizeof (boot_buf) - bl, "%s", "on themsel"); }
   load_thread (NEWS_FILE, &news_list, NOTE_NEWS, 0);
-  strcat (boot_buf, "ves\n\r  the a");
+  { size_t bl = strlen (boot_buf); if (bl < sizeof (boot_buf) - 1) snprintf (boot_buf + bl, sizeof (boot_buf) - bl, "%s", "ves\n\r  the a"); }
   load_thread (WEDDINGS_FILE, &weddings_list, NOTE_WEDDINGS, 0);
-  strcat (boot_buf, "nger of th");
+  { size_t bl = strlen (boot_buf); if (bl < sizeof (boot_buf) - 1) snprintf (boot_buf + bl, sizeof (boot_buf) - bl, "%s", "nger of th"); }
   load_thread (CHANGES_FILE, &changes_list, NOTE_CHANGES, 0);
 }
 
@@ -321,7 +321,7 @@ load_thread (char *name, NOTE_DATA ** list, int type, time_t free_time)
       pnotelast = pnote;
     }
 
-  strcpy (strArea, NOTE_FILE);
+  snprintf (strArea, sizeof (strArea), "%s", NOTE_FILE);
   fpArea = fp;
   bug ("Load_notes: bad key word.", 0);
   exit (1);
@@ -457,8 +457,8 @@ note_remove (CHAR_DATA * ch, NOTE_DATA * pnote, bool delete)
 	  to_list = one_argument (to_list, to_one);
 	  if (to_one[0] != '\0' && str_cmp (ch->name, to_one))
 	    {
-	      strcat (to_new, " ");
-	      strcat (to_new, to_one);
+	      { size_t bl = strlen (to_new); if (bl < sizeof (to_new) - 1) snprintf (to_new + bl, sizeof (to_new) - bl, "%s", " "); }
+              { size_t bl = strlen (to_new); if (bl < sizeof (to_new) - 1) snprintf (to_new + bl, sizeof (to_new) - bl, "%s", to_one); }
 	    }
 	}
       /* Just a simple recipient removal? */
@@ -906,7 +906,7 @@ parse_note (CHAR_DATA * ch, char *argument, int type)
 	  return;
 	}
 
-      strcpy (buf, ch->pnote->text);
+      snprintf (buf, sizeof (buf), "%s", ch->pnote->text);
 
       for (len = strlen (buf); len > 0; len--)
 	{

@@ -611,7 +611,7 @@ do_clanlist (CHAR_DATA * ch, char *argument)
 		  if (strlen (buf) > 29)
 		    break;
 
-		  strcat (buf, " ");
+		  { size_t bl = strlen (buf); if (bl < sizeof (buf) - 1) snprintf (buf + bl, sizeof (buf) - bl, "%s", " "); }
 		}
 	      add_buf (output, buf);
 	      snprintf (buf, sizeof (buf), "`xVnum: `Y%d`x\n\r", clan_table[e].hall);
@@ -756,7 +756,7 @@ load_clanlist (void)
   MBR_DATA *mbr_last;
   int clannum;
 
-  strcat (boot_buf, "- the Powe");
+  { size_t bl = strlen (boot_buf); if (bl < sizeof (boot_buf) - 1) snprintf (boot_buf + bl, sizeof (boot_buf) - bl, "%s", "- the Powe"); }
   for (clannum = 0; clannum < MAX_CLAN; clannum++)
     {
       if (str_cmp (clan_table[clannum].exname, "Unused"))
@@ -800,7 +800,7 @@ load_clanlist (void)
 	  cln_list = pcln;
 	}
     }
-  strcat (boot_buf, "rs that Be.");
+  { size_t bl = strlen (boot_buf); if (bl < sizeof (boot_buf) - 1) snprintf (boot_buf + bl, sizeof (boot_buf) - bl, "%s", "rs that Be."); }
   return;
 }
 
