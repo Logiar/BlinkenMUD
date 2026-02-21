@@ -457,7 +457,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                 engage = session.send_and_capture_prompt(f"kill {target}", timeout_s, allow_reject=True)
                 assert_any_contains(
                     engage,
-                    ["you attack", "you engage", "you hit", "you miss", "isn't here", "they aren't here", "they're not here"],
+                    ["you attack", "you engage", "you hit", "you miss", "you do the best you can", "parries your attack", "dodges your attack", "blocks your attack", "isn't here", "they aren't here", "they're not here"],
                     context="combat_engage",
                     details={"target": target, "hp_now": hp_now},
                 )
@@ -468,8 +468,15 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                     blocked_targets.add(target)
                 else:
                     log_action(f"fighting {target}")
+                can_fight = (
+                    "you can't" not in engage_lower
+                    and "protected" not in engage_lower
+                    and "isn't here" not in engage_lower
+                    and "they aren't here" not in engage_lower
+                    and "they're not here" not in engage_lower
+                )
                 fight_deadline = time.monotonic() + min(25.0, max(8.0, timeout_s))
-                while "you can't" not in engage_lower and "protected" not in engage_lower and "isn't here" not in engage_lower and "they aren't here" not in engage_lower and "they're not here" not in engage_lower and time.monotonic() < fight_deadline:
+                while can_fight and time.monotonic() < fight_deadline:
                     pulse = session.send_and_capture_prompt("", timeout_s, allow_reject=True)
                     pulse_lower = pulse.lower()
                     stats = session.latest_prompt_stats()
