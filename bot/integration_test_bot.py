@@ -498,6 +498,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                         "you:",
                         "you do not have that item",
                         "isn't here",
+                        "not in this room",
                         "they aren't here",
                         "they're not here",
                     ],
@@ -505,7 +506,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                     details={"target": target, "hp_now": hp_now},
                 )
                 engage_lower = engage.lower()
-                if "isn't here" in engage_lower or "they aren't here" in engage_lower or "they're not here" in engage_lower:
+                if "isn't here" in engage_lower or "not in this room" in engage_lower or "they aren't here" in engage_lower or "they're not here" in engage_lower:
                     blocked_targets.add(target)
                 elif "you can't" in engage_lower or "not allowed" in engage_lower or "protected" in engage_lower:
                     blocked_targets.add(target)
@@ -515,6 +516,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                     "you can't" not in engage_lower
                     and "protected" not in engage_lower
                     and "isn't here" not in engage_lower
+                    and "not in this room" not in engage_lower
                     and "they aren't here" not in engage_lower
                     and "they're not here" not in engage_lower
                 )
