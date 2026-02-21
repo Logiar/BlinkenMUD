@@ -97,6 +97,8 @@ class MudSession:
         return response
 
 
+
+
 def wait_for_server_ready(process: subprocess.Popen[str], timeout_s: float) -> None:
     deadline = time.monotonic() + timeout_s
     output = ""
@@ -163,42 +165,49 @@ def validate_cgi_output(timeout_s: float) -> None:
         )
 
 
+def create_character_and_enter_game(session: MudSession, timeout_s: float, name: str, password: str) -> None:
+    """Create a new character and settle at in-game prompt."""
+
+    session.read_until(["What name do you wish to use?"], timeout_s)
+    session.send_line(name)
+
+    session.read_until(["Did I get that right"], timeout_s)
+    session.send_line("y")
+
+    session.read_until(["Give me a password"], timeout_s)
+    session.send_line(password)
+
+    session.read_until(["Please retype password"], timeout_s)
+    session.send_line(password)
+
+    session.read_until(["What is your race"], timeout_s)
+    session.send_line("human")
+
+    session.read_until(["What is your sex"], timeout_s)
+    session.send_line("m")
+
+    session.read_until(["Select a class"], timeout_s)
+    session.send_line("warrior")
+
+    session.read_until(["Which alignment"], timeout_s)
+    session.send_line("g")
+
+    session.read_until(["customize this character"], timeout_s)
+    session.send_line("n")
+
+    session.read_until(["Your choice?"], timeout_s)
+    session.send_line("sword")
+
+    time.sleep(1)
+    finish_login_banner(session, timeout_s)
+
+
 def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) -> None:
     session = MudSession(host=host, port=port, timeout_s=timeout_s)
     try:
-        session.read_until(["What name do you wish to use?"], timeout_s)
-        session.send_line(name)
+        create_character_and_enter_game(session, timeout_s, name, password)
 
-        session.read_until(["Did I get that right"], timeout_s)
-        session.send_line("y")
-
-        session.read_until(["Give me a password"], timeout_s)
-        session.send_line(password)
-
-        session.read_until(["Please retype password"], timeout_s)
-        session.send_line(password)
-
-        session.read_until(["What is your race"], timeout_s)
-        session.send_line("human")
-
-        session.read_until(["What is your sex"], timeout_s)
-        session.send_line("m")
-
-        session.read_until(["Select a class"], timeout_s)
-        session.send_line("warrior")
-
-        session.read_until(["Which alignment"], timeout_s)
-        session.send_line("g")
-
-        session.read_until(["customize this character"], timeout_s)
-        session.send_line("n")
-
-        session.read_until(["Your choice?"], timeout_s)
-        session.send_line("sword")
-
-        # Enter the game and validate a mini player-like session.
-        time.sleep(1)
-        finish_login_banner(session, timeout_s)
+        # Entered the game; validate a mini player-like session.
 
         # Core info checks.
         session.send_and_expect("score", ["you are", "level"], timeout_s)
@@ -227,6 +236,29 @@ def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) ->
         session.close()
 
 
+def run_regression_cases(session: MudSession, timeout_s: float) -> None:
+    """Run targeted regression checks for risky parser and session behavior."""
+
+    # Regression: command parser should tolerate extra whitespace.
+    session.send_and_expect("   look    map   ", ["map", "thera", "midgaard"], timeout_s)
+
+    # Regression: long player input should not disconnect/crash process.
+    session.send_and_expect("say " + ("x" * 500), ["you say"], timeout_s)
+
+    # Regression: movement parser remains stable with noisy whitespace.
+    session.send_and_expect("   north   ", ["school"], timeout_s)
+    session.send_and_expect("   south   ", ["entrance to mud school"], timeout_s)
+
+
+def run_regression_bot(host: str, port: int, timeout_s: float, name: str, password: str) -> None:
+    session = MudSession(host=host, port=port, timeout_s=timeout_s)
+    try:
+        create_character_and_enter_game(session, timeout_s, name, password)
+        run_regression_cases(session, timeout_s)
+    finally:
+        session.close()
+
+
 def delete_player(name: str) -> None:
     candidates = {
         PLAYER_DIR / name,
@@ -244,6 +276,12 @@ def main() -> int:
     parser.add_argument("--port", type=int, default=19000)
     parser.add_argument("--binary", default=str(ROOT / "bin" / "BlinkenMUD"))
     parser.add_argument("--timeout", type=float, default=20.0)
+    parser.add_argument(
+        "--scenario",
+        choices=["smoke", "regression"],
+        default="smoke",
+        help="Choose test scenario to run.",
+    )
     args = parser.parse_args()
 
     binary = Path(args.binary)
@@ -265,8 +303,15 @@ def main() -> int:
 
     try:
         wait_for_server_ready(process, timeout_s=args.timeout)
-        run_bot(host=args.host, port=args.port, timeout_s=args.timeout, name=name, password=password)
-        print(f"Integration bot succeeded on port {args.port} using character {name}.")
+        if args.scenario == "smoke":
+            run_bot(host=args.host, port=args.port, timeout_s=args.timeout, name=name, password=password)
+        else:
+            run_regression_bot(host=args.host, port=args.port, timeout_s=args.timeout, name=name, password=password)
+
+        print(
+            f"Integration bot ({args.scenario}) succeeded on port {args.port} "
+            f"using character {name}."
+        )
         return 0
     finally:
         delete_player(name)

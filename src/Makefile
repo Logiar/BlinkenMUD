@@ -20,9 +20,10 @@ BMUD_FILES = act_comm.o act_enter.o act_info.o act_move.o act_obj.o act_wiz.o \
           string.o olc_mpcode.o minimap.o bank.o reward.o remort.o quest.o  \
 	  teleport.o wpeace.o throwing.o pathfind.o sharpen.o
 
+UNIT_TEST_BINS = tests/test_bit_flags
 
 
-.PHONY: all rot clean test
+.PHONY: all rot clean test unit-tests
 
 all:: rot
 
@@ -38,9 +39,18 @@ rot: $(BMUD_FILES)
 clean: 
 	@rm -fr *.o
 	@rm -fr ../bin/$(NAME)
+	@rm -f $(UNIT_TEST_BINS)
 	@echo "BlinkenMUD has been cleaned"
 
 test:
 	@$(MAKE) clean
 	@$(MAKE) rot
+	@$(MAKE) unit-tests
 	@echo "Build test passed ($(C_STD))"
+
+unit-tests: $(UNIT_TEST_BINS)
+	@for test_bin in $(UNIT_TEST_BINS); do ./$$test_bin; done
+
+tests/test_bit_flags: tests/test_bit_flags.c bit.c merc.h tables.h
+	@mkdir -p tests
+	$(CC) $(C_FLAGS) -I. -o $@ tests/test_bit_flags.c bit.c
