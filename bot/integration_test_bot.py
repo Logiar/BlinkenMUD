@@ -24,7 +24,7 @@ PLAYER_DIR = ROOT / "player"
 WIZLIST_CGI = ROOT / "src" / "wizlist.cgi"
 PROMPT_RE = re.compile(r"<\s*\d+hp\s+\d+m\s+\d+mv\s*>", re.IGNORECASE)
 EXIT_RE = re.compile(r"\[\s*exits\s*:\s*([^\]]+)\]", re.IGNORECASE)
-ROOM_MOB_RE = re.compile(r"^([A-Za-z][A-Za-z'\-\s]{1,30})\s+is\s+here", re.IGNORECASE)
+ROOM_MOB_RE = re.compile(r"^([A-Za-z][A-Za-z'\-\s]{1,40})\s+is\s+(?:here|standing\s+here|resting\s+here|sleeping\s+here|fighting\s+here)", re.IGNORECASE)
 SCORE_HP_RE = re.compile(r"\b(\d+)\/(\d+)\s+hp\b", re.IGNORECASE)
 MOVE_COMMANDS = ["north", "east", "south", "west", "up", "down"]
 REVERSE_DIRECTION = {
@@ -285,7 +285,8 @@ def run_bot(host: str, port: int, timeout_s: float, name: str, password: str, sw
         session.send_and_expect("commands", ["command", "help"], timeout_s)
         session.send_and_expect("who", ["players", "[", name.lower()], timeout_s)
 
-        # Aggressive progression and regression sweep across common game systems.
+        # Prepare equipment and run aggressive progression/combat sweep.
+        ensure_combat_ready(session, timeout_s)
         aggressive_progression_sweep(session=session, timeout_s=timeout_s, duration_s=sweep_duration_s)
 
         # Validate CGI script output while server is still running.
@@ -322,12 +323,19 @@ def extract_room_mob_keywords(look_text: str) -> list[str]:
     keywords = []
     for raw_line in look_text.splitlines():
         line = raw_line.strip()
-        match = ROOM_MOB_RE.match(line)
-        if not match:
+        if not line:
             continue
-        words = [w.lower() for w in re.findall(r"[A-Za-z][A-Za-z'\-]*", match.group(1))]
-        words = [w for w in words if w not in {"a", "an", "the", "some", "pair", "of"}]
-        if words:
+        match = ROOM_MOB_RE.match(line)
+        candidate = None
+        if match:
+            candidate = match.group(1)
+        elif " is " in line.lower() and " here" in line.lower():
+            candidate = line.split(" is ", 1)[0]
+        if not candidate:
+            continue
+        words = [w.lower() for w in re.findall(r"[A-Za-z][A-Za-z'\-]*", candidate)]
+        words = [w for w in words if w not in {"a", "an", "the", "some", "pair", "of", "there", "here"}]
+        if words and len(words[-1]) > 2:
             keywords.append(words[-1])
     return list(dict.fromkeys(keywords))
 
@@ -337,6 +345,16 @@ def parse_max_hp(score_text: str) -> int | None:
     if not match:
         return None
     return int(match.group(2))
+
+
+def ensure_combat_ready(session: MudSession, timeout_s: float) -> None:
+    session.send_and_capture_prompt("wear all", timeout_s, allow_reject=True)
+    for weapon_command in ["wield sword", "wield dagger", "wield mace", "wield spear"]:
+        response = session.send_and_capture_prompt(weapon_command, timeout_s, allow_reject=True)
+        lowered = response.lower()
+        if "you wield" in lowered or "you are already wielding" in lowered:
+            log_action("equipped weapon")
+            return
 
 
 def identify_room(look_text: str) -> str:
@@ -353,6 +371,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
     kills = 0
     attempted_attacks = 0
     mobs_seen = 0
+    blocked_targets: set[str] = set()
     room_graph: dict[str, dict[str, str]] = {}
     explored_edges: set[tuple[str, str]] = set()
 
@@ -367,6 +386,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
     scripted_index = 0
 
     utility_commands = ["score", "inventory", "equipment", "who", "help score", "save"]
+    combat_probe_targets = ["goblin", "orc", "rat", "snake", "guard", "student", "wolf", "blob"]
     utility_idx = 0
     sweep_steps = 0
 
@@ -382,7 +402,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
         seen_rooms.add(room_id)
 
         # Exercise utility commands less frequently to prioritize exploration speed.
-        if sweep_steps % 2 == 0:
+        if sweep_steps % 5 == 0:
             command = utility_commands[utility_idx % len(utility_commands)]
             utility_idx += 1
             response = session.send_and_capture_prompt(command, timeout_s, allow_reject=True)
@@ -402,12 +422,25 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
         if sweep_steps % 5 == 0:
             log_action("checked status")
 
+        if sweep_steps % 20 == 0:
+            ensure_combat_ready(session, timeout_s)
+
         # Natural combat behavior: only pick obvious room targets.
-        room_targets = extract_room_mob_keywords(look_text)
+        room_targets = [t for t in extract_room_mob_keywords(look_text) if t not in blocked_targets]
         if room_targets:
             mobs_seen += len(room_targets)
         current_stats = session.latest_prompt_stats()
         hp_now = current_stats[0] if current_stats else max_hp
+
+        if not room_targets and hp_now >= max(12, int(max_hp * 0.60)) and sweep_steps % 12 == 0:
+            probe_target = combat_probe_targets[(sweep_steps // 12) % len(combat_probe_targets)]
+            if probe_target in blocked_targets:
+                probe_target = ""
+            if probe_target:
+                probe = session.send_and_capture_prompt(f"consider {probe_target}", timeout_s, allow_reject=True)
+                probe_lower = probe.lower()
+                if "isn't here" not in probe_lower and "they're not here" not in probe_lower and "you have no idea" not in probe_lower:
+                    room_targets = [probe_target]
 
         if room_targets and hp_now >= max(12, int(max_hp * 0.60)):
             target = room_targets[0]
@@ -416,21 +449,27 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
             attack_text = session.send_and_capture_prompt(f"consider {target}", timeout_s, allow_reject=True)
             assert_any_contains(
                 attack_text,
-                ["you would", "looks", "you have no idea", "isn't here", "death will thank"],
+                ["you would", "looks", "you have no idea", "isn't here", "they're not here", "death will thank"],
                 context="combat_consider",
                 details={"target": target, "hp_now": hp_now},
             )
             if "you have no idea" not in attack_text.lower() and "isn't here" not in attack_text.lower():
-                log_action(f"fighting {target}")
                 engage = session.send_and_capture_prompt(f"kill {target}", timeout_s, allow_reject=True)
                 assert_any_contains(
                     engage,
-                    ["you attack", "you engage", "you hit", "isn't here"],
+                    ["you attack", "you engage", "you hit", "you miss", "isn't here", "they aren't here", "they're not here"],
                     context="combat_engage",
                     details={"target": target, "hp_now": hp_now},
                 )
+                engage_lower = engage.lower()
+                if "isn't here" in engage_lower or "they aren't here" in engage_lower or "they're not here" in engage_lower:
+                    blocked_targets.add(target)
+                elif "you can't" in engage_lower or "not allowed" in engage_lower or "protected" in engage_lower:
+                    blocked_targets.add(target)
+                else:
+                    log_action(f"fighting {target}")
                 fight_deadline = time.monotonic() + min(25.0, max(8.0, timeout_s))
-                while time.monotonic() < fight_deadline:
+                while "you can't" not in engage_lower and "protected" not in engage_lower and "isn't here" not in engage_lower and "they aren't here" not in engage_lower and "they're not here" not in engage_lower and time.monotonic() < fight_deadline:
                     pulse = session.send_and_capture_prompt("", timeout_s, allow_reject=True)
                     pulse_lower = pulse.lower()
                     stats = session.latest_prompt_stats()
