@@ -9,6 +9,7 @@ exits cleanly.
 from __future__ import annotations
 
 import argparse
+import json
 import random
 import re
 import string
@@ -22,6 +23,42 @@ AREA_DIR = ROOT / "area"
 PLAYER_DIR = ROOT / "player"
 WIZLIST_CGI = ROOT / "src" / "wizlist.cgi"
 PROMPT_RE = re.compile(r"<\s*\d+hp\s+\d+m\s+\d+mv\s*>", re.IGNORECASE)
+EXIT_RE = re.compile(r"\[\s*exits\s*:\s*([^\]]+)\]", re.IGNORECASE)
+ROOM_MOB_RE = re.compile(r"^([A-Za-z][A-Za-z'\-\s]{1,30})\s+is\s+here", re.IGNORECASE)
+SCORE_HP_RE = re.compile(r"\b(\d+)\/(\d+)\s+hp\b", re.IGNORECASE)
+MOVE_COMMANDS = ["north", "east", "south", "west", "up", "down"]
+REVERSE_DIRECTION = {
+    "north": "south",
+    "south": "north",
+    "east": "west",
+    "west": "east",
+    "up": "down",
+    "down": "up",
+}
+
+
+class IntegrationAssertionError(RuntimeError):
+    pass
+
+
+def log_event(event: str, **context: object) -> None:
+    payload = {"event": event, **context}
+    print(f"[integration-bot] {json.dumps(payload, sort_keys=True)}", flush=True)
+
+
+def log_action(action: str) -> None:
+    print(f"[integration-bot] {action}", flush=True)
+
+
+def assert_any_contains(text: str, expected_tokens: list[str], *, context: str, details: dict[str, object]) -> None:
+    lowered = text.lower()
+    if any(token.lower() in lowered for token in expected_tokens):
+        return
+    raise IntegrationAssertionError(
+        "Assertion failure: expected at least one token in response. "
+        f"context={context} expected={expected_tokens} details={details} "
+        f"encountered_tail={text[-800:]}"
+    )
 
 
 class MudSession:
@@ -96,6 +133,34 @@ class MudSession:
             raise RuntimeError(f"Command '{command}' appears to have been rejected.\nResponse:\n{response}")
         return response
 
+    def send_and_capture_prompt(self, command: str, timeout_s: float, allow_reject: bool = False) -> str:
+        start = len(self.buffer)
+        self.send_line(command)
+
+        deadline = time.monotonic() + timeout_s
+        while time.monotonic() < deadline:
+            response = self.buffer[start:]
+            if PROMPT_RE.search(response):
+                break
+            self._recv_into_buffer()
+        else:
+            raise RuntimeError(f"Timed out waiting for prompt after command '{command}'.")
+
+        response = self.buffer[start:]
+        if not allow_reject and "huh?" in response.lower():
+            raise RuntimeError(f"Command '{command}' appears to have been rejected.\nResponse:\n{response}")
+        return response
+
+    def latest_prompt_stats(self) -> tuple[int, int, int] | None:
+        prompts = PROMPT_RE.findall(self.buffer)
+        if not prompts:
+            return None
+        latest = prompts[-1]
+        match = re.search(r"(\d+)hp\s+(\d+)m\s+(\d+)mv", latest, re.IGNORECASE)
+        if not match:
+            return None
+        return int(match.group(1)), int(match.group(2)), int(match.group(3))
+
 
 def wait_for_server_ready(process: subprocess.Popen[str], timeout_s: float) -> None:
     deadline = time.monotonic() + timeout_s
@@ -163,7 +228,7 @@ def validate_cgi_output(timeout_s: float) -> None:
         )
 
 
-def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) -> None:
+def run_bot(host: str, port: int, timeout_s: float, name: str, password: str, sweep_duration_s: float) -> None:
     session = MudSession(host=host, port=port, timeout_s=timeout_s)
     try:
         session.read_until(["What name do you wish to use?"], timeout_s)
@@ -220,6 +285,9 @@ def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) ->
         session.send_and_expect("commands", ["command", "help"], timeout_s)
         session.send_and_expect("who", ["players", "[", name.lower()], timeout_s)
 
+        # Aggressive progression and regression sweep across common game systems.
+        aggressive_progression_sweep(session=session, timeout_s=timeout_s, duration_s=sweep_duration_s)
+
         # Validate CGI script output while server is still running.
         validate_cgi_output(timeout_s)
 
@@ -238,12 +306,235 @@ def delete_player(name: str) -> None:
             path.unlink()
 
 
+def extract_exits(look_text: str) -> list[str]:
+    match = EXIT_RE.search(look_text)
+    if not match:
+        return []
+    exits = []
+    for token in re.split(r"\s+", match.group(1).strip().lower()):
+        token = token.strip(",. ")
+        if token in MOVE_COMMANDS:
+            exits.append(token)
+    return exits
+
+
+def extract_room_mob_keywords(look_text: str) -> list[str]:
+    keywords = []
+    for raw_line in look_text.splitlines():
+        line = raw_line.strip()
+        match = ROOM_MOB_RE.match(line)
+        if not match:
+            continue
+        words = [w.lower() for w in re.findall(r"[A-Za-z][A-Za-z'\-]*", match.group(1))]
+        words = [w for w in words if w not in {"a", "an", "the", "some", "pair", "of"}]
+        if words:
+            keywords.append(words[-1])
+    return list(dict.fromkeys(keywords))
+
+
+def parse_max_hp(score_text: str) -> int | None:
+    match = SCORE_HP_RE.search(score_text)
+    if not match:
+        return None
+    return int(match.group(2))
+
+
+def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration_s: float) -> None:
+    deadline = time.monotonic() + duration_s
+    movement_history: list[str] = []
+    seen_rooms: set[str] = set()
+    kills = 0
+    attempted_attacks = 0
+    mobs_seen = 0
+
+    # Build a health baseline from score.
+    score_text = session.send_and_capture_prompt("score", timeout_s)
+    max_hp = parse_max_hp(score_text) or 30
+    log_event("sweep_start", duration_s=duration_s, max_hp=max_hp)
+
+    scripted_moves = [
+        "north", "north", "east", "west", "north", "south", "east", "west", "south", "south",
+    ]
+    scripted_index = 0
+
+    utility_commands = ["score", "inventory", "equipment", "who", "help score", "save"]
+    sweep_steps = 0
+
+    while time.monotonic() < deadline:
+        sweep_steps += 1
+        look_text = session.send_and_capture_prompt("look", timeout_s)
+        if len(look_text.strip()) < 40:
+            raise IntegrationAssertionError(
+                "Assertion failure: room scan output unexpectedly short. "
+                f"context=room_scan details={{'movement_history_tail': {movement_history[-5:]}}} encountered_tail={look_text[-800:]}"
+            )
+        seen_rooms.add(look_text[:200])
+
+        # Exercise utility and state commands regularly for regression coverage.
+        for command in utility_commands:
+            response = session.send_and_capture_prompt(command, timeout_s, allow_reject=True)
+            if len(response.strip()) < 20:
+                raise IntegrationAssertionError(
+                    "Assertion failure: utility command returned too little output. "
+                    f"context=utility_command details={{'command': '{command}', 'room_snapshot': {look_text[:120]!r}}} "
+                    f"encountered_tail={response[-800:]}"
+                )
+            if "huh?" in response.lower():
+                raise IntegrationAssertionError(
+                    "Assertion failure: utility command rejected by mud. "
+                    f"context=utility_command details={{'command': '{command}', 'room_snapshot': {look_text[:120]!r}}} "
+                    f"encountered_tail={response[-800:]}"
+                )
+
+        if sweep_steps % 3 == 0:
+            log_action("checked status")
+
+        # Natural combat behavior: only pick obvious room targets.
+        room_targets = extract_room_mob_keywords(look_text)
+        if room_targets:
+            mobs_seen += len(room_targets)
+        current_stats = session.latest_prompt_stats()
+        hp_now = current_stats[0] if current_stats else max_hp
+
+        if room_targets and hp_now >= max(12, int(max_hp * 0.60)):
+            target = room_targets[0]
+            attempted_attacks += 1
+            log_event("combat_attempt", target=target, hp_now=hp_now, room=look_text.splitlines()[:2])
+            attack_text = session.send_and_capture_prompt(f"consider {target}", timeout_s, allow_reject=True)
+            assert_any_contains(
+                attack_text,
+                ["you would", "looks", "you have no idea", "isn't here"],
+                context="combat_consider",
+                details={"target": target, "hp_now": hp_now},
+            )
+            if "you have no idea" not in attack_text.lower() and "isn't here" not in attack_text.lower():
+                log_action(f"fighting {target}")
+                engage = session.send_and_capture_prompt(f"kill {target}", timeout_s, allow_reject=True)
+                assert_any_contains(
+                    engage,
+                    ["you attack", "you engage", "you hit", "isn't here"],
+                    context="combat_engage",
+                    details={"target": target, "hp_now": hp_now},
+                )
+                fight_deadline = time.monotonic() + min(25.0, max(8.0, timeout_s))
+                while time.monotonic() < fight_deadline:
+                    pulse = session.send_and_capture_prompt("", timeout_s, allow_reject=True)
+                    pulse_lower = pulse.lower()
+                    stats = session.latest_prompt_stats()
+                    if stats:
+                        hp_now = stats[0]
+
+                    if "you are dead" in pulse_lower:
+                        raise IntegrationAssertionError(
+                            f"Assertion failure: character died. context=combat_loop target={target} encountered_tail={pulse[-800:]}"
+                        )
+
+                    if hp_now <= max(8, int(max_hp * 0.30)):
+                        log_event("combat_retreat", target=target, hp_now=hp_now)
+                        log_action(f"retreating from {target}")
+                        flee_response = session.send_and_capture_prompt("flee", timeout_s, allow_reject=True)
+                        assert_any_contains(
+                            flee_response,
+                            ["you flee", "panic", "you couldn't escape"],
+                            context="combat_flee",
+                            details={"target": target, "hp_now": hp_now},
+                        )
+                        if movement_history:
+                            back = REVERSE_DIRECTION.get(movement_history[-1])
+                            if back:
+                                session.send_and_capture_prompt(back, timeout_s, allow_reject=True)
+                        break
+
+                    if any(token in pulse_lower for token in ["you receive", "you have slain", "is dead"]):
+                        kills += 1
+                        log_event("combat_kill", target=target, kills=kills)
+                        log_action(f"looting {target}")
+                        session.send_and_capture_prompt("get all corpse", timeout_s, allow_reject=True)
+                        inv = session.send_and_capture_prompt("inventory", timeout_s)
+                        assert_any_contains(
+                            inv,
+                            ["you are carrying", "items"],
+                            context="post_combat_inventory",
+                            details={"target": target, "kills": kills},
+                        )
+                        break
+
+                    if "you aren't fighting" in pulse_lower or "isn't here" in pulse_lower:
+                        break
+
+        # Recovery behavior before continuing progression.
+        if hp_now < max(10, int(max_hp * 0.55)):
+            log_event("recovery_start", hp_now=hp_now, max_hp=max_hp)
+            for _ in range(4):
+                rest_response = session.send_and_capture_prompt("rest", timeout_s, allow_reject=True)
+                assert_any_contains(
+                    rest_response,
+                    ["you rest", "you are already resting", "you stop"],
+                    context="recovery_rest",
+                    details={"hp_now": hp_now},
+                )
+                session.send_and_capture_prompt("", timeout_s, allow_reject=True)
+            stand = session.send_and_capture_prompt("stand", timeout_s, allow_reject=True)
+            assert_any_contains(
+                stand,
+                ["you stand", "you are already standing"],
+                context="recovery_stand",
+                details={"hp_now": hp_now},
+            )
+
+        exits = extract_exits(look_text)
+        direction = None
+        if scripted_index < len(scripted_moves):
+            direction = scripted_moves[scripted_index]
+            scripted_index += 1
+        elif exits:
+            direction = random.choice(exits)
+        elif movement_history:
+            direction = REVERSE_DIRECTION.get(movement_history[-1])
+
+        if direction:
+            move_response = session.send_and_capture_prompt(direction, timeout_s, allow_reject=True)
+            if len(move_response.strip()) < 20:
+                raise IntegrationAssertionError(
+                    "Assertion failure: navigation output unexpectedly short. "
+                    f"context=navigation_move details={{'direction': '{direction}', 'available_exits': {exits}}} "
+                    f"encountered_tail={move_response[-800:]}"
+                )
+            if "huh?" in move_response.lower():
+                raise IntegrationAssertionError(
+                    "Assertion failure: navigation command rejected. "
+                    f"context=navigation_move details={{'direction': '{direction}', 'available_exits': {exits}}} "
+                    f"encountered_tail={move_response[-800:]}"
+                )
+            log_action(f"moved {direction}")
+            movement_history.append(direction)
+            if len(movement_history) > 20:
+                movement_history.pop(0)
+
+    if len(seen_rooms) < 3:
+        raise IntegrationAssertionError(
+            f"Assertion failure: progression too shallow. context=sweep_summary expected_rooms>=3 encountered={len(seen_rooms)}"
+        )
+    if mobs_seen > 0 and attempted_attacks == 0:
+        raise IntegrationAssertionError(
+            f"Assertion failure: mobs were seen but combat was never attempted. context=sweep_summary mobs_seen={mobs_seen}"
+        )
+    log_event(
+        "sweep_complete",
+        seen_rooms=len(seen_rooms),
+        mobs_seen=mobs_seen,
+        attempted_attacks=attempted_attacks,
+        kills=kills,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run BlinkenMUD integration bot test")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=19000)
     parser.add_argument("--binary", default=str(ROOT / "bin" / "BlinkenMUD"))
-    parser.add_argument("--timeout", type=float, default=20.0)
+    parser.add_argument("--timeout", type=float, default=30.0)
+    parser.add_argument("--sweep-duration", type=float, default=165.0)
     args = parser.parse_args()
 
     binary = Path(args.binary)
@@ -265,7 +556,14 @@ def main() -> int:
 
     try:
         wait_for_server_ready(process, timeout_s=args.timeout)
-        run_bot(host=args.host, port=args.port, timeout_s=args.timeout, name=name, password=password)
+        run_bot(
+            host=args.host,
+            port=args.port,
+            timeout_s=args.timeout,
+            name=name,
+            password=password,
+            sweep_duration_s=args.sweep_duration,
+        )
         print(f"Integration bot succeeded on port {args.port} using character {name}.")
         return 0
     finally:
