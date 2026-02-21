@@ -37,11 +37,11 @@ save_class (int num)
   char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
   int lev, i;
 
-  sprintf (buf, "%sclasses/%s", DATA_DIR, class_table[num].name);
+  snprintf (buf, sizeof (buf), "%sclasses/%s", DATA_DIR, class_table[num].name);
 
   if (!(fp = fopen (buf, "w")))
     {
-      sprintf (buf2, "Could not open file %s in order to save.", buf);
+      snprintf (buf2, sizeof (buf2), "Could not open file %s in order to save.", buf);
       bug (buf2, 0);
       return;
     }
@@ -81,11 +81,11 @@ load_class (int num)
   int level, n;
   FILE *fp;
 
-  sprintf (buf, "%sclasses/%s", DATA_DIR, class_table[num].name);
+  snprintf (buf, sizeof (buf), "%sclasses/%s", DATA_DIR, class_table[num].name);
 
   if (!(fp = fopen (buf, "r")))
     {
-      sprintf (buf2, "Could not open file %s in order to save.", buf);
+      snprintf (buf2, sizeof (buf2), "Could not open file %s in order to save.", buf);
       bug (buf2, 0);
       return;
     }
@@ -101,7 +101,7 @@ load_class (int num)
       if (n == -1)
 	{
 	  char buf2[200];
-	  sprintf (buf2, "Class %s: unknown spell %s", class_table[num].name,
+	  snprintf (buf2, sizeof (buf2), "Class %s: unknown spell %s", class_table[num].name,
 		   buf);
 	  bug (buf2, 0);
 	}
@@ -150,7 +150,7 @@ do_modskill (CHAR_DATA * ch, char *argument)
 
   if (!is_number (argument) || level < 0 || level > MAX_LEVEL)
     {
-      strcpy (buf, "Level range is from 0 to 310.\n\r");
+      snprintf (buf, sizeof (buf), "%s", "Level range is from 0 to 310.\n\r");
       send_to_char (buf, ch);
       return;
     }
@@ -158,9 +158,8 @@ do_modskill (CHAR_DATA * ch, char *argument)
 
   if ((sn = skill_lookup (skill_name)) == -1)
     {
-      strcpy (buf, "There is no such spell/skill as ");
-      strcat (buf, skill_name);
-      strcat (buf, ".\n\r");
+      snprintf (buf, sizeof (buf), "There is no such spell/skill as %s.\n\r",
+                skill_name);
       send_to_char (buf, ch);
       return;
     }
@@ -171,24 +170,19 @@ do_modskill (CHAR_DATA * ch, char *argument)
 
   if (class_no == MAX_CLASS)
     {
-      strcpy (buf, "No class named '");
-      strcat (buf, class_name);
-      strcat (buf, "' exists. Use the 3-letter WHO names");
-      strcat (buf, "(Psi, Mag etc.)\n\r");
+      snprintf (buf, sizeof (buf),
+                "No class named '%s' exists. Use the 3-letter WHO names"
+                "(Psi, Mag etc.)\n\r", class_name);
       send_to_char (buf, ch);
       return;
     }
 
   skill_table[sn].skill_level[class_no] = level;
 
-  strcpy (buf, "OK, ");
-  strcat (buf, class_table[class_no].name);
-  strcat (buf, "'s will now gain ");
-  strcat (buf, skill_table[sn].name);
-  strcat (buf, " at level ");
-  sprintf (lvl, "%d", level);
-  strcat (buf, lvl);
-  strcat (buf, level > 101 ? " (i.e. never)" : "");
+  snprintf (lvl, sizeof (lvl), "%d", level);
+  snprintf (buf, sizeof (buf), "OK, %s's will now gain %s at level %s%s",
+            class_table[class_no].name, skill_table[sn].name, lvl,
+            level > 101 ? " (i.e. never)" : "");
   send_to_char (buf, ch);
 
   save_classes ();

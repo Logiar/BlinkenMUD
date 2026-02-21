@@ -101,13 +101,26 @@ string_replace (char *orig, char *old, char *new)
   int i;
 
   xbuf[0] = '\0';
-  strcpy (xbuf, orig);
+  snprintf (xbuf, sizeof (xbuf), "%s", orig);
   if (strstr (orig, old) != NULL)
     {
       i = strlen (orig) - strlen (strstr (orig, old));
       xbuf[i] = '\0';
-      strcat (xbuf, new);
-      strcat (xbuf, &orig[i + strlen (old)]);
+      {
+        size_t xbuf_len = strlen (xbuf);
+        if (xbuf_len < sizeof (xbuf) - 1)
+          {
+            snprintf (xbuf + xbuf_len, sizeof (xbuf) - xbuf_len, "%s", new);
+          }
+      }
+      {
+        size_t xbuf_len = strlen (xbuf);
+        if (xbuf_len < sizeof (xbuf) - 1)
+          {
+            snprintf (xbuf + xbuf_len, sizeof (xbuf) - xbuf_len, "%s",
+                      &orig[i + strlen (old)]);
+          }
+      }
       free_string (orig);
     }
 
@@ -167,7 +180,7 @@ string_add (CHAR_DATA * ch, char *argument)
 	  smash_tilde (arg3);	/* Just to be sure -- Hugin */
 	  *ch->desc->pString =
 	    string_replace (*ch->desc->pString, arg2, arg3);
-	  sprintf (buf, "'%s' replaced with '%s'.\n\r", arg2, arg3);
+	  snprintf (buf, sizeof (buf), "'%s' replaced with '%s'.\n\r", arg2, arg3);
 	  send_to_char (buf, ch);
 	  return;
 	}
@@ -203,7 +216,7 @@ string_add (CHAR_DATA * ch, char *argument)
       return;
     }
 
-  strcpy (buf, *ch->desc->pString);
+  snprintf (buf, sizeof (buf), "%s", *ch->desc->pString);
 
   /*
    * Truncate strings to MAX_STRING_LENGTH.
@@ -224,8 +237,20 @@ string_add (CHAR_DATA * ch, char *argument)
    */
   smash_tilde (argument);
 
-  strcat (buf, argument);
-  strcat (buf, "\n\r");
+  {
+    size_t buf_len = strlen (buf);
+    if (buf_len < sizeof (buf) - 1)
+      {
+        snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", argument);
+      }
+  }
+  {
+    size_t buf_len = strlen (buf);
+    if (buf_len < sizeof (buf) - 1)
+      {
+        snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", "\n\r");
+      }
+  }
   free_string (*ch->desc->pString);
   *ch->desc->pString = str_dup (buf);
   return;
@@ -345,7 +370,7 @@ format_string (char *oldstring /*, bool fSpace */ )
 	}
     }
   xbuf[i] = 0;
-  strcpy (xbuf2, xbuf);
+  snprintf (xbuf2, sizeof (xbuf2), "%s", xbuf);
 
   rdesc = xbuf2;
 
@@ -370,8 +395,20 @@ format_string (char *oldstring /*, bool fSpace */ )
       if (i)
 	{
 	  *(rdesc + i) = 0;
-	  strcat (xbuf, rdesc);
-	  strcat (xbuf, "\n\r");
+	  {
+	    size_t xbuf_len = strlen (xbuf);
+	    if (xbuf_len < sizeof (xbuf) - 1)
+	      {
+		snprintf (xbuf + xbuf_len, sizeof (xbuf) - xbuf_len, "%s", rdesc);
+	      }
+	  }
+	  {
+	    size_t xbuf_len = strlen (xbuf);
+	    if (xbuf_len < sizeof (xbuf) - 1)
+	      {
+		snprintf (xbuf + xbuf_len, sizeof (xbuf) - xbuf_len, "%s", "\n\r");
+	      }
+	  }
 	  rdesc += i + 1;
 	  while (*rdesc == ' ')
 	    rdesc++;
@@ -380,8 +417,20 @@ format_string (char *oldstring /*, bool fSpace */ )
 	{
 	  bug ("No spaces", 0);
 	  *(rdesc + 75) = 0;
-	  strcat (xbuf, rdesc);
-	  strcat (xbuf, "-\n\r");
+	  {
+	    size_t xbuf_len = strlen (xbuf);
+	    if (xbuf_len < sizeof (xbuf) - 1)
+	      {
+		snprintf (xbuf + xbuf_len, sizeof (xbuf) - xbuf_len, "%s", rdesc);
+	      }
+	  }
+	  {
+	    size_t xbuf_len = strlen (xbuf);
+	    if (xbuf_len < sizeof (xbuf) - 1)
+	      {
+		snprintf (xbuf + xbuf_len, sizeof (xbuf) - xbuf_len, "%s", "-\n\r");
+	      }
+	  }
 	  rdesc += 76;
 	}
     }
@@ -389,9 +438,21 @@ format_string (char *oldstring /*, bool fSpace */ )
 			  *(rdesc + i) == '\n' || *(rdesc + i) == '\r'))
     i--;
   *(rdesc + i + 1) = 0;
-  strcat (xbuf, rdesc);
+  {
+    size_t xbuf_len = strlen (xbuf);
+    if (xbuf_len < sizeof (xbuf) - 1)
+      {
+        snprintf (xbuf + xbuf_len, sizeof (xbuf) - xbuf_len, "%s", rdesc);
+      }
+  }
   if (xbuf[strlen (xbuf) - 2] != '\n')
-    strcat (xbuf, "\n\r");
+    {
+      size_t xbuf_len = strlen (xbuf);
+      if (xbuf_len < sizeof (xbuf) - 1)
+        {
+          snprintf (xbuf + xbuf_len, sizeof (xbuf) - xbuf_len, "%s", "\n\r");
+        }
+    }
 
   free_string (oldstring);
   return (str_dup (xbuf));
@@ -472,7 +533,7 @@ string_unpad (char *argument)
   while (*s == ' ')
     s++;
 
-  strcpy (buf, s);
+  snprintf (buf, sizeof (buf), "%s", s);
   s = buf;
 
   if (*s != '\0')

@@ -63,6 +63,23 @@ void char_update args ((void));
 void obj_update args ((void));
 void aggr_update args ((void));
 void quest_update args ((void));	/* Vassago - quest.c */
+static void append_to_buf (char *buf, size_t buf_size, const char *text);
+
+
+static void
+append_to_buf (char *buf, size_t buf_size, const char *text)
+{
+  size_t buf_len;
+
+  if (buf_size == 0 || text == NULL)
+    return;
+
+  buf_len = strlen (buf);
+  if (buf_len >= buf_size - 1)
+    return;
+
+  snprintf (buf + buf_len, buf_size - buf_len, "%s", text);
+}
 
 /* used for saving */
 
@@ -87,7 +104,7 @@ advance_level (CHAR_DATA * ch)
   ch->pcdata->last_level =
     (ch->played + (int) (current_time - ch->logon)) / 3600;
 
-  sprintf (buf, "the %s",
+  snprintf (buf, sizeof (buf), "the %s",
 	   title_table[ch->class][ch->level][ch->sex == SEX_FEMALE ? 1 : 0]);
   set_title (ch, buf);
 
@@ -126,7 +143,7 @@ advance_level (CHAR_DATA * ch)
   ch->pcdata->perm_mana += add_mana;
   ch->pcdata->perm_move += add_move;
 
-  sprintf (buf,
+  snprintf (buf, sizeof (buf),
 	   "Your gain is: %d/%d hp, %d/%d m, %d/%d mv %d/%d prac.\n\r",
 	   add_hp, ch->max_hit,
 	   add_mana, ch->max_mana,
@@ -163,7 +180,7 @@ advance_level_quiet (CHAR_DATA * ch)
   ch->pcdata->last_level =
     (ch->played + (int) (current_time - ch->logon)) / 3600;
 
-  sprintf (buf, "the %s",
+  snprintf (buf, sizeof (buf), "the %s",
 	   title_table[ch->class][ch->level][ch->sex == SEX_FEMALE ? 1 : 0]);
   set_title (ch, buf);
 
@@ -234,7 +251,7 @@ gain_exp (CHAR_DATA * ch, int gain)
     {
       send_to_char ("You raise a level!!  ", ch);
       ch->level += 1;
-      sprintf (buf, "$N has attained level %d!", ch->level);
+      snprintf (buf, sizeof (buf), "$N has attained level %d!", ch->level);
       wiznet (buf, ch, NULL, WIZ_LEVELS, 0, 0);
       advance_level (ch);
 
@@ -632,22 +649,22 @@ weather_update (void)
     {
     case 5:
       weather_info.sunlight = SUN_LIGHT;
-      strcat (buf, "`WThe day has begun.`x\n\r");
+      append_to_buf (buf, sizeof (buf), "`WThe day has begun.`x\n\r");
       break;
 
     case 6:
       weather_info.sunlight = SUN_RISE;
-      strcat (buf, "The `ysun`x rises in the east.\n\r");
+      append_to_buf (buf, sizeof (buf), "The `ysun`x rises in the east.\n\r");
       break;
 
     case 19:
       weather_info.sunlight = SUN_SET;
-      strcat (buf, "The `ysun`x slowly disappears in the west.\n\r");
+      append_to_buf (buf, sizeof (buf), "The `ysun`x slowly disappears in the west.\n\r");
       break;
 
     case 20:
       weather_info.sunlight = SUN_DARK;
-      strcat (buf, "The `Dnight`x has begun.\n\r");
+      append_to_buf (buf, sizeof (buf), "The `Dnight`x has begun.\n\r");
       break;
 
     case 24:
@@ -695,7 +712,7 @@ weather_update (void)
       if (weather_info.mmhg < 990
 	  || (weather_info.mmhg < 1010 && number_bits (2) == 0))
 	{
-	  strcat (buf, "The sky is getting `bcloudy`x.\n\r");
+	  append_to_buf (buf, sizeof (buf), "The sky is getting `bcloudy`x.\n\r");
 	  weather_info.sky = SKY_CLOUDY;
 	}
       break;
@@ -704,13 +721,13 @@ weather_update (void)
       if (weather_info.mmhg < 970
 	  || (weather_info.mmhg < 990 && number_bits (2) == 0))
 	{
-	  strcat (buf, "It starts to rain...\n\r");
+	  append_to_buf (buf, sizeof (buf), "It starts to rain...\n\r");
 	  weather_info.sky = SKY_RAINING;
 	}
 
       if (weather_info.mmhg > 1030 && number_bits (2) == 0)
 	{
-	  strcat (buf, "The `Bclouds`x disappear.\n\r");
+	  append_to_buf (buf, sizeof (buf), "The `Bclouds`x disappear.\n\r");
 	  weather_info.sky = SKY_CLOUDLESS;
 	}
       break;
@@ -718,14 +735,14 @@ weather_update (void)
     case SKY_RAINING:
       if (weather_info.mmhg < 970 && number_bits (2) == 0)
 	{
-	  strcat (buf, "Lightning `Yflashes`x in the sky.\n\r");
+	  append_to_buf (buf, sizeof (buf), "Lightning `Yflashes`x in the sky.\n\r");
 	  weather_info.sky = SKY_LIGHTNING;
 	}
 
       if (weather_info.mmhg > 1030
 	  || (weather_info.mmhg > 1010 && number_bits (2) == 0))
 	{
-	  strcat (buf, "The rain stopped...\n\r");
+	  append_to_buf (buf, sizeof (buf), "The rain stopped...\n\r");
 	  weather_info.sky = SKY_CLOUDY;
 	}
       break;
@@ -734,7 +751,7 @@ weather_update (void)
       if (weather_info.mmhg > 1010
 	  || (weather_info.mmhg > 990 && number_bits (2) == 0))
 	{
-	  strcat (buf, "The lightning has stopped...\n\r");
+	  append_to_buf (buf, sizeof (buf), "The lightning has stopped...\n\r");
 	  weather_info.sky = SKY_RAINING;
 	  break;
 	}

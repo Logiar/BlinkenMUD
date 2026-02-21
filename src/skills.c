@@ -93,7 +93,7 @@ do_gain (CHAR_DATA * ch, char *argument)
 
       col = 0;
 
-      sprintf (buf, "%-18s %-5s %-18s %-5s %-18s %-5s\n\r",
+      snprintf (buf, sizeof (buf), "%-18s %-5s %-18s %-5s %-18s %-5s\n\r",
 	       "group", "cost", "group", "cost", "group", "cost");
       send_to_char (buf, ch);
 
@@ -105,7 +105,7 @@ do_gain (CHAR_DATA * ch, char *argument)
 	  if (!ch->pcdata->group_known[gn]
 	      && group_table[gn].rating[ch->class] > 0)
 	    {
-	      sprintf (buf, "%-18s %-5d ",
+	      snprintf (buf, sizeof (buf), "%-18s %-5d ",
 		       group_table[gn].name,
 		       group_table[gn].rating[ch->class]);
 	      send_to_char (buf, ch);
@@ -120,7 +120,7 @@ do_gain (CHAR_DATA * ch, char *argument)
 
       col = 0;
 
-      sprintf (buf, "%-18s %-5s %-18s %-5s %-18s %-5s\n\r",
+      snprintf (buf, sizeof (buf), "%-18s %-5s %-18s %-5s %-18s %-5s\n\r",
 	       "skill", "cost", "skill", "cost", "skill", "cost");
       send_to_char (buf, ch);
 
@@ -133,7 +133,7 @@ do_gain (CHAR_DATA * ch, char *argument)
 	      && skill_table[sn].rating[ch->class] > 0
 	      && skill_table[sn].spell_fun == spell_null)
 	    {
-	      sprintf (buf, "%-18s %-5d ",
+	      snprintf (buf, sizeof (buf), "%-18s %-5d ",
 		       skill_table[sn].name,
 		       skill_table[sn].rating[ch->class]);
 	      send_to_char (buf, ch);
@@ -317,21 +317,24 @@ do_spells (CHAR_DATA * ch, char *argument)
 	  found = TRUE;
 	  lev = skill_table[sn].skill_level[ch->class];
 	  if (ch->level < lev)
-	    sprintf (buf, "%-18s  n/a      ", skill_table[sn].name);
+	    snprintf (buf, sizeof (buf), "%-18s  n/a      ", skill_table[sn].name);
 	  else
 	    {
 	      mana = UMAX (skill_table[sn].min_mana,
 			   100 / (2 + ch->level - lev));
-	      sprintf (buf, "%-18s  %3d mana  ", skill_table[sn].name, mana);
+	      snprintf (buf, sizeof (buf), "%-18s  %3d mana  ", skill_table[sn].name, mana);
 	    }
 
 	  if (spell_list[lev][0] == '\0')
-	    sprintf (spell_list[lev], "\n\rLevel %2d: %s", lev, buf);
+	    snprintf (spell_list[lev], MAX_STRING_LENGTH, "\n\rLevel %2d: %.4500s", lev, buf);
 	  else			/* append */
 	    {
 	      if (++spell_columns[lev] % 2 == 0)
-		strcat (spell_list[lev], "\n\r          ");
-	      strcat (spell_list[lev], buf);
+		snprintf (spell_list[lev] + strlen (spell_list[lev]),
+			  MAX_STRING_LENGTH - strlen (spell_list[lev]),
+			  "\n\r          ");
+	      snprintf (spell_list[lev] + strlen (spell_list[lev]),
+			MAX_STRING_LENGTH - strlen (spell_list[lev]), "%s", buf);
 	    }
 	}
     }
@@ -382,18 +385,21 @@ do_skills (CHAR_DATA * ch, char *argument)
 	  found = TRUE;
 	  lev = skill_table[sn].skill_level[ch->class];
 	  if (ch->level < lev)
-	    sprintf (buf, "%-18s n/a      ", skill_table[sn].name);
+	    snprintf (buf, sizeof (buf), "%-18s n/a      ", skill_table[sn].name);
 	  else
-	    sprintf (buf, "%-18s %3d%%      ", skill_table[sn].name,
+	    snprintf (buf, sizeof (buf), "%-18s %3d%%      ", skill_table[sn].name,
 		     ch->pcdata->learned[sn]);
 
 	  if (skill_list[lev][0] == '\0')
-	    sprintf (skill_list[lev], "\n\rLevel %2d: %s", lev, buf);
+	    snprintf (skill_list[lev], MAX_STRING_LENGTH, "\n\rLevel %2d: %.4500s", lev, buf);
 	  else			/* append */
 	    {
 	      if (++skill_columns[lev] % 2 == 0)
-		strcat (skill_list[lev], "\n\r          ");
-	      strcat (skill_list[lev], buf);
+		snprintf (skill_list[lev] + strlen (skill_list[lev]),
+			  MAX_STRING_LENGTH - strlen (skill_list[lev]),
+			  "\n\r          ");
+	      snprintf (skill_list[lev] + strlen (skill_list[lev]),
+			MAX_STRING_LENGTH - strlen (skill_list[lev]), "%s", buf);
 	    }
 	}
     }
@@ -425,7 +431,7 @@ list_group_costs (CHAR_DATA * ch)
 
   col = 0;
 
-  sprintf (buf, "%-18s %-5s %-18s %-5s %-18s %-5s\n\r", "group", "cp",
+  snprintf (buf, sizeof (buf), "%-18s %-5s %-18s %-5s %-18s %-5s\n\r", "group", "cp",
 	   "group", "cp", "group", "cp");
   send_to_char (buf, ch);
 
@@ -438,7 +444,7 @@ list_group_costs (CHAR_DATA * ch)
 	  && !ch->pcdata->group_known[gn]
 	  && group_table[gn].rating[ch->class] > 0)
 	{
-	  sprintf (buf, "%-18s %-5d ", group_table[gn].name,
+	  snprintf (buf, sizeof (buf), "%-18s %-5d ", group_table[gn].name,
 		   group_table[gn].rating[ch->class]);
 	  send_to_char (buf, ch);
 	  if (++col % 3 == 0)
@@ -451,7 +457,7 @@ list_group_costs (CHAR_DATA * ch)
 
   col = 0;
 
-  sprintf (buf, "%-18s %-5s %-18s %-5s %-18s %-5s\n\r", "skill", "cp",
+  snprintf (buf, sizeof (buf), "%-18s %-5s %-18s %-5s %-18s %-5s\n\r", "skill", "cp",
 	   "skill", "cp", "skill", "cp");
   send_to_char (buf, ch);
 
@@ -465,7 +471,7 @@ list_group_costs (CHAR_DATA * ch)
 	  && skill_table[sn].spell_fun == spell_null
 	  && skill_table[sn].rating[ch->class] > 0)
 	{
-	  sprintf (buf, "%-18s %-5d ", skill_table[sn].name,
+	  snprintf (buf, sizeof (buf), "%-18s %-5d ", skill_table[sn].name,
 		   skill_table[sn].rating[ch->class]);
 	  send_to_char (buf, ch);
 	  if (++col % 3 == 0)
@@ -476,9 +482,9 @@ list_group_costs (CHAR_DATA * ch)
     send_to_char ("\n\r", ch);
   send_to_char ("\n\r", ch);
 
-  sprintf (buf, "Creation points: %d\n\r", ch->pcdata->points);
+  snprintf (buf, sizeof (buf), "Creation points: %d\n\r", ch->pcdata->points);
   send_to_char (buf, ch);
-  sprintf (buf, "Experience per level: %ld\n\r",
+  snprintf (buf, sizeof (buf), "Experience per level: %ld\n\r",
 	   exp_per_level (ch, ch->gen_data->points_chosen));
   send_to_char (buf, ch);
   return;
@@ -496,7 +502,7 @@ list_group_chosen (CHAR_DATA * ch)
 
   col = 0;
 
-  sprintf (buf, "%-18s %-5s %-18s %-5s %-18s %-5s", "group", "cp", "group",
+  snprintf (buf, sizeof (buf), "%-18s %-5s %-18s %-5s %-18s %-5s", "group", "cp", "group",
 	   "cp", "group", "cp\n\r");
   send_to_char (buf, ch);
 
@@ -508,7 +514,7 @@ list_group_chosen (CHAR_DATA * ch)
       if (ch->gen_data->group_chosen[gn]
 	  && group_table[gn].rating[ch->class] > 0)
 	{
-	  sprintf (buf, "%-18s %-5d ", group_table[gn].name,
+	  snprintf (buf, sizeof (buf), "%-18s %-5d ", group_table[gn].name,
 		   group_table[gn].rating[ch->class]);
 	  send_to_char (buf, ch);
 	  if (++col % 3 == 0)
@@ -521,7 +527,7 @@ list_group_chosen (CHAR_DATA * ch)
 
   col = 0;
 
-  sprintf (buf, "%-18s %-5s %-18s %-5s %-18s %-5s", "skill", "cp", "skill",
+  snprintf (buf, sizeof (buf), "%-18s %-5s %-18s %-5s %-18s %-5s", "skill", "cp", "skill",
 	   "cp", "skill", "cp\n\r");
   send_to_char (buf, ch);
 
@@ -533,7 +539,7 @@ list_group_chosen (CHAR_DATA * ch)
       if (ch->gen_data->skill_chosen[sn]
 	  && skill_table[sn].rating[ch->class] > 0)
 	{
-	  sprintf (buf, "%-18s %-5d ", skill_table[sn].name,
+	  snprintf (buf, sizeof (buf), "%-18s %-5d ", skill_table[sn].name,
 		   skill_table[sn].rating[ch->class]);
 	  send_to_char (buf, ch);
 	  if (++col % 3 == 0)
@@ -544,9 +550,9 @@ list_group_chosen (CHAR_DATA * ch)
     send_to_char ("\n\r", ch);
   send_to_char ("\n\r", ch);
 
-  sprintf (buf, "Creation points: %d\n\r", ch->gen_data->points_chosen);
+  snprintf (buf, sizeof (buf), "Creation points: %d\n\r", ch->gen_data->points_chosen);
   send_to_char (buf, ch);
-  sprintf (buf, "Experience per level: %ld\n\r",
+  snprintf (buf, sizeof (buf), "Experience per level: %ld\n\r",
 	   exp_per_level (ch, ch->gen_data->points_chosen));
   send_to_char (buf, ch);
   return;
@@ -644,7 +650,7 @@ parse_gen_groups (CHAR_DATA * ch, char *argument)
 	      return TRUE;
 	    }
 
-	  sprintf (buf, "%s group added\n\r", group_table[gn].name);
+	  snprintf (buf, sizeof (buf), "%s group added\n\r", group_table[gn].name);
 	  send_to_char (buf, ch);
 	  ch->gen_data->group_chosen[gn] = TRUE;
 	  ch->gen_data->points_chosen += group_table[gn].rating[ch->class];
@@ -668,7 +674,7 @@ parse_gen_groups (CHAR_DATA * ch, char *argument)
 	      send_to_char ("That skill is not available.\n\r", ch);
 	      return TRUE;
 	    }
-	  sprintf (buf, "%s skill added\n\r", skill_table[sn].name);
+	  snprintf (buf, sizeof (buf), "%s skill added\n\r", skill_table[sn].name);
 	  send_to_char (buf, ch);
 	  ch->gen_data->skill_chosen[sn] = TRUE;
 	  ch->gen_data->points_chosen += skill_table[sn].rating[ch->class];
@@ -772,7 +778,7 @@ do_groups (CHAR_DATA * ch, char *argument)
 	    break;
 	  if (ch->pcdata->group_known[gn])
 	    {
-	      sprintf (buf, "%-20s ", group_table[gn].name);
+	      snprintf (buf, sizeof (buf), "%-20s ", group_table[gn].name);
 	      send_to_char (buf, ch);
 	      if (++col % 3 == 0)
 		send_to_char ("\n\r", ch);
@@ -780,7 +786,7 @@ do_groups (CHAR_DATA * ch, char *argument)
 	}
       if (col % 3 != 0)
 	send_to_char ("\n\r", ch);
-      sprintf (buf, "Creation points: %d\n\r", ch->pcdata->points);
+      snprintf (buf, sizeof (buf), "Creation points: %d\n\r", ch->pcdata->points);
       send_to_char (buf, ch);
       return;
     }
@@ -791,7 +797,7 @@ do_groups (CHAR_DATA * ch, char *argument)
 	{
 	  if (group_table[gn].name == NULL)
 	    break;
-	  sprintf (buf, "%-20s ", group_table[gn].name);
+	  snprintf (buf, sizeof (buf), "%-20s ", group_table[gn].name);
 	  send_to_char (buf, ch);
 	  if (++col % 3 == 0)
 	    send_to_char ("\n\r", ch);
@@ -816,7 +822,7 @@ do_groups (CHAR_DATA * ch, char *argument)
     {
       if (group_table[gn].spells[sn] == NULL)
 	break;
-      sprintf (buf, "%-20s ", group_table[gn].spells[sn]);
+      snprintf (buf, sizeof (buf), "%-20s ", group_table[gn].spells[sn]);
       send_to_char (buf, ch);
       if (++col % 3 == 0)
 	send_to_char ("\n\r", ch);
@@ -848,7 +854,7 @@ do_class (CHAR_DATA * ch, char *argument)
 	    break;
 	  if (ch->pcdata->group_known[gn])
 	    {
-	      sprintf (buf, "%-20s ", group_table[gn].name);
+	      snprintf (buf, sizeof (buf), "%-20s ", group_table[gn].name);
 	      send_to_char (buf, ch);
 	      if (++col % 3 == 0)
 		send_to_char ("\n\r", ch);
@@ -856,7 +862,7 @@ do_class (CHAR_DATA * ch, char *argument)
 	}
       if (col % 3 != 0)
 	send_to_char ("\n\r", ch);
-      sprintf (buf, "Creation points: %d\n\r", ch->pcdata->points);
+      snprintf (buf, sizeof (buf), "Creation points: %d\n\r", ch->pcdata->points);
       send_to_char (buf, ch);
       return;
     }
@@ -871,7 +877,7 @@ do_class (CHAR_DATA * ch, char *argument)
 	    break;
 	  if (group_table[gn].rating[ch->class] > 0)
 	    {
-	      sprintf (buf, "%-20s ", group_table[gn].name);
+	      snprintf (buf, sizeof (buf), "%-20s ", group_table[gn].name);
 	      send_to_char (buf, ch);
 	      if (++col % 3 == 0)
 		send_to_char ("\n\r", ch);
@@ -903,7 +909,7 @@ do_class (CHAR_DATA * ch, char *argument)
 	break;
       if ((tn = spell_avail (ch, group_table[gn].spells[sn])) >= 0)
 	{
-	  sprintf (buf, "`B%-5d `G%-20s ",
+	  snprintf (buf, sizeof (buf), "`B%-5d `G%-20s ",
 		   skill_table[tn].skill_level[ch->class],
 		   group_table[gn].spells[sn]);
 	  send_to_char (buf, ch);
@@ -968,7 +974,7 @@ check_improve (CHAR_DATA * ch, int sn, bool success, int multiplier)
       chance = URANGE (5, 100 - ch->pcdata->learned[sn], 95);
       if (number_percent () < chance)
 	{
-	  sprintf (buf, "You have become better at %s!\n\r",
+	  snprintf (buf, sizeof (buf), "You have become better at %s!\n\r",
 		   skill_table[sn].name);
 	  send_to_char (buf, ch);
 	  ch->pcdata->learned[sn]++;
@@ -981,7 +987,7 @@ check_improve (CHAR_DATA * ch, int sn, bool success, int multiplier)
       chance = URANGE (5, ch->pcdata->learned[sn] / 2, 30);
       if (number_percent () < chance)
 	{
-	  sprintf (buf,
+	  snprintf (buf, sizeof (buf),
 		   "You learn from your mistakes, and your %s skill improves.\n\r",
 		   skill_table[sn].name);
 	  send_to_char (buf, ch);

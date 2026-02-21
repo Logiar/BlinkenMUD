@@ -148,7 +148,7 @@ parse_sign (CHAR_DATA * ch, char *argument, int type)
 	  return;
 	}
 
-      strcpy (buf, ch->pnote->text);
+      snprintf (buf, sizeof (buf), "%s", ch->pnote->text);
 
       for (len = strlen (buf); len > 0; len--)
 	{

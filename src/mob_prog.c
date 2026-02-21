@@ -444,7 +444,7 @@ cmd_eval (sh_int vnum, char *line, int check,
     {
       if ((oper = keyword_lookup (fn_evals, buf)) < 0)
 	{
-	  sprintf (buf, "Cmd_eval: prog %d syntax error(2) '%s'",
+	  snprintf (buf, sizeof (buf), "Cmd_eval: prog %d syntax error(2) '%s'",
 		   vnum, original);
 	  bug (buf, 0);
 	  return FALSE;
@@ -460,7 +460,7 @@ cmd_eval (sh_int vnum, char *line, int check,
    */
   if (buf[0] != '$' || buf[1] == '\0')
     {
-      sprintf (buf, "Cmd_eval: prog %d syntax error(3) '%s'", vnum, original);
+      snprintf (buf, sizeof (buf), "Cmd_eval: prog %d syntax error(3) '%s'", vnum, original);
       bug (buf, 0);
       return FALSE;
     }
@@ -490,7 +490,7 @@ cmd_eval (sh_int vnum, char *line, int check,
       lval_char = mob->mprog_target;
       break;
     default:
-      sprintf (buf, "Cmd_eval: prog %d syntax error(4) '%s'", vnum, original);
+      snprintf (buf, sizeof (buf), "Cmd_eval: prog %d syntax error(4) '%s'", vnum, original);
       bug (buf, 0);
       return FALSE;
     }
@@ -617,7 +617,7 @@ cmd_eval (sh_int vnum, char *line, int check,
    */
   if ((oper = keyword_lookup (fn_evals, buf)) < 0)
     {
-      sprintf (buf, "Cmd_eval: prog %d syntax error(5): '%s'",
+      snprintf (buf, sizeof (buf), "Cmd_eval: prog %d syntax error(5): '%s'",
 	       vnum, original);
       bug (buf, 0);
       return FALSE;
@@ -1008,7 +1008,7 @@ program_flow (sh_int pvnum,	/* For diagnostic purposes */
 	{
 	  if (state[level] == BEGIN_BLOCK)
 	    {
-	      sprintf (buf, "Mobprog: misplaced if statement, mob %d prog %d",
+	      snprintf (buf, sizeof (buf), "Mobprog: misplaced if statement, mob %d prog %d",
 		       mvnum, pvnum);
 	      bug (buf, 0);
 	      return;
@@ -1016,7 +1016,7 @@ program_flow (sh_int pvnum,	/* For diagnostic purposes */
 	  state[level] = BEGIN_BLOCK;
 	  if (++level >= MAX_NESTED_LEVEL)
 	    {
-	      sprintf (buf,
+	      snprintf (buf, sizeof (buf),
 		       "Mobprog: Max nested level exceeded, mob %d prog %d",
 		       mvnum, pvnum);
 	      bug (buf, 0);
@@ -1035,7 +1035,7 @@ program_flow (sh_int pvnum,	/* For diagnostic purposes */
 	    }
 	  else
 	    {
-	      sprintf (buf, "Mobprog: invalid if_check (if), mob %d prog %d",
+	      snprintf (buf, sizeof (buf), "Mobprog: invalid if_check (if), mob %d prog %d",
 		       mvnum, pvnum);
 	      bug (buf, 0);
 	      return;
@@ -1046,7 +1046,7 @@ program_flow (sh_int pvnum,	/* For diagnostic purposes */
 	{
 	  if (!level || state[level - 1] != BEGIN_BLOCK)
 	    {
-	      sprintf (buf, "Mobprog: or without if, mob %d prog %d",
+	      snprintf (buf, sizeof (buf), "Mobprog: or without if, mob %d prog %d",
 		       mvnum, pvnum);
 	      bug (buf, 0);
 	      return;
@@ -1060,7 +1060,7 @@ program_flow (sh_int pvnum,	/* For diagnostic purposes */
 	    }
 	  else
 	    {
-	      sprintf (buf, "Mobprog: invalid if_check (or), mob %d prog %d",
+	      snprintf (buf, sizeof (buf), "Mobprog: invalid if_check (or), mob %d prog %d",
 		       mvnum, pvnum);
 	      bug (buf, 0);
 	      return;
@@ -1071,7 +1071,7 @@ program_flow (sh_int pvnum,	/* For diagnostic purposes */
 	{
 	  if (!level || state[level - 1] != BEGIN_BLOCK)
 	    {
-	      sprintf (buf, "Mobprog: and without if, mob %d prog %d",
+	      snprintf (buf, sizeof (buf), "Mobprog: and without if, mob %d prog %d",
 		       mvnum, pvnum);
 	      bug (buf, 0);
 	      return;
@@ -1085,7 +1085,7 @@ program_flow (sh_int pvnum,	/* For diagnostic purposes */
 	    }
 	  else
 	    {
-	      sprintf (buf, "Mobprog: invalid if_check (and), mob %d prog %d",
+	      snprintf (buf, sizeof (buf), "Mobprog: invalid if_check (and), mob %d prog %d",
 		       mvnum, pvnum);
 	      bug (buf, 0);
 	      return;
@@ -1097,7 +1097,7 @@ program_flow (sh_int pvnum,	/* For diagnostic purposes */
 	{
 	  if (!level || state[level - 1] != BEGIN_BLOCK)
 	    {
-	      sprintf (buf, "Mobprog: endif without if, mob %d prog %d",
+	      snprintf (buf, sizeof (buf), "Mobprog: endif without if, mob %d prog %d",
 		       mvnum, pvnum);
 	      bug (buf, 0);
 	      return;
@@ -1110,7 +1110,7 @@ program_flow (sh_int pvnum,	/* For diagnostic purposes */
 	{
 	  if (!level || state[level - 1] != BEGIN_BLOCK)
 	    {
-	      sprintf (buf, "Mobprog: else without if, mob %d prog %d",
+	      snprintf (buf, sizeof (buf), "Mobprog: else without if, mob %d prog %d",
 		       mvnum, pvnum);
 	      bug (buf, 0);
 	      return;

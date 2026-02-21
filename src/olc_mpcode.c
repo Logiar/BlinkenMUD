@@ -40,7 +40,7 @@ mpedit (CHAR_DATA * ch, char *argument)
   int cmd;
 
   smash_tilde (argument);
-  strcpy (arg, argument);
+  snprintf (arg, sizeof (arg), "%s", argument);
   argument = one_argument (argument, command);
 
   //  EDIT_MPCODE (ch, pMcode);
@@ -164,7 +164,7 @@ MPEDIT (mpedit_show)
 
   EDIT_MPCODE (ch, pMcode);
 
-  sprintf (buf,
+  snprintf (buf, sizeof (buf),
 	   "Vnum:       [%d]\n\r"
 	   "Code:\n\r%s\n\r", pMcode->vnum, pMcode->code);
   send_to_char (buf, ch);
@@ -198,7 +198,7 @@ do_mplist (CHAR_DATA * ch, char *argument)
 
   for (count = 1, mprg = mprog_list; mprg != NULL; mprg = mprg->next)
     {
-      sprintf (buf, "[%3d] %5d\n\r", count, mprg->vnum);
+      snprintf (buf, sizeof (buf), "[%3d] %5d\n\r", count, mprg->vnum);
       add_buf (buffer, buf);
       count++;
     }

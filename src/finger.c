@@ -85,7 +85,7 @@ do_finger (CHAR_DATA * ch, char *argument)
   victim->pcdata = new_pcdata ();
   fOld = FALSE;
 
-  sprintf (buf, "%s%s", PLAYER_DIR, capitalize (arg));
+  snprintf (buf, sizeof (buf), "%s%s", PLAYER_DIR, capitalize (arg));
   if ((fp = fopen (buf, "r")) != NULL)
     {
       int iNest;
@@ -145,7 +145,7 @@ do_finger (CHAR_DATA * ch, char *argument)
       free_char (victim);
       return;
     }
-  sprintf (buf, "%s last logged off on %s",
+  snprintf (buf, sizeof (buf), "%s last logged off on %s",
 	   victim->name, (char *) ctime (&victim->llogoff));
   send_to_char (buf, ch);
   free_pcdata (victim->pcdata);

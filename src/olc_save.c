@@ -55,7 +55,7 @@ fix_string (const char *str)
   int o;
 
   if (str == NULL)
-    return '\0';
+    return NULL;
 
   for (o = i = 0; str[i + o] != '\0'; i++)
     {
@@ -129,7 +129,7 @@ fwrite_flag (long flags, char buf[])
 
   if (flags == 0)
     {
-      strcpy (buf, "0");
+      snprintf (buf, MAX_STRING_LENGTH, "%s", "0");
       return buf;
     }
 
@@ -783,7 +783,7 @@ save_resets (FILE * fp, AREA_DATA * pArea)
 			       pLastMob ? pLastMob->short_descr : "!NO_MOB!");
 		      if (!pLastMob)
 			{
-			  sprintf (buf, "Save_resets: !NO_MOB! in [%s]",
+			  snprintf (buf, sizeof (buf), "Save_resets: !NO_MOB! in [%s]",
 				   pArea->file_name);
 			  bug (buf, 0);
 			}
@@ -799,7 +799,7 @@ save_resets (FILE * fp, AREA_DATA * pArea)
 			       pLastMob ? pLastMob->short_descr : "!NO_MOB!");
 		      if (!pLastMob)
 			{
-			  sprintf (buf, "Save_resets: !NO_MOB! in [%s]",
+			  snprintf (buf, sizeof (buf), "Save_resets: !NO_MOB! in [%s]",
 				   pArea->file_name);
 			  bug (buf, 0);
 			}
@@ -840,7 +840,7 @@ save_resets (FILE * fp, AREA_DATA * pArea)
 		  fprintf (fp, "G 0 %d 0\n", pReset->arg1);
 		  if (!pLastMob)
 		    {
-		      sprintf (buf,
+		      snprintf (buf, sizeof (buf),
 			       "Save_resets: !NO_MOB! in [%s]",
 			       pArea->file_name);
 		      bug (buf, 0);
@@ -851,7 +851,7 @@ save_resets (FILE * fp, AREA_DATA * pArea)
 		  fprintf (fp, "E 0 %d 0 %d\n", pReset->arg1, pReset->arg3);
 		  if (!pLastMob)
 		    {
-		      sprintf (buf,
+		      snprintf (buf, sizeof (buf),
 			       "Save_resets: !NO_MOB! in [%s]",
 			       pArea->file_name);
 		      bug (buf, 0);
@@ -994,7 +994,7 @@ do_asave (CHAR_DATA * ch, char *argument)
       return;
     }
   smash_tilde (argument);
-  strcpy (arg1, argument);
+  snprintf (arg1, sizeof (arg1), "%s", argument);
   if (arg1[0] == '\0')
     {
       send_to_char ("Syntax:\n\r", ch);
@@ -1058,7 +1058,7 @@ do_asave (CHAR_DATA * ch, char *argument)
       save_area_list ();
 
       send_to_char ("Saved zones:\n\r", ch);
-      sprintf (buf, "None.\n\r");
+      snprintf (buf, sizeof (buf), "None.\n\r");
 
       for (pArea = area_first; pArea; pArea = pArea->next)
 	{
@@ -1070,7 +1070,7 @@ do_asave (CHAR_DATA * ch, char *argument)
 	  if (IS_SET (pArea->area_flags, AREA_CHANGED))
 	    {
 	      save_area (pArea);
-	      sprintf (buf, "%24s - '%s'\n\r", pArea->name, pArea->file_name);
+	      snprintf (buf, sizeof (buf), "%24s - '%s'\n\r", pArea->name, pArea->file_name);
 	      send_to_char (buf, ch);
 	      REMOVE_BIT (pArea->area_flags, AREA_CHANGED);
 	    }

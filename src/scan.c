@@ -109,7 +109,7 @@ do_scan (CHAR_DATA * ch, char *argument)
 
   act ("You peer intently $T.", ch, NULL, dir_name[door], TO_CHAR);
   act ("$n peers intently $T.", ch, NULL, dir_name[door], TO_ROOM);
-  sprintf (buf, "Looking %s you see:\n\r", dir_name[door]);
+  snprintf (buf, sizeof (buf), "Looking %s you see:\n\r", dir_name[door]);
 
   scan_room = ch->in_room;
 
@@ -157,20 +157,29 @@ scan_char (CHAR_DATA * victim, CHAR_DATA * ch, sh_int depth, sh_int door)
   extern char *const distance[];
   char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
 
-  buf[0] = '\0';
-
   if (IS_AFFECTED (ch, AFF_FARSIGHT) || depth == 0)
     {
-      strcat (buf, PERS (victim, ch));
-      strcat (buf, ", ");
+      snprintf (buf, sizeof (buf), "%s, ", PERS (victim, ch));
     }
   else
     {
-      strcat (buf, "Something is moving ");
+      snprintf (buf, sizeof (buf), "%s", "Something is moving ");
     }
-  sprintf (buf2, distance[depth], dir_name[door]);
-  strcat (buf, buf2);
-  strcat (buf, "\n\r");
+  snprintf (buf2, sizeof (buf2), distance[depth], dir_name[door]);
+  {
+    size_t buf_len = strlen (buf);
+    if (buf_len < sizeof (buf) - 1)
+      {
+        snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", buf2);
+      }
+  }
+  {
+    size_t buf_len = strlen (buf);
+    if (buf_len < sizeof (buf) - 1)
+      {
+        snprintf (buf + buf_len, sizeof (buf) - buf_len, "%s", "\n\r");
+      }
+  }
 
   send_to_char (buf, ch);
   return;

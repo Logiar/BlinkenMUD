@@ -123,7 +123,7 @@ save_char_obj (CHAR_DATA * ch)
   if (IS_IMMORTAL (ch) || ch->level >= LEVEL_IMMORTAL)
     {
       fclose (fpReserve);
-      sprintf (strsave, "%s%s", GOD_DIR, capitalize (ch->name));
+      snprintf (strsave, sizeof (strsave), "%s%s", GOD_DIR, capitalize (ch->name));
       if ((fp = fopen (strsave, "w")) == NULL)
 	{
 	  bug ("Save_char_obj: fopen", 0);
@@ -138,7 +138,7 @@ save_char_obj (CHAR_DATA * ch)
 #endif
 
   fclose (fpReserve);
-  sprintf (strsave, "%s%s", PLAYER_DIR, capitalize (ch->name));
+  snprintf (strsave, sizeof (strsave), "%s%s", PLAYER_DIR, capitalize (ch->name));
   if ((fp = fopen (TEMP_FILE, "w")) == NULL)
     {
       bug ("Save_char_obj: fopen", 0);
@@ -813,16 +813,19 @@ load_char_obj (DESCRIPTOR_DATA * d, char *name)
 
 #if defined(unix)
   /* decompress if .gz file exists */
-  sprintf (strsave, "%s%s%s", PLAYER_DIR, capitalize (name), ".gz");
+  snprintf (strsave, sizeof (strsave), "%s%s%s", PLAYER_DIR, capitalize (name), ".gz");
   if ((fp = fopen (strsave, "r")) != NULL)
     {
       fclose (fp);
-      sprintf (buf, "gzip -dfq %s", strsave);
-      system (buf);
+      snprintf (buf, sizeof (buf), "gzip -dfq %.80s", strsave);
+      if (system (buf) == -1)
+	{
+	  log_string ("gzip command failed while loading player file.");
+	}
     }
 #endif
 
-  sprintf (strsave, "%s%s", PLAYER_DIR, capitalize (name));
+  snprintf (strsave, sizeof (strsave), "%s%s", PLAYER_DIR, capitalize (name));
   if ((fp = fopen (strsave, "r")) != NULL)
     {
       int iNest;
@@ -996,7 +999,7 @@ fread_char (CHAR_DATA * ch, FILE * fp)
   int lastlogoff = current_time;
   int percent;
 
-  sprintf (buf, "Loading %s.", ch->name);
+  snprintf (buf, sizeof (buf), "Loading %s.", ch->name);
   if (strcmp (ch->name, ""))
     {
       log_string (buf);
@@ -1449,7 +1452,7 @@ fread_char (CHAR_DATA * ch, FILE * fp)
 		  && ch->pcdata->title[0] != '!'
 		  && ch->pcdata->title[0] != '?')
 		{
-		  sprintf (buf, " %s", ch->pcdata->title);
+		  snprintf (buf, sizeof (buf), " %s", ch->pcdata->title);
 		  free_string (ch->pcdata->title);
 		  ch->pcdata->title = str_dup (buf);
 		}

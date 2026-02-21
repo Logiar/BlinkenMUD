@@ -260,6 +260,23 @@ void load_clanlist args ((void));
 void fix_exits args ((void));
 void fix_mobprogs args ((void));
 void reset_area args ((AREA_DATA * pArea));
+static void append_to_buf (char *buf, size_t buf_size, const char *text);
+
+
+static void
+append_to_buf (char *buf, size_t buf_size, const char *text)
+{
+  size_t buf_len;
+
+  if (buf_size == 0 || text == NULL)
+    return;
+
+  buf_len = strlen (buf);
+  if (buf_len >= buf_size - 1)
+    return;
+
+  snprintf (buf + buf_len, buf_size - buf_len, "%s", text);
+}
 
 /*
  * Big mama top level function.
@@ -289,9 +306,9 @@ boot_db (void)
    * Init random number generator.
    */
   {
-    strcat (boot_buf, "The ");
+    append_to_buf (boot_buf, sizeof (boot_buf), "The ");
     init_mm ();
-    strcat (boot_buf, "says:\n\r\n\r");
+    append_to_buf (boot_buf, sizeof (boot_buf), "says:\n\r\n\r");
   }
 
   /*
@@ -305,11 +322,11 @@ boot_db (void)
 
     lhour = (current_time - 650336715) / (PULSE_TICK / PULSE_PER_SECOND);
     time_info.hour = lhour % 24;
-    strcat (boot_buf, "  Loy");
+    append_to_buf (boot_buf, sizeof (boot_buf), "  Loy");
     lday = lhour / 24;
     time_info.day = lday % 35;
     lmonth = lday / 35;
-    strcat (boot_buf, "al citize");
+    append_to_buf (boot_buf, sizeof (boot_buf), "al citize");
     time_info.month = lmonth % 17;
     time_info.year = lmonth / 17;
 
@@ -323,14 +340,14 @@ boot_db (void)
       weather_info.sunlight = SUN_SET;
     else
       weather_info.sunlight = SUN_DARK;
-    strcat (boot_buf, "ns of Mi");
+    append_to_buf (boot_buf, sizeof (boot_buf), "ns of Mi");
     weather_info.change = 0;
     weather_info.mmhg = 960;
     if (time_info.month >= 7 && time_info.month <= 12)
       weather_info.mmhg += number_range (1, 50);
     else
       weather_info.mmhg += number_range (1, 80);
-    strcat (boot_buf, "dgaard.  ");
+    append_to_buf (boot_buf, sizeof (boot_buf), "dgaard.  ");
     if (weather_info.mmhg <= 980)
       weather_info.sky = SKY_LIGHTNING;
     else if (weather_info.mmhg <= 1000)
@@ -339,7 +356,7 @@ boot_db (void)
       weather_info.sky = SKY_CLOUDY;
     else
       weather_info.sky = SKY_CLOUDLESS;
-    strcat (boot_buf, "These are ");
+    append_to_buf (boot_buf, sizeof (boot_buf), "These are ");
   }
 
   /* reboot counter */
@@ -353,13 +370,13 @@ boot_db (void)
     int sn;
 
     log_string ("Assigning GSN's.");
-    strcat (boot_buf, "the eart");
+    append_to_buf (boot_buf, sizeof (boot_buf), "the eart");
     for (sn = 0; sn < MAX_SKILL; sn++)
       {
 	if (skill_table[sn].pgsn != NULL)
 	  *skill_table[sn].pgsn = sn;
       }
-    strcat (boot_buf, "hly remai");
+    append_to_buf (boot_buf, sizeof (boot_buf), "hly remai");
   }
 
   /*
@@ -369,16 +386,16 @@ boot_db (void)
     FILE *fpList;
 
     log_string ("Reading Area List.");
-    strcat (boot_buf, "ns of the\n\r  thre");
+    append_to_buf (boot_buf, sizeof (boot_buf), "ns of the\n\r  thre");
     if ((fpList = fopen (AREA_LIST, "r")) == NULL)
       {
 	perror (AREA_LIST);
 	exit (1);
       }
-    strcat (boot_buf, "e heret");
+    append_to_buf (boot_buf, sizeof (boot_buf), "e heret");
     for (;;)
       {
-	strcpy (strArea, fread_word (fpList));
+	snprintf (strArea, sizeof (strArea), "%s", fread_word (fpList));
 	if (strArea[0] == '$')
 	  break;
 
@@ -391,7 +408,7 @@ boot_db (void)
 
 
 
-	    sprintf (log_buf, "reading %s", strArea);
+	    snprintf (log_buf, sizeof (log_buf), "reading %s", strArea);
 	    log_string (log_buf);
 
 	    if ((fpArea = fopen (strArea, "r")) == NULL)
@@ -455,7 +472,7 @@ boot_db (void)
       }
     fclose (fpList);
   }
-  strcat (boot_buf, "ics 'Tab");
+  append_to_buf (boot_buf, sizeof (boot_buf), "ics 'Tab");
   /*
    * Fix up exits.
    * Declare db booting over.
@@ -463,31 +480,31 @@ boot_db (void)
    * Load up the songs, notes and ban files.
    */
   {
-    strcat (boot_buf, "or', 'Wya");
+    append_to_buf (boot_buf, sizeof (boot_buf), "or', 'Wya");
     log_string ("Fixing exits.");
     fix_exits ();
     fix_mobprogs ();
     fBootDb = FALSE;
     convert_objects ();		/* ROM OLC */
-    strcat (boot_buf, "ng forge");
+    append_to_buf (boot_buf, sizeof (boot_buf), "ng forge");
     log_string ("Area Update.");
     area_update ();
-    strcat (boot_buf, "d themsel");
+    append_to_buf (boot_buf, sizeof (boot_buf), "d themsel");
     log_string ("Loading Moveable Exits.");
     randomize_entrances (0);
-    strcat (boot_buf, "ves to imm");
+    append_to_buf (boot_buf, sizeof (boot_buf), "ves to imm");
     log_string ("Loading Notes.");
     load_notes ();
-    strcat (boot_buf, "e implement");
+    append_to_buf (boot_buf, sizeof (boot_buf), "e implement");
     log_string ("Loading Bans.");
     load_bans ();
-    strcat (boot_buf, "t this be a le");
+    append_to_buf (boot_buf, sizeof (boot_buf), "t this be a le");
     log_string ("Loading Wizlist.");
     load_wizlist ();
-    strcat (boot_buf, "                -");
+    append_to_buf (boot_buf, sizeof (boot_buf), "                -");
     log_string ("Loading Clanlists.");
     load_clanlist ();
-    strcat (boot_buf, "\n\r");
+    append_to_buf (boot_buf, sizeof (boot_buf), "\n\r");
     log_string ("Loading Songs.");
     load_songs ();
   }
@@ -629,8 +646,7 @@ new_load_area (FILE * fp)
 	case 'E':
 	  if (!str_cmp (word, "End"))
 	    {
-	      fMatch = TRUE;
-	      if (area_first == NULL)
+		      if (area_first == NULL)
 		area_first = pArea;
 	      if (area_last != NULL)
 		area_last->next = pArea;
@@ -647,6 +663,8 @@ new_load_area (FILE * fp)
 	  SKEY ("Credits", pArea->credits);
 	  break;
 	}
+
+      (void) fMatch;
     }
 }
 
@@ -1554,7 +1572,7 @@ fix_exits (void)
   int iHash;
   int door;
 
-  strcat (boot_buf, "tt' and 'Fun");
+  append_to_buf (boot_buf, sizeof (boot_buf), "tt' and 'Fun");
   for (iHash = 0; iHash < MAX_KEY_HASH; iHash++)
     {
       for (pRoomIndex = room_index_hash[iHash];
@@ -1581,7 +1599,7 @@ fix_exits (void)
 	    SET_BIT (pRoomIndex->room_flags, ROOM_NO_MOB);
 	}
     }
-  strcat (boot_buf, "ky' of thi");
+  append_to_buf (boot_buf, sizeof (boot_buf), "ky' of thi");
 /*
     for ( iHash = 0; iHash < MAX_KEY_HASH; iHash++ )
     {
@@ -1600,7 +1618,7 @@ fix_exits (void)
                 &&   (pRoomIndex->vnum != 8705)
                 &&   (pRoomIndex->vnum != 8717))
 		{
-		    sprintf( buf, "Fix_exits: %d:%d -> %d:%d -> %d.",
+		    snprintf( buf, sizeof (buf), "Fix_exits: %d:%d -> %d:%d -> %d.",
 			pRoomIndex->vnum, door,
 			to_room->vnum,    rev_dir[door],
 			(pexit_rev->u1.to_room == NULL)
@@ -1611,7 +1629,7 @@ fix_exits (void)
 	}
     }
 */
-  strcat (boot_buf, "s world.\n\r  Havi");
+  append_to_buf (boot_buf, sizeof (boot_buf), "s world.\n\r  Havi");
   return;
 }
 
@@ -1642,7 +1660,7 @@ area_update (void)
 	  ROOM_INDEX_DATA *pRoomIndex;
 
 	  reset_area (pArea);
-	  sprintf (buf, "%s has just been reset.", pArea->name);
+	  snprintf (buf, sizeof (buf), "%s has just been reset.", pArea->name);
 	  wiznet (buf, NULL, NULL, WIZ_RESETS, 0, 0);
 
 	  pArea->age = number_range (0, 3);
@@ -1792,7 +1810,7 @@ reset_room (ROOM_INDEX_DATA * pRoom)
 	  if (!(pObjIndex = get_obj_index (pReset->arg1)))
 	    {
 	      bug ("Reset_room: 'O' 1 : bad vnum %d", pReset->arg1);
-	      sprintf (buf, "%d %d %d %d", pReset->arg1, pReset->arg2,
+	      snprintf (buf, sizeof (buf), "%d %d %d %d", pReset->arg1, pReset->arg2,
 		       pReset->arg3, pReset->arg4);
 	      bug (buf, 1);
 	      continue;
@@ -1802,7 +1820,7 @@ reset_room (ROOM_INDEX_DATA * pRoom)
 	  if (!(pRoomIndex = get_room_index (pReset->arg3)))
 	    {
 	      bug ("Reset_room: 'O' 2 : bad vnum %d.", pReset->arg3);
-	      sprintf (buf, "%d %d %d %d", pReset->arg1, pReset->arg2,
+	      snprintf (buf, sizeof (buf), "%d %d %d %d", pReset->arg1, pReset->arg2,
 		       pReset->arg3, pReset->arg4);
 	      bug (buf, 1);
 	      continue;
@@ -3326,7 +3344,7 @@ str_dup (const char *str)
     return (char *) str;
 
   str_new = alloc_mem (strlen (str) + 1);
-  strcpy (str_new, str);
+  memcpy (str_new, str, strlen (str) + 1);
   return str_new;
 }
 
@@ -3376,7 +3394,7 @@ do_areas (CHAR_DATA * ch, char *argument)
 
   for (iArea = 0; iArea < iAreaHalf; iArea++)
     {
-      sprintf (buf, "%-39s%-39s\n\r",
+      snprintf (buf, sizeof (buf), "%-39s%-39s\n\r",
 	       pArea1->credits, (pArea2 != NULL) ? pArea2->credits : "");
       AreaStrLen = strlen (buf);
       for (AreaCnt = 0; AreaCnt < AreaStrLen; AreaCnt++)
@@ -3401,1109 +3419,38 @@ do_memory (CHAR_DATA * ch, char *argument)
 {
   char buf[MAX_STRING_LENGTH];
 
-  sprintf (buf, "Affects %5d\n\r", top_affect);
+  snprintf (buf, sizeof (buf), "Affects %5d\n\r", top_affect);
   send_to_char (buf, ch);
-  sprintf (buf, "Areas   %5d\n\r", top_area);
+  snprintf (buf, sizeof (buf), "Areas   %5d\n\r", top_area);
   send_to_char (buf, ch);
-  sprintf (buf, "ExDes   %5d\n\r", top_ed);
+  snprintf (buf, sizeof (buf), "ExDes   %5d\n\r", top_ed);
   send_to_char (buf, ch);
-  sprintf (buf, "Exits   %5d\n\r", top_exit);
+  snprintf (buf, sizeof (buf), "Exits   %5d\n\r", top_exit);
   send_to_char (buf, ch);
-  sprintf (buf, "Helps   %5d\n\r", top_help);
+  snprintf (buf, sizeof (buf), "Helps   %5d\n\r", top_help);
   send_to_char (buf, ch);
-  sprintf (buf, "Socials %5d\n\r", social_count);
+  snprintf (buf, sizeof (buf), "Socials %5d\n\r", social_count);
   send_to_char (buf, ch);
-  sprintf (buf, "Mobs    %5d(%d new format)\n\r", top_mob_index, newmobs);
+  snprintf (buf, sizeof (buf), "Mobs    %5d(%d new format)\n\r", top_mob_index, newmobs);
   send_to_char (buf, ch);
-  sprintf (buf, "(in use)%5d\n\r", mobile_count);
+  snprintf (buf, sizeof (buf), "(in use)%5d\n\r", mobile_count);
   send_to_char (buf, ch);
-  sprintf (buf, "Objs    %5d(%d new format)\n\r", top_obj_index, newobjs);
+  snprintf (buf, sizeof (buf), "Objs    %5d(%d new format)\n\r", top_obj_index, newobjs);
   send_to_char (buf, ch);
-  sprintf (buf, "Resets  %5d\n\r", top_reset);
+  snprintf (buf, sizeof (buf), "Resets  %5d\n\r", top_reset);
   send_to_char (buf, ch);
-  sprintf (buf, "Rooms   %5d\n\r", top_room);
+  snprintf (buf, sizeof (buf), "Rooms   %5d\n\r", top_room);
   send_to_char (buf, ch);
-  sprintf (buf, "Shops   %5d\n\r", top_shop);
+  snprintf (buf, sizeof (buf), "Shops   %5d\n\r", top_shop);
   send_to_char (buf, ch);
 
-  sprintf (buf, "Strings %5d strings of %7d bytes (max %d).\n\r",
+  snprintf (buf, sizeof (buf), "Strings %5d strings of %7d bytes (max %d).\n\r",
 	   nAllocString, sAllocString, MAX_STRING);
   send_to_char (buf, ch);
 
-  sprintf (buf, "Perms   %5d blocks  of %7d bytes.\n\r",
+  snprintf (buf, sizeof (buf), "Perms   %5d blocks  of %7d bytes.\n\r",
 	   nAllocPerm, sAllocPerm);
   send_to_char (buf, ch);
 
-  return;
-}
-
-void
-do_dump (CHAR_DATA * ch, char *argument)
-{
-  int count, count2, num_pcs, aff_count;
-  CHAR_DATA *fch;
-  MOB_INDEX_DATA *pMobIndex;
-  PC_DATA *pc;
-  OBJ_DATA *obj;
-  OBJ_INDEX_DATA *pObjIndex;
-  ROOM_INDEX_DATA *room;
-  EXIT_DATA *exit;
-  DESCRIPTOR_DATA *d;
-  AFFECT_DATA *af;
-  FILE *fp;
-  int vnum, nMatch = 0;
-
-  /* open file */
-  fclose (fpReserve);
-  fp = fopen ("mem.dmp", "w");
-
-  /* report use of data structures */
-
-  num_pcs = 0;
-  aff_count = 0;
-
-  /* mobile prototypes */
-  fprintf (fp, "MobProt	%4d (%8lu bytes)\n",
-	   top_mob_index, top_mob_index * (sizeof (*pMobIndex)));
-
-  /* mobs */
-  count = 0;
-  count2 = 0;
-  for (fch = char_list; fch != NULL; fch = fch->next)
-    {
-      count++;
-      if (fch->pcdata != NULL)
-	num_pcs++;
-      for (af = fch->affected; af != NULL; af = af->next)
-	aff_count++;
-    }
-  for (fch = char_free; fch != NULL; fch = fch->next)
-    count2++;
-
-  fprintf (fp, "Mobs	%4d (%8lu bytes), %2d free (%lu bytes)\n",
-	   count, count * (sizeof (*fch)), count2, count2 * (sizeof (*fch)));
-
-  /* pcdata */
-  count = 0;
-  for (pc = pcdata_free; pc != NULL; pc = pc->next)
-    count++;
-
-  fprintf (fp, "Pcdata	%4d (%8lu bytes), %2d free (%lu bytes)\n",
-	   num_pcs, num_pcs * (sizeof (*pc)), count, count * (sizeof (*pc)));
-
-  /* descriptors */
-  count = 0;
-  count2 = 0;
-  for (d = descriptor_list; d != NULL; d = d->next)
-    count++;
-  for (d = descriptor_free; d != NULL; d = d->next)
-    count2++;
-
-  fprintf (fp, "Descs	%4d (%8lu bytes), %2d free (%lu bytes)\n",
-	   count, count * (sizeof (*d)), count2, count2 * (sizeof (*d)));
-
-  /* object prototypes */
-  for (vnum = 0; nMatch < top_obj_index; vnum++)
-    if ((pObjIndex = get_obj_index (vnum)) != NULL)
-      {
-	for (af = pObjIndex->affected; af != NULL; af = af->next)
-	  aff_count++;
-	nMatch++;
-      }
-
-  fprintf (fp, "ObjProt	%4d (%8lu bytes)\n",
-	   top_obj_index, top_obj_index * (sizeof (*pObjIndex)));
-
-
-  /* objects */
-  count = 0;
-  count2 = 0;
-  for (obj = object_list; obj != NULL; obj = obj->next)
-    {
-      count++;
-      for (af = obj->affected; af != NULL; af = af->next)
-	aff_count++;
-    }
-  for (obj = obj_free; obj != NULL; obj = obj->next)
-    count2++;
-
-  fprintf (fp, "Objs	%4d (%8lu bytes), %2d free (%lu bytes)\n",
-	   count, count * (sizeof (*obj)), count2, count2 * (sizeof (*obj)));
-
-  /* affects */
-  count = 0;
-  for (af = affect_free; af != NULL; af = af->next)
-    count++;
-
-  fprintf (fp, "Affects	%4d (%8lu bytes), %2d free (%lu bytes)\n",
-	   aff_count, aff_count * (sizeof (*af)), count,
-	   count * (sizeof (*af)));
-
-  /* rooms */
-  fprintf (fp, "Rooms	%4d (%8lu bytes)\n",
-	   top_room, top_room * (sizeof (*room)));
-
-  /* exits */
-  fprintf (fp, "Exits	%4d (%8lu bytes)\n",
-	   top_exit, top_exit * (sizeof (*exit)));
-
-  fclose (fp);
-
-  /* start printing out mobile data */
-  fp = fopen ("mob.dmp", "w");
-
-  fprintf (fp, "\nMobile Analysis\n");
-  fprintf (fp, "---------------\n");
-  nMatch = 0;
-  for (vnum = 0; nMatch < top_mob_index; vnum++)
-    if ((pMobIndex = get_mob_index (vnum)) != NULL)
-      {
-	nMatch++;
-	fprintf (fp, "#%-4d %3d active %3d killed     %s\n",
-		 pMobIndex->vnum, pMobIndex->count,
-		 pMobIndex->killed, pMobIndex->short_descr);
-      }
-  fclose (fp);
-
-  /* start printing out object data */
-  fp = fopen ("obj.dmp", "w");
-
-  fprintf (fp, "\nObject Analysis\n");
-  fprintf (fp, "---------------\n");
-  nMatch = 0;
-  for (vnum = 0; nMatch < top_obj_index; vnum++)
-    if ((pObjIndex = get_obj_index (vnum)) != NULL)
-      {
-	nMatch++;
-	fprintf (fp, "#%-4d %3d active %3d reset      %s\n",
-		 pObjIndex->vnum, pObjIndex->count,
-		 pObjIndex->reset_num, pObjIndex->short_descr);
-      }
-
-  /* close file */
-  fclose (fp);
-  fpReserve = fopen (NULL_FILE, "r");
-}
-
-
-
-/*
- * Stick a little fuzz on a number.
- */
-int
-number_fuzzy (int number)
-{
-  switch (number_bits (2))
-    {
-    case 0:
-      number -= 1;
-      break;
-    case 3:
-      number += 1;
-      break;
-    }
-
-  return UMAX (1, number);
-}
-
-
-
-/*
- * Generate a random number.
- */
-int
-number_range (int from, int to)
-{
-  int power;
-  int number;
-
-  if (from == 0 && to == 0)
-    return 0;
-
-  if ((to = to - from + 1) <= 1)
-    return from;
-
-  for (power = 2; power < to; power <<= 1)
-    ;
-
-  while ((number = number_mm () & (power - 1)) >= to)
-    ;
-
-  return from + number;
-}
-
-
-
-/*
- * Generate a percentile roll.
- */
-int
-number_percent (void)
-{
-  int percent;
-
-  while ((percent = number_mm () & (128 - 1)) > 99)
-    ;
-
-  return 1 + percent;
-}
-
-
-
-/*
- * Generate a random door.
- */
-int
-number_door (void)
-{
-  int door;
-
-  while ((door = number_mm () & (8 - 1)) > 11)
-    ;
-
-  return door;
-}
-
-int
-number_bits (int width)
-{
-  return number_mm () & ((1 << width) - 1);
-}
-
-
-
-
-/*
- * I've gotten too many bad reports on OS-supplied random number generators.
- * This is the Mitchell-Moore algorithm from Knuth Volume II.
- * Best to leave the constants alone unless you've read Knuth.
- * -- Furey
- */
-
-/* I noticed streaking with this random number generator, so I switched
-   back to the system srandom call.  If this doesn't work for you, 
-   define OLD_RAND to use the old system -- Alander */
-
-#if defined (OLD_RAND)
-static int rgiState[2 + 55];
-#endif
-
-void
-init_mm ()
-{
-#if defined (OLD_RAND)
-  int *piState;
-  int iState;
-
-  piState = &rgiState[2];
-
-  piState[-2] = 55 - 55;
-  piState[-1] = 55 - 24;
-
-  piState[0] = ((int) current_time) & ((1 << 30) - 1);
-  piState[1] = 1;
-  for (iState = 2; iState < 55; iState++)
-    {
-      piState[iState] = (piState[iState - 1] + piState[iState - 2])
-	& ((1 << 30) - 1);
-    }
-#else
-  srandom (time (NULL) ^ getpid ());
-#endif
-  strcat (boot_buf, "sign ");
-  return;
-}
-
-
-
-long
-number_mm (void)
-{
-#if defined (OLD_RAND)
-  int *piState;
-  int iState1;
-  int iState2;
-  int iRand;
-
-  piState = &rgiState[2];
-  iState1 = piState[-2];
-  iState2 = piState[-1];
-  iRand = (piState[iState1] + piState[iState2]) & ((1 << 30) - 1);
-  piState[iState1] = iRand;
-  if (++iState1 == 55)
-    iState1 = 0;
-  if (++iState2 == 55)
-    iState2 = 0;
-  piState[-2] = iState1;
-  piState[-1] = iState2;
-  return iRand >> 6;
-#else
-  return random () >> 6;
-#endif
-}
-
-
-/*
- * Roll some dice.
- */
-int
-dice (int number, int size)
-{
-  int idice;
-  int sum;
-
-  switch (size)
-    {
-    case 0:
-      return 0;
-    case 1:
-      return number;
-    }
-
-  for (idice = 0, sum = 0; idice < number; idice++)
-    sum += number_range (1, size);
-
-  return sum;
-}
-
-
-
-/*
- * Simple linear interpolation.
- */
-int
-interpolate (int level, int value_00, int value_32)
-{
-  return value_00 + level * (value_32 - value_00) / 32;
-}
-
-
-
-/*
- * Removes the tildes from a string.
- * Used for player-entered strings that go into disk files.
- */
-void
-smash_tilde (char *str)
-{
-  for (; *str != '\0'; str++)
-    {
-      if (*str == '~')
-	*str = '-';
-    }
-
-  return;
-}
-
-
-
-/*
- * Compare strings, case insensitive.
- * Return TRUE if different
- *   (compatibility with historical functions).
- */
-bool
-str_cmp (const char *astr, const char *bstr)
-{
-  if (astr == NULL)
-    {
-      bug ("Str_cmp: null astr.", 0);
-      return TRUE;
-    }
-
-  if (bstr == NULL)
-    {
-      bug ("Str_cmp: null bstr.", 0);
-      return TRUE;
-    }
-
-  for (; *astr || *bstr; astr++, bstr++)
-    {
-      if (LOWER (*astr) != LOWER (*bstr))
-	return TRUE;
-    }
-
-  return FALSE;
-}
-
-
-
-/*
- * Compare strings, case insensitive, for prefix matching.
- * Return TRUE if astr not a prefix of bstr
- *   (compatibility with historical functions).
- */
-bool
-str_prefix (const char *astr, const char *bstr)
-{
-  if (astr == NULL)
-    {
-      bug ("Strn_cmp: null astr.", 0);
-      return TRUE;
-    }
-
-  if (bstr == NULL)
-    {
-      bug ("Strn_cmp: null bstr.", 0);
-      return TRUE;
-    }
-
-  for (; *astr; astr++, bstr++)
-    {
-      if (LOWER (*astr) != LOWER (*bstr))
-	return TRUE;
-    }
-
-  return FALSE;
-}
-
-/*
- * Compare strings, case sensitive, for prefix matching.
- * Return TRUE if astr not a prefix of bstr
- *   (compatibility with historical functions).
- */
-bool
-str_prefix_c (const char *astr, const char *bstr)
-{
-  if (astr == NULL)
-    {
-      bug ("Strn_cmp: null astr.", 0);
-      return TRUE;
-    }
-
-  if (bstr == NULL)
-    {
-      bug ("Strn_cmp: null bstr.", 0);
-      return TRUE;
-    }
-
-  for (; *astr; astr++, bstr++)
-    {
-      if (*astr != *bstr)
-	return TRUE;
-    }
-
-  return FALSE;
-}
-
-/*
- * Compare strings, case insensitive, for match anywhere.
- * Returns TRUE is astr not part of bstr.
- *   (compatibility with historical functions).
- */
-bool
-str_infix (const char *astr, const char *bstr)
-{
-  int sstr1;
-  int sstr2;
-  int ichar;
-  char c0;
-
-  if ((c0 = LOWER (astr[0])) == '\0')
-    return FALSE;
-
-  sstr1 = strlen (astr);
-  sstr2 = strlen (bstr);
-
-  for (ichar = 0; ichar <= sstr2 - sstr1; ichar++)
-    {
-      if (c0 == LOWER (bstr[ichar]) && !str_prefix (astr, bstr + ichar))
-	return FALSE;
-    }
-
-  return TRUE;
-}
-
-
-/*
- * Compare strings, case sensitive, for match anywhere.
- * Returns TRUE is astr not part of bstr.
- *   (compatibility with historical functions).
- */
-bool
-str_infix_c (const char *astr, const char *bstr)
-{
-  int sstr1;
-  int sstr2;
-  int ichar;
-  char c0;
-
-  if ((c0 = astr[0]) == '\0')
-    return FALSE;
-
-  sstr1 = strlen (astr);
-  sstr2 = strlen (bstr);
-
-  for (ichar = 0; ichar <= sstr2 - sstr1; ichar++)
-    {
-      if (c0 == bstr[ichar] && !str_prefix_c (astr, bstr + ichar))
-	return FALSE;
-    }
-
-  return TRUE;
-}
-
-
-/*
- * Replace a substring in a string, case insensitive...Russ Walsh
- * looks for bstr within astr and replaces it with cstr.
- */
-char *
-str_replace (char *astr, char *bstr, char *cstr)
-{
-  char newstr[MAX_STRING_LENGTH];
-  char buf[MAX_STRING_LENGTH];
-  bool found = FALSE;
-  int sstr1, sstr2;
-  int ichar, jchar;
-  char c0, c1, c2;
-
-  if (((c0 = LOWER (astr[0])) == '\0')
-      || ((c1 = LOWER (bstr[0])) == '\0') || ((c2 = LOWER (cstr[0])) == '\0'))
-    return astr;
-
-  if (str_infix (bstr, astr))
-    return astr;
-
-/* make sure we don't start an infinite loop */
-  if (!str_infix (bstr, cstr))
-    return astr;
-
-  sstr1 = strlen (astr);
-  sstr2 = strlen (bstr);
-  jchar = 0;
-
-  if (sstr1 < sstr2)
-    return astr;
-
-  for (ichar = 0; ichar <= sstr1 - sstr2; ichar++)
-    {
-      if (c1 == LOWER (astr[ichar]) && !str_prefix (bstr, astr + ichar))
-	{
-	  found = TRUE;
-	  jchar = ichar;
-	  ichar = sstr1;
-	}
-    }
-  if (found)
-    {
-      buf[0] = '\0';
-      for (ichar = 0; ichar < jchar; ichar++)
-	{
-	  sprintf (newstr, "%c", astr[ichar]);
-	  strcat (buf, newstr);
-	}
-      strcat (buf, cstr);
-      for (ichar = jchar + sstr2; ichar < sstr1; ichar++)
-	{
-	  sprintf (newstr, "%c", astr[ichar]);
-	  strcat (buf, newstr);
-	}
-      sprintf (astr, "%s", str_replace (buf, bstr, cstr));
-      return astr;
-    }
-  return astr;
-}
-
-/*
- * Replace a substring in a string, case sensitive...Russ Walsh
- * looks for bstr within astr and replaces it with cstr.
- */
-char *
-str_replace_c (char *astr, char *bstr, char *cstr)
-{
-  char newstr[MAX_STRING_LENGTH];
-  char buf[MAX_STRING_LENGTH];
-  bool found = FALSE;
-  int sstr1, sstr2;
-  int ichar, jchar;
-  char c0, c1, c2;
-
-  if (((c0 = astr[0]) == '\0')
-      || ((c1 = bstr[0]) == '\0') || ((c2 = cstr[0]) == '\0'))
-    return astr;
-
-  if (str_infix_c (bstr, astr))
-    return astr;
-
-/* make sure we don't start an infinite loop */
-  if (!str_infix_c (bstr, cstr))
-    return astr;
-
-  sstr1 = strlen (astr);
-  sstr2 = strlen (bstr);
-  jchar = 0;
-
-  if (sstr1 < sstr2)
-    return astr;
-
-  for (ichar = 0; ichar <= sstr1 - sstr2; ichar++)
-    {
-      if (c1 == astr[ichar] && !str_prefix_c (bstr, astr + ichar))
-	{
-	  found = TRUE;
-	  jchar = ichar;
-	  ichar = sstr1;
-	}
-    }
-  if (found)
-    {
-      buf[0] = '\0';
-      for (ichar = 0; ichar < jchar; ichar++)
-	{
-	  sprintf (newstr, "%c", astr[ichar]);
-	  strcat (buf, newstr);
-	}
-      strcat (buf, cstr);
-      for (ichar = jchar + sstr2; ichar < sstr1; ichar++)
-	{
-	  sprintf (newstr, "%c", astr[ichar]);
-	  strcat (buf, newstr);
-	}
-      sprintf (astr, "%s", str_replace_c (buf, bstr, cstr));
-      return astr;
-    }
-  return astr;
-}
-
-
-/*
- * Compare strings, case insensitive, for suffix matching.
- * Return TRUE if astr not a suffix of bstr
- *   (compatibility with historical functions).
- */
-bool
-str_suffix (const char *astr, const char *bstr)
-{
-  int sstr1;
-  int sstr2;
-
-  sstr1 = strlen (astr);
-  sstr2 = strlen (bstr);
-  if (sstr1 <= sstr2 && !str_cmp (astr, bstr + sstr2 - sstr1))
-    return FALSE;
-  else
-    return TRUE;
-}
-
-
-
-/*
- * Returns an initial-capped string.
- */
-char *
-capitalize (const char *str)
-{
-  static char strcap[MAX_STRING_LENGTH];
-  int i;
-
-  for (i = 0; str[i] != '\0'; i++)
-    strcap[i] = LOWER (str[i]);
-  strcap[i] = '\0';
-  strcap[0] = UPPER (strcap[0]);
-  return strcap;
-}
-
-/* Returns a string all lowercase - Fallon*/
-char *
-lowercase (const char *str)
-{
-  static char strlow[MAX_STRING_LENGTH];
-  int i;
-
-  if (!str)
-    return NULL;
-
-  for (i = 0; str[i] != '\0'; i++)
-    strlow[i] = LOWER (str[i]);
-  strlow[i] = '\0';
-  return strlow;
-}
-
-/* Returns a string with the first letter lowercased - Fallon */
-char *
-decap (const char *str)
-{
-  static char firstlow[MAX_STRING_LENGTH];
-  int i;
-
-  for (i = 0; str[i] != '\0'; i++)
-    firstlow[i] = str[i];
-  firstlow[i] = '\0';
-  firstlow[0] = LOWER (firstlow[0]);
-  return firstlow;
-}
-
-/* Returns a string with returns inserted - Fallon */
-char *
-wrapstr (CHAR_DATA * ch, const char *str)
-{
-  static char strwrap[MAX_STRING_LENGTH];
-  size_t i;
-  int count = strlen (IS_NPC (ch) ? ch->short_descr : ch->name);
-
-  for (i = 0; i < strlen (str); i++)
-    {
-      count++;
-      if (count > 66 && str[i] == ' ')
-	{
-	  strwrap[i] = '\n';
-	  strwrap[i + 1] = '\r';
-	  count = 0;
-	}
-      else
-	{
-	  strwrap[i] = str[i];
-	}
-    }
-  strwrap[i] = '\0';
-  return strwrap;
-}
-
-/*
- * Append a string to a file.
- */
-void
-append_file (CHAR_DATA * ch, char *file, char *str)
-{
-  FILE *fp;
-
-  if (IS_NPC (ch) || str[0] == '\0')
-    return;
-
-  fclose (fpReserve);
-  if ((fp = fopen (file, "a")) == NULL)
-    {
-      perror (file);
-      send_to_char ("Could not open the file!\n\r", ch);
-    }
-  else
-    {
-      fprintf (fp, "[%5d] %s: %s\n",
-	       ch->in_room ? ch->in_room->vnum : 0, ch->name, str);
-      fclose (fp);
-    }
-
-  fpReserve = fopen (NULL_FILE, "r");
-  return;
-}
-
-
-
-/*
- * Reports a bug.
- */
-void
-bug (const char *str, int param)
-{
-  char buf[MAX_STRING_LENGTH];
-
-  if (fpArea != NULL)
-    {
-      int iLine;
-      int iChar;
-
-      if (fpArea == stdin)
-	{
-	  iLine = 0;
-	}
-      else
-	{
-	  iChar = ftell (fpArea);
-	  fseek (fpArea, 0, 0);
-	  for (iLine = 0; ftell (fpArea) < iChar; iLine++)
-	    {
-	      while (getc (fpArea) != '\n')
-		;
-	    }
-	  fseek (fpArea, iChar, 0);
-	}
-
-      sprintf (buf, "[*****] FILE: %s LINE: %d", strArea, iLine);
-      log_string (buf);
-/* RT removed because we don't want bugs shutting the mud 
-	if ( ( fp = fopen( "shutdown.txt", "a" ) ) != NULL )
-	{
-	    fprintf( fp, "[*****] %s\n", buf );
-	    fclose( fp );
-	}
-*/
-    }
-
-  strcpy (buf, "[*****] BUG: ");
-  sprintf (buf + strlen (buf), str, param);
-  log_string (buf);
-/* RT removed due to bug-file spamming 
-    fclose( fpReserve );
-    if ( ( fp = fopen( BUG_FILE, "a" ) ) != NULL )
-    {
-	fprintf( fp, "%s\n", buf );
-	fclose( fp );
-    }
-    fpReserve = fopen( NULL_FILE, "r" );
-*/
-
-  return;
-}
-
-
-
-/*
- * Writes a string to the log.
- */
-void
-log_string (const char *str)
-{
-  char *strtime;
-
-  strtime = ctime (&current_time);
-  strtime[strlen (strtime) - 1] = '\0';
-  fprintf (stderr, "%s :: %s\n", strtime, str);
-  return;
-}
-
-
-
-/*
- * This function is here to aid in debugging.
- * If the last expression in a function is another function call,
- *   gcc likes to generate a JMP instead of a CALL.
- * This is called "tail chaining."
- * It hoses the debugger call stack for that call.
- * So I make this the last call in certain critical functions,
- *   where I really need the call stack to be right for debugging!
- *
- * If you don't understand this, then LEAVE IT ALONE.
- * Don't remove any calls to tail_chain anywhere.
- *
- * -- Furey
- */
-void
-tail_chain (void)
-{
-  return;
-}
-
-
-void
-randomize_entrances (int code)
-{
-  char buf[MAX_STRING_LENGTH];
-  ROOM_INDEX_DATA *pRoomIndex;
-  ROOM_INDEX_DATA *pToRoomIndex;
-  OBJ_DATA *portal;
-  OBJ_DATA *toportal;
-  EXIT_DATA *pexit;
-  int clannum, door, todoor;
-  sh_int room, toroom;
-
-  if (code == 0)
-    chain = 3120;
-
-  if ((code == 0) || (code == ROOM_VNUM_CLANS))
-    {
-      for (clannum = 0; clannum < MAX_CLAN; clannum++)
-	{
-	  room = clan_table[clannum].entrance;
-
-	  if (room == ROOM_VNUM_ALTAR)
-	    continue;
-
-	  if ((pRoomIndex = get_room_index (room)) == NULL)
-	    {
-	      bug ("Clan Entrance: bad vnum %d.", room);
-	      continue;
-	    }
-	  for (door = 0; door < 6; door++)
-	    {
-	      if (door == 5)
-		todoor = 4;
-	      else if (door == 4)
-		todoor = 5;
-	      else if (door < 2)
-		todoor = door + 2;
-	      else
-		todoor = door - 2;
-	      portal = get_obj_exit (dir_name[door], pRoomIndex->contents);
-	      if ((portal != NULL) && (portal->item_type == ITEM_EXIT))
-		{
-		  pToRoomIndex = get_room_index (portal->value[0]);
-		  if (pToRoomIndex != NULL)
-		    {
-		      toportal =
-			get_obj_exit (dir_name[todoor],
-				      pToRoomIndex->contents);
-		      if ((toportal != NULL)
-			  && (toportal->item_type == ITEM_EXIT))
-			extract_obj (toportal);
-		    }
-		  extract_obj (portal);
-		}
-	    }
-	  for (;;)
-	    {
-	      door = number_range (0, 5);
-	      if (door == 5)
-		todoor = 4;
-	      else if (door == 4)
-		todoor = 5;
-	      else if (door < 2)
-		todoor = door + 2;
-	      else
-		todoor = door - 2;
-
-	      if ((pexit = pRoomIndex->exit[door]) == NULL)
-		{
-		  for (;;)
-		    {
-		      pToRoomIndex =
-			get_room_index (number_range (0, top_vnum));
-		      if (pToRoomIndex != NULL)
-			{
-			  if (!IS_SET (pToRoomIndex->room_flags, ROOM_PRIVATE)
-			      && !IS_SET (pToRoomIndex->room_flags, ROOM_SAFE)
-			      && !IS_SET (pToRoomIndex->room_flags,
-					  ROOM_SOLITARY)
-			      && !IS_SET (pToRoomIndex->room_flags,
-					  ROOM_IMP_ONLY)
-			      && !IS_SET (pToRoomIndex->room_flags,
-					  ROOM_GODS_ONLY)
-			      && !IS_SET (pToRoomIndex->room_flags,
-					  ROOM_HEROES_ONLY)
-			      && !IS_SET (pToRoomIndex->room_flags,
-					  ROOM_NEWBIES_ONLY)
-			      && !IS_SET (pToRoomIndex->room_flags, ROOM_LAW)
-			      && !IS_SET (pToRoomIndex->room_flags,
-					  ROOM_NOWHERE)
-			      && !IS_SET (pToRoomIndex->room_flags,
-					  ROOM_LOCKED)
-			      && (pToRoomIndex->vnum != ROOM_VNUM_CHAIN)
-			      && (pToRoomIndex->exit[todoor] == NULL)
-			      && (pToRoomIndex->exit[todoor + 6] == NULL))
-			    {
-			      portal =
-				get_obj_exit ("exit", pRoomIndex->contents);
-			      if (portal == NULL)
-				break;
-			    }
-			}
-		    }
-		  portal = create_object (get_obj_index (OBJ_VNUM_EXIT), 1);
-		  sprintf (buf, "exit %s", dir_name[door]);
-		  free_string (portal->name);
-		  portal->name = str_dup (buf);
-		  free_string (portal->short_descr);
-		  portal->short_descr = str_dup (dir_name[door]);
-		  portal->value[0] = pToRoomIndex->vnum;
-		  obj_to_room (portal, pRoomIndex);
-		  toportal = create_object (get_obj_index (OBJ_VNUM_EXIT), 1);
-		  sprintf (buf, "exit %s", dir_name[todoor]);
-		  free_string (toportal->name);
-		  toportal->name = str_dup (buf);
-		  free_string (toportal->short_descr);
-		  toportal->short_descr = str_dup (dir_name[todoor]);
-		  toportal->value[0] = pRoomIndex->vnum;
-		  obj_to_room (toportal, pToRoomIndex);
-		  buf[0] = '\0';
-		  break;
-		}
-	    }
-	}
-      if (code != 0)
-	{
-	  return;
-	}
-    }
-  if ((code == 0) || (code == ROOM_VNUM_CHAIN))
-    {
-      CHAR_DATA *rch;
-
-      if (code == ROOM_VNUM_CHAIN)
-	{
-	  if (number_range (0, 1000) < 500)
-	    return;
-	}
-      room = ROOM_VNUM_CHAIN;
-      if ((pRoomIndex = get_room_index (room)) == NULL)
-	{
-	  bug ("Chain Room: bad vnum %d.", room);
-	  return;
-	}
-      door = 5;
-      todoor = 4;
-      portal = get_obj_exit (dir_name[door], pRoomIndex->contents);
-      if ((portal != NULL) && (portal->item_type == ITEM_EXIT))
-	{
-	  toroom = portal->value[0];
-	  pToRoomIndex = get_room_index (toroom);
-	  if (pToRoomIndex != NULL)
-	    {
-	      toportal = get_obj_exit ("chain", pToRoomIndex->contents);
-	      if ((toportal != NULL) && (toportal->item_type == ITEM_EXIT))
-		extract_obj (toportal);
-	    }
-	  extract_obj (portal);
-	}
-      else
-	{
-	  toroom = 3120;
-	  chain = 3120;
-	}
-      pToRoomIndex = get_room_index (toroom);
-      for (;;)
-	{
-	  door = number_range (0, 3);
-	  if ((pexit = pToRoomIndex->exit[door]) != NULL)
-	    {
-	      if (((pexit->u1.to_room->vnum >= 3100)
-		   && (pexit->u1.to_room->vnum <= 3141)
-		   && (pexit->u1.to_room->vnum != 3106)
-		   && (pexit->u1.to_room->vnum != 3110)
-		   && (pexit->u1.to_room->vnum != 3114)
-		   && (pexit->u1.to_room->vnum != 3137)
-		   && (pexit->u1.to_room->vnum != 3138))
-		  || ((pexit->u1.to_room->vnum >= 3270)
-		      && (pexit->u1.to_room->vnum <= 3273))
-		  || (pexit->u1.to_room->vnum == 3144)
-		  || (pexit->u1.to_room->vnum == 3255))
-		{
-		  toroom = pexit->u1.to_room->vnum;
-		  break;
-		}
-	    }
-	}
-      if (door < 2)
-	todoor = door + 2;
-      else
-	todoor = door - 2;
-
-      sprintf (buf, "The chain drifts off to the %s.\n\r", dir_name[door]);
-      for (rch = pToRoomIndex->people; rch != NULL; rch = rch->next_in_room)
-	send_to_char (buf, rch);
-
-      pToRoomIndex = get_room_index (toroom);
-      sprintf (buf, "A chain drifts in from the %s.\n\r", dir_name[todoor]);
-      for (rch = pToRoomIndex->people; rch != NULL; rch = rch->next_in_room)
-	send_to_char (buf, rch);
-
-      chain = toroom;
-      door = 5;
-      todoor = 4;
-      portal = create_object (get_obj_index (OBJ_VNUM_EXIT), 1);
-      sprintf (buf, "exit %s", dir_name[door]);
-      free_string (portal->name);
-      portal->name = str_dup (buf);
-      free_string (portal->short_descr);
-      portal->short_descr = str_dup (dir_name[door]);
-      portal->value[0] = pToRoomIndex->vnum;
-      obj_to_room (portal, pRoomIndex);
-      toportal = create_object (get_obj_index (OBJ_VNUM_CHAIN), 1);
-      obj_to_room (toportal, pToRoomIndex);
-      buf[0] = '\0';
-      if (code != 0)
-	{
-	  return;
-	}
-    }
   return;
 }

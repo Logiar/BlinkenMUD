@@ -33,7 +33,7 @@ void do_wpeace(CHAR_DATA *ch, char *argument )
       
       if ( rch->fighting )
 	{
-	  sprintf( buf, "%s has declared World Peace.\n\r", ch->name );
+	  snprintf( buf, sizeof(buf), "%s has declared World Peace.\n\r", ch->name );
 	  send_to_char( buf, rch );
 	  stop_fighting( rch, TRUE );
 	}

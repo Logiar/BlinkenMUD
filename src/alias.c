@@ -63,7 +63,7 @@ substitute_alias (DESCRIPTOR_DATA * d, char *argument)
 	send_to_char ("Line to long, prefix not processed.\r\n", ch);
       else
 	{
-	  sprintf (prefix, "%s %s", ch->prefix, argument);
+	  snprintf (prefix, sizeof (prefix), "%s %s", ch->prefix, argument);
 	  argument = prefix;
 	}
     }
@@ -76,7 +76,7 @@ substitute_alias (DESCRIPTOR_DATA * d, char *argument)
       return;
     }
 
-  strcpy (buf, argument);
+  snprintf (buf, sizeof (buf), "%s", argument);
 
   for (alias = 0; alias < MAX_ALIAS; alias++)	/* go through the aliases */
     {
@@ -88,10 +88,8 @@ substitute_alias (DESCRIPTOR_DATA * d, char *argument)
 	  point = one_argument (argument, name);
 	  if (!strcmp (ch->pcdata->alias[alias], name))
 	    {
-	      buf[0] = '\0';
-	      strcat (buf, ch->pcdata->alias_sub[alias]);
-	      strcat (buf, " ");
-	      strcat (buf, point);
+	      snprintf (buf, sizeof (buf), "%s %s",
+			ch->pcdata->alias_sub[alias], point);
 	      break;
 	    }
 	  if (strlen (buf) > MAX_INPUT_LENGTH)
@@ -148,7 +146,7 @@ do_alias (CHAR_DATA * ch, char *argument)
 	      || rch->pcdata->alias_sub[pos] == NULL)
 	    break;
 
-	  sprintf (buf, "    %s:  %s\n\r", rch->pcdata->alias[pos],
+	  snprintf (buf, sizeof (buf), "    %s:  %s\n\r", rch->pcdata->alias[pos],
 		   rch->pcdata->alias_sub[pos]);
 	  send_to_char (buf, ch);
 	}
@@ -171,7 +169,7 @@ do_alias (CHAR_DATA * ch, char *argument)
 
 	  if (!str_cmp (arg, rch->pcdata->alias[pos]))
 	    {
-	      sprintf (buf, "%s aliases to '%s'.\n\r",
+	      snprintf (buf, sizeof (buf), "%s aliases to '%s'.\n\r",
 		       rch->pcdata->alias[pos], rch->pcdata->alias_sub[pos]);
 	      send_to_char (buf, ch);
 	      return;
@@ -197,7 +195,7 @@ do_alias (CHAR_DATA * ch, char *argument)
 	{
 	  free_string (rch->pcdata->alias_sub[pos]);
 	  rch->pcdata->alias_sub[pos] = str_dup (argument);
-	  sprintf (buf, "%s is now realiased to '%s'.\n\r", arg, argument);
+	  snprintf (buf, sizeof (buf), "%s is now realiased to '%s'.\n\r", arg, argument);
 	  send_to_char (buf, ch);
 	  return;
 	}
@@ -212,7 +210,7 @@ do_alias (CHAR_DATA * ch, char *argument)
   /* make a new alias */
   rch->pcdata->alias[pos] = str_dup (arg);
   rch->pcdata->alias_sub[pos] = str_dup (argument);
-  sprintf (buf, "%s is now aliased to '%s'.\n\r", arg, argument);
+  snprintf (buf, sizeof (buf), "%s is now aliased to '%s'.\n\r", arg, argument);
   send_to_char (buf, ch);
 }
 
@@ -235,7 +233,7 @@ do_unalias (CHAR_DATA * ch, char *argument)
 
   argument = one_argument (argument, arg);
 
-  if (arg == '\0')
+  if (arg[0] == '\0')
     {
       send_to_char ("Unalias what?\n\r", ch);
       return;

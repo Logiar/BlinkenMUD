@@ -83,7 +83,14 @@ load_bans (void)
   FILE *fp;
   BAN_DATA *ban_last;
 
-  strcat (boot_buf, "ators.\n\r                Le");
+  {
+    size_t boot_len = strlen (boot_buf);
+    if (boot_len < sizeof (boot_buf) - 1)
+      {
+        snprintf (boot_buf + boot_len, sizeof (boot_buf) - boot_len,
+                  "%s", "ators.\n\r                Le");
+      }
+  }
   if ((fp = fopen (BAN_FILE, "r")) == NULL)
     return;
 
@@ -118,7 +125,7 @@ check_ban (char *site, int type)
   BAN_DATA *pban;
   char host[MAX_STRING_LENGTH];
 
-  strcpy (host, capitalize (site));
+  snprintf (host, sizeof (host), "%s", capitalize (site));
   host[0] = LOWER (host[0]);
 
   for (pban = ban_list; pban != NULL; pban = pban->next)
@@ -158,7 +165,7 @@ check_adr (char *site, int type)
   char bans[MAX_STRING_LENGTH];
   char host[MAX_STRING_LENGTH];
 
-  strcpy (host, capitalize (site));
+  snprintf (host, sizeof (host), "%s", capitalize (site));
   host[0] = LOWER (host[0]);
 
   if ((strstr (bans, host) != NULL)
@@ -199,11 +206,11 @@ ban_site (CHAR_DATA * ch, char *argument, bool fPerm)
       add_buf (buffer, "Banned sites  level  type     status\n\r");
       for (pban = ban_list; pban != NULL; pban = pban->next)
 	{
-	  sprintf (buf2, "%s%s%s",
+	  snprintf (buf2, sizeof (buf2), "%s%.200s%s",
 		   IS_SET (pban->ban_flags, BAN_PREFIX) ? "*" : "",
 		   pban->name,
 		   IS_SET (pban->ban_flags, BAN_SUFFIX) ? "*" : "");
-	  sprintf (buf, "%-12s    %-3d  %-7s  %s\n\r",
+	  snprintf (buf, sizeof (buf), "%-12.12s    %-3d  %-7s  %s\n\r",
 		   buf2, pban->level,
 		   IS_SET (pban->ban_flags, BAN_NEWBIES) ? "newbies" :
 		   IS_SET (pban->ban_flags, BAN_PERMIT) ? "permit" :
@@ -289,7 +296,7 @@ ban_site (CHAR_DATA * ch, char *argument, bool fPerm)
   pban->next = ban_list;
   ban_list = pban;
   save_bans ();
-  sprintf (buf, "%s has been banned.\n\r", pban->name);
+  snprintf (buf, sizeof (buf), "%s has been banned.\n\r", pban->name);
   send_to_char (buf, ch);
   return;
 }
@@ -339,7 +346,7 @@ do_allow (CHAR_DATA * ch, char *argument)
 	    prev->next = curr->next;
 
 	  free_ban (curr);
-	  sprintf (buf, "Ban on %s lifted.\n\r", arg);
+	  snprintf (buf, sizeof (buf), "Ban on %s lifted.\n\r", arg);
 	  send_to_char (buf, ch);
 	  save_bans ();
 	  return;

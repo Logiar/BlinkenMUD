@@ -518,7 +518,7 @@ interpret (CHAR_DATA * ch, char *argument)
    * Special parsing so ' can be a command,
    *   also no spaces needed after punctuation.
    */
-  strcpy (logline, argument);
+  snprintf (logline, sizeof (logline), "%s", argument);
   if (!isalpha (argument[0]) && !isdigit (argument[0]))
     {
       command[0] = argument[0];
@@ -565,13 +565,13 @@ interpret (CHAR_DATA * ch, char *argument)
    * Log and snoop.
    */
   if (cmd_table[cmd].log == LOG_NEVER)
-    strcpy (logline, "");
+    snprintf (logline, sizeof (logline), "%s", "");
 
   if ((!IS_NPC (ch) && IS_SET (ch->act, PLR_LOG))
       || fLogAll
       || (cmd_table[cmd].log == LOG_ALWAYS && ch->level != MAX_LEVEL))
     {
-      sprintf (log_buf, "Log %s: %s", ch->name, logline);
+      snprintf (log_buf, MAX_STRING_LENGTH, "Log %s: %s", ch->name, logline);
       wiznet (log_buf, ch, NULL, WIZ_SECURE, 0, get_trust (ch));
       log_string (log_buf);
     }
@@ -800,12 +800,12 @@ number_argument (char *argument, char *arg)
 	  *pdot = '\0';
 	  number = atoi (argument);
 	  *pdot = '.';
-	  strcpy (arg, pdot + 1);
+	  snprintf (arg, MAX_INPUT_LENGTH, "%s", pdot + 1);
 	  return number;
 	}
     }
 
-  strcpy (arg, argument);
+  snprintf (arg, MAX_INPUT_LENGTH, "%s", argument);
   return 1;
 }
 
@@ -825,12 +825,12 @@ mult_argument (char *argument, char *arg)
 	  *pdot = '\0';
 	  number = atoi (argument);
 	  *pdot = '*';
-	  strcpy (arg, pdot + 1);
+	  snprintf (arg, MAX_INPUT_LENGTH, "%s", pdot + 1);
 	  return number;
 	}
     }
 
-  strcpy (arg, argument);
+  snprintf (arg, MAX_INPUT_LENGTH, "%s", argument);
   return 1;
 }
 
@@ -886,21 +886,21 @@ do_commands (CHAR_DATA * ch, char *argument)
 	{
 	  if (cmd_table[cmd].tier == 1)
 	    {
-	      sprintf (buf, "%-12s", cmd_table[cmd].name);
+	      snprintf (buf, sizeof (buf), "%-12s", cmd_table[cmd].name);
 	      send_to_char (buf, ch);
 	      if (++col % 6 == 0)
 		send_to_char ("\n\r", ch);
 	    }
 	  else if (ch->class >= MAX_CLASS / 2)
 	    {
-	      sprintf (buf, "%-12s", cmd_table[cmd].name);
+	      snprintf (buf, sizeof (buf), "%-12s", cmd_table[cmd].name);
 	      send_to_char (buf, ch);
 	      if (++col % 6 == 0)
 		send_to_char ("\n\r", ch);
 	    }
 	  else if (ch->level >= LEVEL_HERO)
 	    {
-	      sprintf (buf, "%-12s", cmd_table[cmd].name);
+	      snprintf (buf, sizeof (buf), "%-12s", cmd_table[cmd].name);
 	      send_to_char (buf, ch);
 	      if (++col % 6 == 0)
 		send_to_char ("\n\r", ch);
@@ -935,7 +935,7 @@ do_wizhelp (CHAR_DATA * ch, char *argument)
 	      && cmd_table[cmd].show))
 
 	{
-	  sprintf (buf, "%-12s", cmd_table[cmd].name);
+	  snprintf (buf, sizeof (buf), "%-12s", cmd_table[cmd].name);
 	  send_to_char (buf, ch);
 	  if (++col % 6 == 0)
 	    send_to_char ("\n\r", ch);

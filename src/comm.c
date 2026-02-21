@@ -297,7 +297,7 @@ main (int argc, char **argv)
    */
   gettimeofday (&now_time, NULL);
   current_time = (time_t) now_time.tv_sec;
-  strcpy (str_boot_time, ctime (&current_time));
+  snprintf (str_boot_time, sizeof (str_boot_time), "%s", ctime (&current_time));
 
 
   /*
@@ -348,7 +348,7 @@ main (int argc, char **argv)
   control = init_socket (port);
   wwwcontrol = init_socket (wwwport);
   boot_db ();
-  sprintf (log_buf, "BlinkenMuD is ready to rock on ports %d and %d.", port,
+  snprintf (log_buf, MAX_STRING_LENGTH, "BlinkenMuD is ready to rock on ports %d and %d.", port,
 	   wwwport);
   log_string (log_buf);
   game_loop_unix (control, wwwcontrol);
@@ -715,10 +715,10 @@ init_descriptor (int control)
       int addr;
 
       addr = ntohl (sock.sin_addr.s_addr);
-      sprintf (buf, "%d.%d.%d.%d",
+      snprintf (buf, sizeof (buf), "%d.%d.%d.%d",
 	       (addr >> 24) & 0xFF, (addr >> 16) & 0xFF,
 	       (addr >> 8) & 0xFF, (addr) & 0xFF);
-      sprintf (log_buf, "Sock.sinaddr:  %s", buf);
+      snprintf (log_buf, MAX_STRING_LENGTH, "Sock.sinaddr:  %.4500s", buf);
       log_string (log_buf);
       from = gethostbyaddr ((char *) &sock.sin_addr,
 			    sizeof (sock.sin_addr), AF_INET);
@@ -828,7 +828,6 @@ init_descriptor_www (int wwwcontrol)
   int iClan;
   int iLevelLower;
   int iLevelUpper;
-  int nMatch;
   FILE *fg;
   bool rgfClass[MAX_CLASS];
   bool rgfRace[MAX_PC_RACE];
@@ -884,10 +883,10 @@ init_descriptor_www (int wwwcontrol)
       int addr;
 
       addr = ntohl (sock.sin_addr.s_addr);
-      sprintf (buf, "%d.%d.%d.%d",
+      snprintf (buf, sizeof (buf), "%d.%d.%d.%d",
 	       (addr >> 24) & 0xFF, (addr >> 16) & 0xFF,
 	       (addr >> 8) & 0xFF, (addr) & 0xFF);
-      sprintf (log_buf, "Sock.sinaddr:  %s", buf);
+      snprintf (log_buf, MAX_STRING_LENGTH, "Sock.sinaddr:  %.4500s", buf);
       from = gethostbyaddr ((char *) &sock.sin_addr,
 			    sizeof (sock.sin_addr), AF_INET);
       dnew->host = str_dup (from ? from->h_name : buf);
@@ -902,10 +901,9 @@ init_descriptor_www (int wwwcontrol)
   for (iClan = 0; iClan < MAX_CLAN; iClan++)
     rgfClan[iClan] = FALSE;
 
-  nMatch = 0;
   buf[0] = '\0';
   //output = new_buf ();
-  sprintf (buf, WWW_WHO);
+  snprintf (buf, sizeof (buf), WWW_WHO);
   if ((fg = fopen (buf, "w")) == NULL)
     {
       bug ("WWW-Who: fopen", 0);
@@ -946,7 +944,6 @@ init_descriptor_www (int wwwcontrol)
 	  || (fClanRestrict && !rgfClan[wch->clan]))
 	continue;
 
-      nMatch++;
 
       /*
        * Figure out what to print for class.
@@ -958,38 +955,38 @@ init_descriptor_www (int wwwcontrol)
        */
       if (!is_clan (wch))
 	{
-	  sprintf (clandat, "X,3,3");
+	  snprintf (clandat, sizeof (clandat), "X,3,3");
 	}
       else
 	{
 	  if (clan_table[wch->clan].independent)
 	    {
-	      sprintf (clandat, "%s,0,0", clan_table[wch->clan].who_name);
+	      snprintf (clandat, sizeof (clandat), "%s,0,0", clan_table[wch->clan].who_name);
 	    }
 	  else if (is_clead (wch) && is_pkill (wch))
 	    {
-	      sprintf (clandat, "%s,1,1", clan_table[wch->clan].who_name);
+	      snprintf (clandat, sizeof (clandat), "%s,1,1", clan_table[wch->clan].who_name);
 	    }
 	  else if (is_clead (wch) && !is_pkill (wch))
 	    {
-	      sprintf (clandat, "%s,2,1", clan_table[wch->clan].who_name);
+	      snprintf (clandat, sizeof (clandat), "%s,2,1", clan_table[wch->clan].who_name);
 	    }
 	  else if (is_pkill (wch))
 	    {
-	      sprintf (clandat, "%s,1,0", clan_table[wch->clan].who_name);
+	      snprintf (clandat, sizeof (clandat), "%s,1,0", clan_table[wch->clan].who_name);
 	    }
 	  else
 	    {
-	      sprintf (clandat, "%s,2,0", clan_table[wch->clan].who_name);
+	      snprintf (clandat, sizeof (clandat), "%s,2,0", clan_table[wch->clan].who_name);
 	    }
 	}
-      sprintf (buf2, "%s", IS_NPC (wch) ? "" : wch->pcdata->title);
+      snprintf (buf2, sizeof (buf2), "%.3000s", IS_NPC (wch) ? "" : wch->pcdata->title);
       normalize_colour_markers_for_www (buf2);
-      sprintf (buf, "%3d,%s,%s,%s,%s%s\n\r", wch->level,
+      snprintf (buf, sizeof (buf), "%3d,%.200s,%.200s,%.200s,%.200s%.3000s\n\r", wch->level,
 	       wch->race <
 	       MAX_PC_RACE ? pc_race_table[wch->race].who_name : "      ",
 	       class, clandat, wch->name, buf2);
-      fprintf (fg, buf);
+      fprintf (fg, "%s", buf);
     }
   fclose (fg);
   close (desc);
@@ -1023,16 +1020,12 @@ close_socket (DESCRIPTOR_DATA * dclose)
 
   if ((ch = dclose->character) != NULL)
     {
-      sprintf (log_buf, "Closing link to %s.", ch->name);
+      snprintf (log_buf, MAX_STRING_LENGTH, "Closing link to %s.", ch->name);
       log_string (log_buf);
       if (dclose->connected == CON_PLAYING)
 	{
 	  act ("$n has lost $s link.", ch, NULL, NULL, TO_ROOM);
 	  wiznet ("Net death has claimed $N.", ch, NULL, WIZ_LINKS, 0, 0);
-	  {
-	    char buf[MAX_STRING_LENGTH];
-	    act (buf, ch, NULL, NULL, TO_ALL);
-	  }
 	  ch->desc = NULL;
 	}
       else
@@ -1080,7 +1073,7 @@ read_from_descriptor (DESCRIPTOR_DATA * d)
   iStart = strlen (d->inbuf);
   if (iStart >= sizeof (d->inbuf) - 10)
     {
-      sprintf (log_buf, "%s input overflow!", d->host);
+      snprintf (log_buf, MAX_STRING_LENGTH, "%s input overflow!", d->host);
       log_string (log_buf);
       write_to_descriptor (d->descriptor,
 			   "\n\r*** PUT A LID ON IT!!! ***\n\r", 0);
@@ -1189,7 +1182,7 @@ read_from_buffer (DESCRIPTOR_DATA * d)
 	  d->repeat++;
 	  if (d->repeat == 25)
 	    {
-	      sprintf (log_buf, "%s input spamming!", d->host);
+	      snprintf (log_buf, MAX_STRING_LENGTH, "%s input spamming!", d->host);
 	      log_string (log_buf);
 	      wiznet ("Spam spam spam $N spam spam spam spam spam!",
 		      d->character, NULL, WIZ_SPAM, 0,
@@ -1203,7 +1196,7 @@ read_from_buffer (DESCRIPTOR_DATA * d)
 	    }
 	  else if (d->repeat == 35)
 	    {
-	      sprintf (log_buf, "%s still input spamming!", d->host);
+	      snprintf (log_buf, MAX_STRING_LENGTH, "%s still input spamming!", d->host);
 	      log_string (log_buf);
 	      wiznet ("Spam spam spam $N spam spam spam spam spam!",
 		      d->character, NULL, WIZ_SPAM, 0,
@@ -1222,7 +1215,7 @@ read_from_buffer (DESCRIPTOR_DATA * d)
 	      d->repeat = 0;
 	      write_to_descriptor (d->descriptor,
 				   "\n\r*** I WARNED YOU!!! ***\n\r", 0);
-	      strcpy (d->incomm, "quit");
+	      snprintf (d->incomm, sizeof (d->incomm), "quit");
 	    }
 	}
     }
@@ -1232,9 +1225,9 @@ read_from_buffer (DESCRIPTOR_DATA * d)
    * Do '!' substitution.
    */
   if (d->incomm[0] == '!')
-    strcpy (d->incomm, d->inlast);
+    snprintf (d->incomm, sizeof (d->incomm), "%s", d->inlast);
   else
-    strcpy (d->inlast, d->incomm);
+    snprintf (d->inlast, sizeof (d->inlast), "%s", d->incomm);
 
   /*
    * Shift the input buffer.
@@ -1283,55 +1276,55 @@ process_output (DESCRIPTOR_DATA * d, bool fPrompt)
 	    percent = -1;
 
 	  if (percent >= 100)
-	    sprintf (wound, "[`c********************`x]");
+	    snprintf (wound, sizeof (wound), "[`c********************`x]");
 	  else if (percent >= 95)
-	    sprintf (wound, "[`@******************* `x]");
+	    snprintf (wound, sizeof (wound), "[`@******************* `x]");
 	  else if (percent >= 90)
-	    sprintf (wound, "[`@******************  `x]");
+	    snprintf (wound, sizeof (wound), "[`@******************  `x]");
 	  else if (percent >= 85)
-	    sprintf (wound, "[`@*****************   `x]");
+	    snprintf (wound, sizeof (wound), "[`@*****************   `x]");
 	  else if (percent >= 80)
-	    sprintf (wound, "[`@****************    `x]");
+	    snprintf (wound, sizeof (wound), "[`@****************    `x]");
 	  else if (percent >= 75)
-	    sprintf (wound, "%s", "[`@**********75%**     `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`@**********75%**     `x]");
 	  else if (percent >= 70)
-	    sprintf (wound, "[`2**************      `x]");
+	    snprintf (wound, sizeof (wound), "[`2**************      `x]");
 	  else if (percent >= 65)
-	    sprintf (wound, "[`2*************       `x]");
+	    snprintf (wound, sizeof (wound), "[`2*************       `x]");
 	  else if (percent >= 60)
-	    sprintf (wound, "[`#************        `x]");
+	    snprintf (wound, sizeof (wound), "[`#************        `x]");
 	  else if (percent >= 55)
-	    sprintf (wound, "[`#***********         `x]");
+	    snprintf (wound, sizeof (wound), "[`#***********         `x]");
 	  else if (percent >= 50)
-	    sprintf (wound, "%s", "[`3**********50%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`3**********50%       `x]");
 	  else if (percent >= 45)
-	    sprintf (wound, "%s", "[`3********* 45%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`3********* 45%       `x]");
 	  else if (percent >= 40)
-	    sprintf (wound, "%s", "[`%********  40%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`%********  40%       `x]");
 	  else if (percent >= 35)
-	    sprintf (wound, "%s", "[`%*******   35%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`%*******   35%       `x]");
 	  else if (percent >= 30)
-	    sprintf (wound, "%s", "[`5******    30%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`5******    30%       `x]");
 	  else if (percent >= 25)
-	    sprintf (wound, "%s", "[`5*****     25%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`5*****     25%       `x]");
 	  else if (percent >= 20)
-	    sprintf (wound, "%s", "[`!****      20%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`!****      20%       `x]");
 	  else if (percent >= 15)
-	    sprintf (wound, "%s", "[`!**        15%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`!**        15%       `x]");
 	  else if (percent >= 10)
-	    sprintf (wound, "%s", "[`1**        10%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`1**        10%       `x]");
 	  else if (percent >= 5)
-	    sprintf (wound, "%s", "[`1*          5%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`1*          5%       `x]");
 	  else if (percent >= 0)
-	    sprintf (wound, "[`r      CRITICAL      `x]");
-	  sprintf (buf, "%s`x: %s`x\n\r",
+	    snprintf (wound, sizeof (wound), "[`r      CRITICAL      `x]");
+	  snprintf (buf, sizeof (buf), "%s`x: %s`x\n\r",
 		   IS_NPC (victim) ? victim->short_descr : victim->name,
 		   wound);
 	  buf[0] = UPPER (buf[0]);
 	  send_to_char (buf, ch);
 	  if (victim->stunned)
 	    {
-	      sprintf (buf, "`f%s is stunned.`x\n\r",
+	      snprintf (buf, sizeof (buf), "`f%s is stunned.`x\n\r",
 		       IS_NPC (victim) ? victim->short_descr : victim->name);
 	      send_to_char (buf, ch);
 	    }
@@ -1340,55 +1333,55 @@ process_output (DESCRIPTOR_DATA * d, bool fPrompt)
 	  else
 	    percent = -1;
 	  if (percent >= 100)
-	    sprintf (wound, "[`c********************`x]");
+	    snprintf (wound, sizeof (wound), "[`c********************`x]");
 	  else if (percent >= 95)
-	    sprintf (wound, "[`@******************* `x]");
+	    snprintf (wound, sizeof (wound), "[`@******************* `x]");
 	  else if (percent >= 90)
-	    sprintf (wound, "[`@******************  `x]");
+	    snprintf (wound, sizeof (wound), "[`@******************  `x]");
 	  else if (percent >= 85)
-	    sprintf (wound, "[`@*****************   `x]");
+	    snprintf (wound, sizeof (wound), "[`@*****************   `x]");
 	  else if (percent >= 80)
-	    sprintf (wound, "[`@****************    `x]");
+	    snprintf (wound, sizeof (wound), "[`@****************    `x]");
 	  else if (percent >= 75)
-	    sprintf (wound, "%s", "[`@**********75%**     `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`@**********75%**     `x]");
 	  else if (percent >= 70)
-	    sprintf (wound, "[`2**************      `x]");
+	    snprintf (wound, sizeof (wound), "[`2**************      `x]");
 	  else if (percent >= 65)
-	    sprintf (wound, "[`2*************       `x]");
+	    snprintf (wound, sizeof (wound), "[`2*************       `x]");
 	  else if (percent >= 60)
-	    sprintf (wound, "[`#************        `x]");
+	    snprintf (wound, sizeof (wound), "[`#************        `x]");
 	  else if (percent >= 55)
-	    sprintf (wound, "[`#***********         `x]");
+	    snprintf (wound, sizeof (wound), "[`#***********         `x]");
 	  else if (percent >= 50)
-	    sprintf (wound, "%s", "[`3**********50%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`3**********50%       `x]");
 	  else if (percent >= 45)
-	    sprintf (wound, "%s", "[`3********* 45%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`3********* 45%       `x]");
 	  else if (percent >= 40)
-	    sprintf (wound, "%s", "[`%********  40%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`%********  40%       `x]");
 	  else if (percent >= 35)
-	    sprintf (wound, "%s", "[`%*******   35%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`%*******   35%       `x]");
 	  else if (percent >= 30)
-	    sprintf (wound, "%s", "[`5******    30%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`5******    30%       `x]");
 	  else if (percent >= 25)
-	    sprintf (wound, "%s", "[`5*****     25%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`5*****     25%       `x]");
 	  else if (percent >= 20)
-	    sprintf (wound, "%s", "[`!****      20%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`!****      20%       `x]");
 	  else if (percent >= 15)
-	    sprintf (wound, "%s", "[`!**        15%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`!**        15%       `x]");
 	  else if (percent >= 10)
-	    sprintf (wound, "%s", "[`1**        10%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`1**        10%       `x]");
 	  else if (percent >= 5)
-	    sprintf (wound, "%s", "[`1*          5%       `x]");
+	    snprintf (wound, sizeof (wound), "%s", "[`1*          5%       `x]");
 	  else if (percent >= 0)
-	    sprintf (wound, "[`r      CRITICAL      `x]");
-	  sprintf (buf, "You: %s\n\r", wound);
+	    snprintf (wound, sizeof (wound), "[`r      CRITICAL      `x]");
+	  snprintf (buf, sizeof (buf), "You: %s\n\r", wound);
 	  buf[0] = UPPER (buf[0]);
 	  send_to_char (buf, ch);
 
 
 	  if (victim->stunned)
 	    {
-	      sprintf (buf, "`f%s is stunned.`x\n\r",
+	      snprintf (buf, sizeof (buf), "`f%s is stunned.`x\n\r",
 		       IS_NPC (victim) ? victim->short_descr : victim->name);
 	      send_to_char (buf, ch);
 	    }
@@ -1460,11 +1453,11 @@ bust_a_prompt (CHAR_DATA * ch)
   char *door_name[] = { "north", "east", "south", "west", "up", "down" };
   int door, outlet;
 
-  sprintf (buf2, "%s", ch->prompt);
-  if (buf2 == NULL || buf2[0] == '\0')
+  snprintf (buf2, sizeof (buf2), "%s", ch->prompt);
+  if (buf2[0] == '\0')
     {
-      sprintf (buf, "<%dhp %dm %dmv> %s",
-	       ch->hit, ch->mana, ch->move, ch->prefix);
+      snprintf (buf, sizeof (buf), "<%dhp %dm %dmv> %s",
+		ch->hit, ch->mana, ch->move, ch->prefix);
       send_to_char (buf, ch);
       return;
     }
@@ -1493,7 +1486,8 @@ bust_a_prompt (CHAR_DATA * ch)
 	{
 	  found = TRUE;
 	  round = TRUE;
-	  strcat (doors, dir_name[door]);
+	  snprintf (doors + strlen (doors), sizeof (doors) - strlen (doors), "%s",
+		   dir_name[door]);
 	}
       if (!round)
 	{
@@ -1504,76 +1498,77 @@ bust_a_prompt (CHAR_DATA * ch)
 	    {
 	      found = TRUE;
 	      round = TRUE;
-	      strcat (doors, dir_name[door]);
+	      snprintf (doors + strlen (doors), sizeof (doors) - strlen (doors), "%s",
+		       dir_name[door]);
 	    }
 	}
     }
   if (!found)
     {
-      sprintf (buf, "none");
+      snprintf (buf, sizeof (buf), "none");
     }
   else
     {
-      sprintf (buf, "%s", doors);
+      snprintf (buf, sizeof (buf), "%s", doors);
     }
   str_replace_c (buf2, "%e", buf);
   str_replace_c (buf2, "%c", "\n\r");
-  sprintf (buf, "%d", ch->hit);
+  snprintf (buf, sizeof (buf), "%d", ch->hit);
   str_replace_c (buf2, "%h", buf);
-  sprintf (buf, "%d", ch->max_hit);
+  snprintf (buf, sizeof (buf), "%d", ch->max_hit);
   str_replace_c (buf2, "%H", buf);
-  sprintf (buf, "%d", ch->mana);
+  snprintf (buf, sizeof (buf), "%d", ch->mana);
   str_replace_c (buf2, "%m", buf);
-  sprintf (buf, "%d", ch->max_mana);
+  snprintf (buf, sizeof (buf), "%d", ch->max_mana);
   str_replace_c (buf2, "%M", buf);
-  sprintf (buf, "%d", ch->move);
+  snprintf (buf, sizeof (buf), "%d", ch->move);
   str_replace_c (buf2, "%v", buf);
-  sprintf (buf, "%d", ch->max_move);
+  snprintf (buf, sizeof (buf), "%d", ch->max_move);
   str_replace_c (buf2, "%V", buf);
-  sprintf (buf, "%ld", ch->exp);
+  snprintf (buf, sizeof (buf), "%ld", ch->exp);
   str_replace_c (buf2, "%x", buf);
   if (!IS_NPC (ch))
-    sprintf (buf, "%ld",
+    snprintf (buf, sizeof (buf), "%ld",
 	     (ch->level + 1) * exp_per_level (ch,
 					      ch->pcdata->points) - ch->exp);
   else
-    sprintf (buf, "none");
+    snprintf (buf, sizeof (buf), "none");
   str_replace_c (buf2, "%X", buf);
-  sprintf (buf, "%ld", ch->platinum);
+  snprintf (buf, sizeof (buf), "%ld", ch->platinum);
   str_replace_c (buf2, "%p", buf);
-  sprintf (buf, "%ld", ch->gold);
+  snprintf (buf, sizeof (buf), "%ld", ch->gold);
   str_replace_c (buf2, "%g", buf);
-  sprintf (buf, "%ld", ch->silver);
+  snprintf (buf, sizeof (buf), "%ld", ch->silver);
   str_replace_c (buf2, "%s", buf);
   if (ch->level > 9)
-    sprintf (buf, "%d", ch->alignment);
+    snprintf (buf, sizeof (buf), "%d", ch->alignment);
   else
-    sprintf (buf, "%s", IS_GOOD (ch) ? "good" : IS_EVIL (ch) ?
+    snprintf (buf, sizeof (buf), "%s", IS_GOOD (ch) ? "good" : IS_EVIL (ch) ?
 	     "evil" : "neutral");
   str_replace_c (buf2, "%a", buf);
   if (ch->in_room != NULL)
-    sprintf (buf, "%s",
+    snprintf (buf, sizeof (buf), "%s",
 	     ((!IS_NPC (ch) && IS_SET (ch->act, PLR_HOLYLIGHT)) ||
 	      (!IS_AFFECTED (ch, AFF_BLIND) && !room_is_dark (ch->in_room)))
 	     ? ch->in_room->name : "darkness");
   else
-    sprintf (buf, " ");
+    snprintf (buf, sizeof (buf), " ");
   str_replace_c (buf2, "%r", buf);
   if (IS_IMMORTAL (ch) && ch->in_room != NULL)
-    sprintf (buf, "%d", ch->in_room->vnum);
+    snprintf (buf, sizeof (buf), "%d", ch->in_room->vnum);
   else
-    sprintf (buf, " ");
+    snprintf (buf, sizeof (buf), " ");
   str_replace_c (buf2, "%o", buf);
   if (IS_IMMORTAL (ch))
-    sprintf (buf, "%s", olc_ed_name (ch));
+    snprintf (buf, sizeof (buf), "%s", olc_ed_name (ch));
   str_replace_c (buf2, "%O", buf);
   if (IS_IMMORTAL (ch))
-    sprintf (buf, "%s", olc_ed_vnum (ch));
+    snprintf (buf, sizeof (buf), "%s", olc_ed_vnum (ch));
   str_replace_c (buf2, "%R", buf);
   if (IS_IMMORTAL (ch) && ch->in_room != NULL)
-    sprintf (buf, "%s", ch->in_room->area->name);
+    snprintf (buf, sizeof (buf), "%s", ch->in_room->area->name);
   else
-    sprintf (buf, " ");
+    snprintf (buf, sizeof (buf), " ");
   str_replace_c (buf2, "%z", buf);
 
   send_to_char (buf2, ch);
@@ -1731,7 +1726,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 
       if (IS_SET (ch->act, PLR_DENY))
 	{
-	  sprintf (log_buf, "Denying access to %s@%s.", argument, d->host);
+	  snprintf (log_buf, MAX_STRING_LENGTH, "Denying access to %s@%s.", argument, d->host);
 	  log_string (log_buf);
 	  write_to_buffer (d, "You are denied access.\n\r", 0);
 	  close_socket (d);
@@ -1800,7 +1795,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	      return;
 	    }
 
-	  sprintf (buf, "Did I get that right, %s (Y/N)? ", argument);
+	  snprintf (buf, sizeof (buf), "Did I get that right, %s (Y/N)? ", argument);
 	  write_to_buffer (d, buf, 0);
 	  d->connected = CON_CONFIRM_NEW_NAME;
 	  return;
@@ -1826,7 +1821,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
       if (check_reconnect (d, ch->name, TRUE))
 	return;
 
-      sprintf (log_buf, "%s@%s has connected.", ch->name, d->host);
+      snprintf (log_buf, MAX_STRING_LENGTH, "%s@%s has connected.", ch->name, d->host);
       log_string (log_buf);
       wiznet (log_buf, NULL, NULL, WIZ_SITES, 0, get_trust (ch));
       ch->pcdata->socket = str_dup (d->host);
@@ -1908,7 +1903,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	{
 	case 'y':
 	case 'Y':
-	  sprintf (buf, "New character.\n\rGive me a password for %s: %s",
+	  snprintf (buf, sizeof (buf), "New character.\n\rGive me a password for %s: %s",
 		   ch->name, echo_off_str);
 	  ch->pcdata->socket = str_dup (d->host);
 	  write_to_buffer (d, buf, 0);
@@ -2094,7 +2089,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 
       write_to_buffer (d, echo_on_str, 0);
       write_to_buffer (d, "The following classes are available:\n\r\n\r", 0);
-      strcpy (buf, "Select a class [");
+      snprintf (buf, sizeof (buf), "Select a class [");
       for (iClass = 0; iClass < MAX_CLASS; iClass++)
 	{
 	  if (!class_table[iClass].remort_class
@@ -2102,13 +2097,14 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 		  && IS_SET (ch->act, PLR_REMORT)))
 	    {
 	      if (iClass > 0)
-		strcat (buf, " - ");
-	      strcat (buf, class_table[iClass].name);
-	      strcat (buf, " - ");
+		snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), " - ");
+	      snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), "%s",
+		       class_table[iClass].name);
+	      snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), " - ");
 	    }
 	}
 
-      strcat (buf, "]: ");
+      snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), "]: ");
       write_to_buffer (d, buf, 0);
       d->connected = CON_GET_NEW_CLASS;
       break;
@@ -2126,7 +2122,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 
       ch->class = iClass;
 
-      sprintf (log_buf, "%s@%s new player.", ch->name, d->host);
+      snprintf (log_buf, MAX_STRING_LENGTH, "%s@%s new player.", ch->name, d->host);
       log_string (log_buf);
       wiznet ("Newbie alert!  $N sighted.", ch, NULL, WIZ_NEWBIE, 0, 0);
       wiznet (log_buf, NULL, NULL, WIZ_SITES, 0, get_trust (ch));
@@ -2198,10 +2194,11 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	  for (i = 0; weapon_table[i].name != NULL; i++)
 	    if (ch->pcdata->learned[*weapon_table[i].gsn] > 0)
 	      {
-		strcat (buf, weapon_table[i].name);
-		strcat (buf, " ");
+		snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), "%s",
+			  weapon_table[i].name);
+		snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), " ");
 	      }
-	  strcat (buf, "\n\rYour choice? ");
+	  snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), "\n\rYour choice? ");
 	  write_to_buffer (d, buf, 0);
 	  d->connected = CON_PICK_WEAPON;
 	  break;
@@ -2223,10 +2220,11 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	  for (i = 0; weapon_table[i].name != NULL; i++)
 	    if (ch->pcdata->learned[*weapon_table[i].gsn] > 0)
 	      {
-		strcat (buf, weapon_table[i].name);
-		strcat (buf, " ");
+		snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), "%s",
+			  weapon_table[i].name);
+		snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), " ");
 	      }
-	  strcat (buf, "\n\rYour choice? ");
+	  snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), "\n\rYour choice? ");
 	  write_to_buffer (d, buf, 0);
 	  return;
 	}
@@ -2241,9 +2239,9 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
       send_to_char ("\n\r", ch);
       if (!str_cmp (argument, "done"))
 	{
-	  sprintf (buf, "Creation points: %d\n\r", ch->pcdata->points);
+	  snprintf (buf, sizeof (buf), "Creation points: %d\n\r", ch->pcdata->points);
 	  send_to_char (buf, ch);
-	  sprintf (buf, "Experience per level: %ld\n\r",
+	  snprintf (buf, sizeof (buf), "Experience per level: %ld\n\r",
 		   (long) exp_per_level (ch, ch->gen_data->points_chosen));
 	  if (ch->pcdata->points < 40)
 	    ch->train = (40 - ch->pcdata->points + 1) / 2;
@@ -2258,10 +2256,11 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	  for (i = 0; weapon_table[i].name != NULL; i++)
 	    if (ch->pcdata->learned[*weapon_table[i].gsn] > 0)
 	      {
-		strcat (buf, weapon_table[i].name);
-		strcat (buf, " ");
+		snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), "%s",
+			  weapon_table[i].name);
+		snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), " ");
 	      }
-	  strcat (buf, "\n\rYour choice? ");
+	  snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), "\n\rYour choice? ");
 	  write_to_buffer (d, buf, 0);
 	  d->connected = CON_PICK_WEAPON;
 	  break;
@@ -2328,7 +2327,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	  ch->move = ch->max_move;
 	  ch->train = 23;
 	  ch->practice = 25;
-	  sprintf (buf, "the %s",
+	  snprintf (buf, sizeof (buf), "the %s",
 		   title_table[ch->class][ch->level]
 		   [ch->sex == SEX_FEMALE ? 1 : 0]);
 	  set_title (ch, buf);
@@ -2532,7 +2531,7 @@ check_reconnect (DESCRIPTOR_DATA * d, char *name, bool fConn)
 	      ch->timer = 0;
 	      if (ch->tells)
 		{
-		  sprintf (buf,
+		  snprintf (buf, sizeof (buf),
 			   "Reconnecting.  You have `R%d`x tells waiting.\n\r",
 			   ch->tells);
 		  send_to_char (buf, ch);
@@ -2548,7 +2547,7 @@ check_reconnect (DESCRIPTOR_DATA * d, char *name, bool fConn)
 		  && obj->item_type == ITEM_LIGHT && obj->value[2] != 0)
 		--ch->in_room->light;
 
-	      sprintf (log_buf, "%s@%s reconnected.", ch->name, d->host);
+	      snprintf (log_buf, MAX_STRING_LENGTH, "%s@%s reconnected.", ch->name, d->host);
 	      log_string (log_buf);
 	      wiznet ("$N groks the fullness of $S link.",
 		      ch, NULL, WIZ_LINKS, 0, 0);
@@ -2657,7 +2656,8 @@ send_to_char (const char *txt, CHAR_DATA * ch)
 		      *++point2 = '\0';
 		      continue;
 		    }
-		  strcat (buf, colour (*point, ch));
+		  snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), "%s",
+			    colour (*point, ch));
 		  for (point2 = buf; *point2; point2++)
 		    ;
 		  continue;
@@ -2713,7 +2713,7 @@ page_to_char_bw (const char *txt, CHAR_DATA * ch)
       }
 
   ch->desc->showstr_head = alloc_mem (strlen (txt) + 1);
-  strcpy (ch->desc->showstr_head, txt);
+  snprintf (ch->desc->showstr_head, strlen (txt) + 1, "%s", txt);
   ch->desc->showstr_point = ch->desc->showstr_head;
   show_string (ch->desc, "");
 
@@ -2753,7 +2753,8 @@ page_to_char (const char *txt, CHAR_DATA * ch)
 		      *++point2 = '\0';
 		      continue;
 		    }
-		  strcat (buf, colour (*point, ch));
+		  snprintf (buf + strlen (buf), sizeof (buf) - strlen (buf), "%s",
+			    colour (*point, ch));
 		  for (point2 = buf; *point2; point2++)
 		    ;
 		  continue;
@@ -2836,7 +2837,8 @@ show_string (struct descriptor_data *d, char *input)
 	{
 	  *scan = '\0';
 	  write_to_buffer (d, buffer, strlen (buffer));
-	  for (chk = d->showstr_point; isspace (*chk); chk++);
+	  for (chk = d->showstr_point; isspace (*chk); chk++)
+	    ;
 	  {
 	    if (!*chk)
 	      {
@@ -3099,7 +3101,8 @@ act_new (const char *format, CHAR_DATA * ch, const void *arg1,
 			      *++i2 = '\0';
 			      continue;
 			    }
-			  strcat (fixed, colour (*i, to));
+			  snprintf (fixed + strlen (fixed), sizeof (fixed) - strlen (fixed),
+				    "%s", colour (*i, to));
 			  for (i2 = fixed; *i2; i2++)
 			    ;
 			  continue;
@@ -3165,11 +3168,11 @@ colour_clear (CHAR_DATA * ch)
 {
   if (ch->color < 17)
     {
-      strcpy(clcode, clearColor[ch->color]);
+      snprintf(clcode, sizeof(clcode), "%s", clearColor[ch->color]);
     }
   else
     {
-      strcpy(clcode, CLEAR);
+      snprintf(clcode, sizeof(clcode), "%s", CLEAR);
     }
   return clcode;
 }
@@ -3181,11 +3184,11 @@ colour_channel (int colornum, CHAR_DATA * ch)
 
   if (ch->color < 17)
     {
-      strcpy(clcode, channelColors[ch->color]);
+      snprintf(clcode, sizeof(clcode), "%s", channelColors[ch->color]);
     }
   else
     {
-      strcpy(clcode, CLEAR);
+      snprintf(clcode, sizeof(clcode), "%s", CLEAR);
     }
 
   return clcode;
@@ -3312,7 +3315,7 @@ colour (char type, CHAR_DATA * ch)
 	{
 	  if (mapping[i].code == type)
 	    {
-	      strcpy(clcode, mapping[i].colour);
+	      snprintf(clcode, sizeof(clcode), "%s", mapping[i].colour);
 	      return clcode;
 	    }
 	}
