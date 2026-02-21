@@ -2,14 +2,14 @@ NAME    = BlinkenMUD
 CC      = gcc
 PROF    = -O -ggdb
 BASE_C_FLAGS =  $(PROF) $(NOCRYPT) -std=gnu99 -Wall -Wformat -Wformat-security -Wunused-value \
- -Wextra -Wno-unused-parameter -fcommon 
+ -Wextra -Wno-unused-parameter -fcommon
 L_FLAGS =  $(PROF)
 LDLIBS  = -lcrypt
 
 # Prefer the newest GNU C standard supported by the current compiler.
 # Use recursive expansion so this probe runs only when C_STD/C_FLAGS are needed.
 C_STD = $(shell if $(CC) -std=gnu23 -x c -c /dev/null -o /dev/null >/dev/null 2>&1; then echo gnu23; elif $(CC) -std=gnu2x -x c -c /dev/null -o /dev/null >/dev/null 2>&1; then echo gnu2x; else echo gnu99; fi)
-C_FLAGS = $(filter-out -std=%,$(BASE_C_FLAGS)) -std=$(C_STD)
+C_FLAGS = $(filter-out -std=%,$(BASE_C_FLAGS)) -std=$(C_STD) $(EXTRA_C_FLAGS)
 
 BMUD_FILES = act_comm.o act_enter.o act_info.o act_move.o act_obj.o act_wiz.o \
           alias.o ban.o clans.o comm.o const.o curse.o db.o db2.o effects.o \
@@ -32,7 +32,7 @@ rot: $(BMUD_FILES)
 	@mkdir -p ../bin
 	@mv ./$(NAME) ../bin/
 
-.c.o: merc.h
+%.o: %.c merc.h
 	$(CC) -c $(C_FLAGS) $<
 
 clean: 

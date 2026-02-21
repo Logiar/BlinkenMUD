@@ -828,7 +828,6 @@ init_descriptor_www (int wwwcontrol)
   int iClan;
   int iLevelLower;
   int iLevelUpper;
-  int nMatch;
   FILE *fg;
   bool rgfClass[MAX_CLASS];
   bool rgfRace[MAX_PC_RACE];
@@ -902,7 +901,6 @@ init_descriptor_www (int wwwcontrol)
   for (iClan = 0; iClan < MAX_CLAN; iClan++)
     rgfClan[iClan] = FALSE;
 
-  nMatch = 0;
   buf[0] = '\0';
   //output = new_buf ();
   snprintf (buf, sizeof (buf), WWW_WHO);
@@ -946,7 +944,6 @@ init_descriptor_www (int wwwcontrol)
 	  || (fClanRestrict && !rgfClan[wch->clan]))
 	continue;
 
-      nMatch++;
 
       /*
        * Figure out what to print for class.
