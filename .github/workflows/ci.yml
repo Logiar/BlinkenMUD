@@ -26,3 +26,25 @@ jobs:
       - name: Run integration bot smoke test
         run: python3 bot/integration_test_bot.py --port 19000
 
+  sanitizer-checks:
+    name: Sanitizer checks (gcc)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build with ASan + UBSan
+        run: |
+          make -C src clean all \
+            EXTRA_C_FLAGS='-Werror -fsanitize=address,undefined -fno-omit-frame-pointer' \
+            L_FLAGS='-fsanitize=address,undefined'
+
+      - name: Run unit tests with sanitizers
+        run: |
+          make -C src unit-tests \
+            EXTRA_C_FLAGS='-Werror -fsanitize=address,undefined -fno-omit-frame-pointer' \
+            L_FLAGS='-fsanitize=address,undefined'
+
+      - name: Run integration bot with sanitizers
+        run: python3 bot/integration_test_bot.py --port 19001 --sweep-duration 90
