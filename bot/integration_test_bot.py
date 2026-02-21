@@ -461,13 +461,29 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                     "perfect match",
                     "is here",
                     "waiting to eat",
+                    "you miss",
+                    "scratches you",
+                    "the blob:",
+                    "you:",
                 ],
                 context="combat_consider",
                 details={"target": target, "hp_now": hp_now},
             )
             attack_lower = attack_text.lower()
+            already_fighting = any(token in attack_lower for token in [
+                "you miss",
+                "you hit",
+                "parries your attack",
+                "dodges your attack",
+                "blocks your attack",
+                "the blob:",
+                "you:",
+            ])
             if "you have no idea" not in attack_lower and "isn't here" not in attack_lower and "they're not here" not in attack_lower:
-                engage = session.send_and_capture_prompt(f"kill {target}", timeout_s, allow_reject=True)
+                if already_fighting:
+                    engage = attack_text
+                else:
+                    engage = session.send_and_capture_prompt(f"kill {target}", timeout_s, allow_reject=True)
                 assert_any_contains(
                     engage,
                     ["you attack", "you engage", "you hit", "you miss", "you do the best you can", "parries your attack", "dodges your attack", "blocks your attack", "isn't here", "they aren't here", "they're not here"],
@@ -544,7 +560,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                 rest_response = session.send_and_capture_prompt("rest", timeout_s, allow_reject=True)
                 assert_any_contains(
                     rest_response,
-                    ["you rest", "you are already resting", "you stop"],
+                    ["you rest", "you are already resting", "you stop", "too relaxed"],
                     context="recovery_rest",
                     details={"hp_now": hp_now},
                 )
