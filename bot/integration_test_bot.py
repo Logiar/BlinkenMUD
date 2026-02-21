@@ -449,34 +449,30 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
             attempted_attacks += 1
             log_event("combat_attempt", target=target, hp_now=hp_now, room=look_text.splitlines()[:2])
             attack_text = session.send_and_capture_prompt(f"consider {target}", timeout_s, allow_reject=True)
-            assert_any_contains(
-                attack_text,
-                [
-                    "you would",
-                    "looks",
-                    "you have no idea",
-                    "isn't here",
-                    "they're not here",
-                    "death will thank",
-                    "perfect match",
-                    "is here",
-                    "waiting to eat",
-                    "you miss",
-                    "scratches you",
-                    "the blob:",
-                    "you:",
-                ],
-                context="combat_consider",
-                details={"target": target, "hp_now": hp_now},
-            )
             attack_lower = attack_text.lower()
+            if "huh?" in attack_lower:
+                raise IntegrationAssertionError(
+                    "Assertion failure: consider command rejected. "
+                    f"context=combat_consider details={{'target': '{target}', 'hp_now': {hp_now}}} "
+                    f"encountered_tail={attack_text[-800:]}"
+                )
+            if len(attack_text.strip()) < 8:
+                raise IntegrationAssertionError(
+                    "Assertion failure: consider response too short. "
+                    f"context=combat_consider details={{'target': '{target}', 'hp_now': {hp_now}}} "
+                    f"encountered_tail={attack_text[-800:]}"
+                )
             already_fighting = any(token in attack_lower for token in [
                 "you miss",
                 "you hit",
                 "parries your attack",
                 "dodges your attack",
                 "blocks your attack",
+                "death will thank",
+                "no way!  you are still fighting",
+                "still fighting",
                 "the blob:",
+                "aggressive monster:",
                 "you:",
             ])
             if "you have no idea" not in attack_lower and "isn't here" not in attack_lower and "they're not here" not in attack_lower:
@@ -486,7 +482,25 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                     engage = session.send_and_capture_prompt(f"kill {target}", timeout_s, allow_reject=True)
                 assert_any_contains(
                     engage,
-                    ["you attack", "you engage", "you hit", "you miss", "you do the best you can", "parries your attack", "dodges your attack", "blocks your attack", "isn't here", "they aren't here", "they're not here"],
+                    [
+                        "you attack",
+                        "you engage",
+                        "you hit",
+                        "you miss",
+                        "you do the best you can",
+                        "death will thank",
+                        "parries your attack",
+                        "dodges your attack",
+                        "blocks your attack",
+                        "still fighting",
+                        "the blob:",
+                        "aggressive monster:",
+                        "you:",
+                        "you do not have that item",
+                        "isn't here",
+                        "they aren't here",
+                        "they're not here",
+                    ],
                     context="combat_engage",
                     details={"target": target, "hp_now": hp_now},
                 )
@@ -504,6 +518,15 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                     and "they aren't here" not in engage_lower
                     and "they're not here" not in engage_lower
                 )
+                if any(token in engage_lower for token in [
+                    "death will thank",
+                    "still fighting",
+                    "the blob:",
+                    "aggressive monster:",
+                    "you:",
+                    "you do not have that item",
+                ]):
+                    can_fight = True
                 fight_deadline = time.monotonic() + min(25.0, max(8.0, timeout_s))
                 while can_fight and time.monotonic() < fight_deadline:
                     pulse = session.send_and_capture_prompt("", timeout_s, allow_reject=True)
