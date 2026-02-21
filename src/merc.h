@@ -653,7 +653,7 @@ struct kill_data
 #define cc			268435456
 #define dd			536870912
 #define ee 		       1073741824
-#define ff		       2147483648
+#define ff		       ((int) 0x80000000u)
 #define gg		       4294967296
 
 /*

@@ -18,10 +18,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Compile project
-        run: make -C src CC=${{ matrix.compiler }} clean all
+        run: make -C src CC=${{ matrix.compiler }} clean all EXTRA_C_FLAGS='-Werror'
 
       - name: Run make test target
-        run: make -C src CC=${{ matrix.compiler }} test
+        run: make -C src CC=${{ matrix.compiler }} test EXTRA_C_FLAGS='-Werror'
 
       - name: Run integration bot smoke test
         run: python3 bot/integration_test_bot.py --port 19000
