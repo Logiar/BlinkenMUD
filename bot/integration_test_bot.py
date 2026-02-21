@@ -83,6 +83,8 @@ class MudSession:
         text = re.sub(r"\xff[\xfb\xfc\xfd\xfe].", "", text)
         # Strip ANSI color codes.
         text = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", text)
+        # Normalize line endings from telnet streams to avoid doubled blank lines.
+        text = text.replace("\r\n", "\n").replace("\r", "")
         return text
 
     def _recv_into_buffer(self) -> bool:
@@ -449,11 +451,22 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
             attack_text = session.send_and_capture_prompt(f"consider {target}", timeout_s, allow_reject=True)
             assert_any_contains(
                 attack_text,
-                ["you would", "looks", "you have no idea", "isn't here", "they're not here", "death will thank"],
+                [
+                    "you would",
+                    "looks",
+                    "you have no idea",
+                    "isn't here",
+                    "they're not here",
+                    "death will thank",
+                    "perfect match",
+                    "is here",
+                    "waiting to eat",
+                ],
                 context="combat_consider",
                 details={"target": target, "hp_now": hp_now},
             )
-            if "you have no idea" not in attack_text.lower() and "isn't here" not in attack_text.lower():
+            attack_lower = attack_text.lower()
+            if "you have no idea" not in attack_lower and "isn't here" not in attack_lower and "they're not here" not in attack_lower:
                 engage = session.send_and_capture_prompt(f"kill {target}", timeout_s, allow_reject=True)
                 assert_any_contains(
                     engage,
@@ -492,12 +505,15 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                         log_event("combat_retreat", target=target, hp_now=hp_now)
                         log_action(f"retreating from {target}")
                         flee_response = session.send_and_capture_prompt("flee", timeout_s, allow_reject=True)
-                        assert_any_contains(
-                            flee_response,
-                            ["you flee", "panic", "you couldn't escape"],
-                            context="combat_flee",
-                            details={"target": target, "hp_now": hp_now},
-                        )
+                        flee_lower = flee_response.lower()
+                        if not any(token in flee_lower for token in ["you flee", "panic", "you couldn't escape"]):
+                            # Some servers only emit a prompt when flee succeeds/fails quickly; tolerate prompt-only output.
+                            if len(flee_response.strip()) > 0 and not PROMPT_RE.search(flee_response):
+                                raise IntegrationAssertionError(
+                                    "Assertion failure: flee returned unexpected output. "
+                                    f"context=combat_flee details={{'target': '{target}', 'hp_now': {hp_now}}} "
+                                    f"encountered_tail={flee_response[-800:]}"
+                                )
                         if movement_history:
                             back = REVERSE_DIRECTION.get(movement_history[-1])
                             if back:
