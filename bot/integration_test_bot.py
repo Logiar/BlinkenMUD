@@ -339,6 +339,13 @@ def parse_max_hp(score_text: str) -> int | None:
     return int(match.group(2))
 
 
+def identify_room(look_text: str) -> str:
+    sanitized = re.sub(r"<\s*\d+hp\s+\d+m\s+\d+mv\s*>", "", look_text, flags=re.IGNORECASE)
+    sanitized = sanitized.replace("@", ".")
+    compact = " ".join(sanitized.split())
+    return compact[:220].lower()
+
+
 def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration_s: float) -> None:
     deadline = time.monotonic() + duration_s
     movement_history: list[str] = []
@@ -346,6 +353,8 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
     kills = 0
     attempted_attacks = 0
     mobs_seen = 0
+    room_graph: dict[str, dict[str, str]] = {}
+    explored_edges: set[tuple[str, str]] = set()
 
     # Build a health baseline from score.
     score_text = session.send_and_capture_prompt("score", timeout_s)
@@ -358,6 +367,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
     scripted_index = 0
 
     utility_commands = ["score", "inventory", "equipment", "who", "help score", "save"]
+    utility_idx = 0
     sweep_steps = 0
 
     while time.monotonic() < deadline:
@@ -368,25 +378,28 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
                 "Assertion failure: room scan output unexpectedly short. "
                 f"context=room_scan details={{'movement_history_tail': {movement_history[-5:]}}} encountered_tail={look_text[-800:]}"
             )
-        seen_rooms.add(look_text[:200])
+        room_id = identify_room(look_text)
+        seen_rooms.add(room_id)
 
-        # Exercise utility and state commands regularly for regression coverage.
-        for command in utility_commands:
+        # Exercise utility commands less frequently to prioritize exploration speed.
+        if sweep_steps % 2 == 0:
+            command = utility_commands[utility_idx % len(utility_commands)]
+            utility_idx += 1
             response = session.send_and_capture_prompt(command, timeout_s, allow_reject=True)
             if len(response.strip()) < 20:
                 raise IntegrationAssertionError(
                     "Assertion failure: utility command returned too little output. "
-                    f"context=utility_command details={{'command': '{command}', 'room_snapshot': {look_text[:120]!r}}} "
+                    f"context=utility_command details={{'command': '{command}', 'room': '{room_id}'}} "
                     f"encountered_tail={response[-800:]}"
                 )
             if "huh?" in response.lower():
                 raise IntegrationAssertionError(
                     "Assertion failure: utility command rejected by mud. "
-                    f"context=utility_command details={{'command': '{command}', 'room_snapshot': {look_text[:120]!r}}} "
+                    f"context=utility_command details={{'command': '{command}', 'room': '{room_id}'}} "
                     f"encountered_tail={response[-800:]}"
                 )
 
-        if sweep_steps % 3 == 0:
+        if sweep_steps % 5 == 0:
             log_action("checked status")
 
         # Natural combat behavior: only pick obvious room targets.
@@ -403,7 +416,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
             attack_text = session.send_and_capture_prompt(f"consider {target}", timeout_s, allow_reject=True)
             assert_any_contains(
                 attack_text,
-                ["you would", "looks", "you have no idea", "isn't here"],
+                ["you would", "looks", "you have no idea", "isn't here", "death will thank"],
                 context="combat_consider",
                 details={"target": target, "hp_now": hp_now},
             )
@@ -483,29 +496,46 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
             )
 
         exits = extract_exits(look_text)
+        room_graph.setdefault(room_id, {})
         direction = None
+
         if scripted_index < len(scripted_moves):
             direction = scripted_moves[scripted_index]
             scripted_index += 1
-        elif exits:
-            direction = random.choice(exits)
-        elif movement_history:
-            direction = REVERSE_DIRECTION.get(movement_history[-1])
+
+        if direction is None and exits:
+            unexplored = [d for d in exits if (room_id, d) not in explored_edges]
+            if unexplored:
+                direction = unexplored[0]
+            else:
+                non_backtrack = [d for d in exits if not movement_history or d != REVERSE_DIRECTION.get(movement_history[-1])]
+                direction = random.choice(non_backtrack or exits)
+
+        if direction is None:
+            previous = REVERSE_DIRECTION.get(movement_history[-1]) if movement_history else None
+            probe_dirs = [d for d in MOVE_COMMANDS if d != previous]
+            direction = random.choice(probe_dirs or MOVE_COMMANDS)
 
         if direction:
+            explored_edges.add((room_id, direction))
             move_response = session.send_and_capture_prompt(direction, timeout_s, allow_reject=True)
             if len(move_response.strip()) < 20:
                 raise IntegrationAssertionError(
                     "Assertion failure: navigation output unexpectedly short. "
-                    f"context=navigation_move details={{'direction': '{direction}', 'available_exits': {exits}}} "
+                    f"context=navigation_move details={{'direction': '{direction}', 'available_exits': {exits}, 'room': '{room_id}'}} "
                     f"encountered_tail={move_response[-800:]}"
                 )
             if "huh?" in move_response.lower():
                 raise IntegrationAssertionError(
                     "Assertion failure: navigation command rejected. "
-                    f"context=navigation_move details={{'direction': '{direction}', 'available_exits': {exits}}} "
+                    f"context=navigation_move details={{'direction': '{direction}', 'available_exits': {exits}, 'room': '{room_id}'}} "
                     f"encountered_tail={move_response[-800:]}"
                 )
+            new_room = identify_room(move_response)
+            room_graph[room_id][direction] = new_room
+            reverse = REVERSE_DIRECTION.get(direction)
+            if reverse:
+                room_graph.setdefault(new_room, {})[reverse] = room_id
             log_action(f"moved {direction}")
             movement_history.append(direction)
             if len(movement_history) > 20:
@@ -525,6 +555,7 @@ def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration
         mobs_seen=mobs_seen,
         attempted_attacks=attempted_attacks,
         kills=kills,
+        mapped_rooms=len(room_graph),
     )
 
 
