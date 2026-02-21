@@ -25,3 +25,29 @@ jobs:
 
       - name: Run integration bot smoke test
         run: python3 bot/integration_test_bot.py --port 19000
+
+  warning-gate-pointer-compare:
+    name: Warning gate (gcc -Werror=pointer-compare)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build with pointer-compare promoted to error
+        run: make -C src CC=gcc test EXTRA_C_FLAGS='-Werror=pointer-compare'
+
+  warning-gate-all:
+    name: Warning gate (${{ matrix.compiler }} -Werror)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build with all warnings promoted to errors
+        run: make -C src CC=${{ matrix.compiler }} test EXTRA_C_FLAGS='-Werror'

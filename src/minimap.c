@@ -695,7 +695,7 @@ display_map (CHAR_DATA * ch)
 	  else if (y != max_y && y_pos < 3)
 	    {
 	      start = str_pos;
-	      for (desc_pos = desc_pos; desc[desc_pos] != '\0'; desc_pos++)
+	      for (; desc[desc_pos] != '\0'; desc_pos++)
 		{
 		  if (desc[desc_pos] == '\n')
 		    {
@@ -735,7 +735,7 @@ display_map (CHAR_DATA * ch)
   while (desc[desc_pos] != '\0')
     {
       start = str_pos;
-      for (desc_pos = desc_pos; desc[desc_pos] != '\0'; desc_pos++)
+      for (; desc[desc_pos] != '\0'; desc_pos++)
 	{
 	  if (desc[desc_pos] == '\n')
 	    {
