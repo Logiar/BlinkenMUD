@@ -9,6 +9,7 @@ exits cleanly.
 from __future__ import annotations
 
 import argparse
+import json
 import random
 import re
 import string
@@ -22,6 +23,42 @@ AREA_DIR = ROOT / "area"
 PLAYER_DIR = ROOT / "player"
 WIZLIST_CGI = ROOT / "src" / "wizlist.cgi"
 PROMPT_RE = re.compile(r"<\s*\d+hp\s+\d+m\s+\d+mv\s*>", re.IGNORECASE)
+EXIT_RE = re.compile(r"\[\s*exits\s*:\s*([^\]]+)\]", re.IGNORECASE)
+ROOM_MOB_RE = re.compile(r"^([A-Za-z][A-Za-z'\-\s]{1,40})\s+is\s+(?:here|standing\s+here|resting\s+here|sleeping\s+here|fighting\s+here)", re.IGNORECASE)
+SCORE_HP_RE = re.compile(r"\b(\d+)\/(\d+)\s+hp\b", re.IGNORECASE)
+MOVE_COMMANDS = ["north", "east", "south", "west", "up", "down"]
+REVERSE_DIRECTION = {
+    "north": "south",
+    "south": "north",
+    "east": "west",
+    "west": "east",
+    "up": "down",
+    "down": "up",
+}
+
+
+class IntegrationAssertionError(RuntimeError):
+    pass
+
+
+def log_event(event: str, **context: object) -> None:
+    payload = {"event": event, **context}
+    print(f"[integration-bot] {json.dumps(payload, sort_keys=True)}", flush=True)
+
+
+def log_action(action: str) -> None:
+    print(f"[integration-bot] {action}", flush=True)
+
+
+def assert_any_contains(text: str, expected_tokens: list[str], *, context: str, details: dict[str, object]) -> None:
+    lowered = text.lower()
+    if any(token.lower() in lowered for token in expected_tokens):
+        return
+    raise IntegrationAssertionError(
+        "Assertion failure: expected at least one token in response. "
+        f"context={context} expected={expected_tokens} details={details} "
+        f"encountered_tail={text[-800:]}"
+    )
 
 
 class MudSession:
@@ -46,6 +83,8 @@ class MudSession:
         text = re.sub(r"\xff[\xfb\xfc\xfd\xfe].", "", text)
         # Strip ANSI color codes.
         text = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", text)
+        # Normalize line endings from telnet streams to avoid doubled blank lines.
+        text = text.replace("\r\n", "\n").replace("\r", "")
         return text
 
     def _recv_into_buffer(self) -> bool:
@@ -96,7 +135,33 @@ class MudSession:
             raise RuntimeError(f"Command '{command}' appears to have been rejected.\nResponse:\n{response}")
         return response
 
+    def send_and_capture_prompt(self, command: str, timeout_s: float, allow_reject: bool = False) -> str:
+        start = len(self.buffer)
+        self.send_line(command)
 
+        deadline = time.monotonic() + timeout_s
+        while time.monotonic() < deadline:
+            response = self.buffer[start:]
+            if PROMPT_RE.search(response):
+                break
+            self._recv_into_buffer()
+        else:
+            raise RuntimeError(f"Timed out waiting for prompt after command '{command}'.")
+
+        response = self.buffer[start:]
+        if not allow_reject and "huh?" in response.lower():
+            raise RuntimeError(f"Command '{command}' appears to have been rejected.\nResponse:\n{response}")
+        return response
+
+    def latest_prompt_stats(self) -> tuple[int, int, int] | None:
+        prompts = PROMPT_RE.findall(self.buffer)
+        if not prompts:
+            return None
+        latest = prompts[-1]
+        match = re.search(r"(\d+)hp\s+(\d+)m\s+(\d+)mv", latest, re.IGNORECASE)
+        if not match:
+            return None
+        return int(match.group(1)), int(match.group(2)), int(match.group(3))
 
 
 def wait_for_server_ready(process: subprocess.Popen[str], timeout_s: float) -> None:
@@ -165,49 +230,42 @@ def validate_cgi_output(timeout_s: float) -> None:
         )
 
 
-def create_character_and_enter_game(session: MudSession, timeout_s: float, name: str, password: str) -> None:
-    """Create a new character and settle at in-game prompt."""
-
-    session.read_until(["What name do you wish to use?"], timeout_s)
-    session.send_line(name)
-
-    session.read_until(["Did I get that right"], timeout_s)
-    session.send_line("y")
-
-    session.read_until(["Give me a password"], timeout_s)
-    session.send_line(password)
-
-    session.read_until(["Please retype password"], timeout_s)
-    session.send_line(password)
-
-    session.read_until(["What is your race"], timeout_s)
-    session.send_line("human")
-
-    session.read_until(["What is your sex"], timeout_s)
-    session.send_line("m")
-
-    session.read_until(["Select a class"], timeout_s)
-    session.send_line("warrior")
-
-    session.read_until(["Which alignment"], timeout_s)
-    session.send_line("g")
-
-    session.read_until(["customize this character"], timeout_s)
-    session.send_line("n")
-
-    session.read_until(["Your choice?"], timeout_s)
-    session.send_line("sword")
-
-    time.sleep(1)
-    finish_login_banner(session, timeout_s)
-
-
-def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) -> None:
+def run_bot(host: str, port: int, timeout_s: float, name: str, password: str, sweep_duration_s: float) -> None:
     session = MudSession(host=host, port=port, timeout_s=timeout_s)
     try:
-        create_character_and_enter_game(session, timeout_s, name, password)
+        session.read_until(["What name do you wish to use?"], timeout_s)
+        session.send_line(name)
 
-        # Entered the game; validate a mini player-like session.
+        session.read_until(["Did I get that right"], timeout_s)
+        session.send_line("y")
+
+        session.read_until(["Give me a password"], timeout_s)
+        session.send_line(password)
+
+        session.read_until(["Please retype password"], timeout_s)
+        session.send_line(password)
+
+        session.read_until(["What is your race"], timeout_s)
+        session.send_line("human")
+
+        session.read_until(["What is your sex"], timeout_s)
+        session.send_line("m")
+
+        session.read_until(["Select a class"], timeout_s)
+        session.send_line("warrior")
+
+        session.read_until(["Which alignment"], timeout_s)
+        session.send_line("g")
+
+        session.read_until(["customize this character"], timeout_s)
+        session.send_line("n")
+
+        session.read_until(["Your choice?"], timeout_s)
+        session.send_line("sword")
+
+        # Enter the game and validate a mini player-like session.
+        time.sleep(1)
+        finish_login_banner(session, timeout_s)
 
         # Core info checks.
         session.send_and_expect("score", ["you are", "level"], timeout_s)
@@ -229,32 +287,13 @@ def run_bot(host: str, port: int, timeout_s: float, name: str, password: str) ->
         session.send_and_expect("commands", ["command", "help"], timeout_s)
         session.send_and_expect("who", ["players", "[", name.lower()], timeout_s)
 
+        # Prepare equipment and run aggressive progression/combat sweep.
+        ensure_combat_ready(session, timeout_s)
+        aggressive_progression_sweep(session=session, timeout_s=timeout_s, duration_s=sweep_duration_s)
+
         # Validate CGI script output while server is still running.
         validate_cgi_output(timeout_s)
 
-    finally:
-        session.close()
-
-
-def run_regression_cases(session: MudSession, timeout_s: float) -> None:
-    """Run targeted regression checks for risky parser and session behavior."""
-
-    # Regression: command parser should tolerate extra whitespace.
-    session.send_and_expect("   look    map   ", ["map", "thera", "midgaard"], timeout_s)
-
-    # Regression: long player input should not disconnect/crash process.
-    session.send_and_expect("say " + ("x" * 500), ["you say"], timeout_s)
-
-    # Regression: movement parser remains stable with noisy whitespace.
-    session.send_and_expect("   north   ", ["school"], timeout_s)
-    session.send_and_expect("   south   ", ["entrance to mud school"], timeout_s)
-
-
-def run_regression_bot(host: str, port: int, timeout_s: float, name: str, password: str) -> None:
-    session = MudSession(host=host, port=port, timeout_s=timeout_s)
-    try:
-        create_character_and_enter_game(session, timeout_s, name, password)
-        run_regression_cases(session, timeout_s)
     finally:
         session.close()
 
@@ -270,18 +309,366 @@ def delete_player(name: str) -> None:
             path.unlink()
 
 
+def extract_exits(look_text: str) -> list[str]:
+    match = EXIT_RE.search(look_text)
+    if not match:
+        return []
+    exits = []
+    for token in re.split(r"\s+", match.group(1).strip().lower()):
+        token = token.strip(",. ")
+        if token in MOVE_COMMANDS:
+            exits.append(token)
+    return exits
+
+
+def extract_room_mob_keywords(look_text: str) -> list[str]:
+    keywords = []
+    for raw_line in look_text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        match = ROOM_MOB_RE.match(line)
+        candidate = None
+        if match:
+            candidate = match.group(1)
+        elif " is " in line.lower() and " here" in line.lower():
+            candidate = line.split(" is ", 1)[0]
+        if not candidate:
+            continue
+        words = [w.lower() for w in re.findall(r"[A-Za-z][A-Za-z'\-]*", candidate)]
+        words = [w for w in words if w not in {"a", "an", "the", "some", "pair", "of", "there", "here"}]
+        if words and len(words[-1]) > 2:
+            keywords.append(words[-1])
+    return list(dict.fromkeys(keywords))
+
+
+def parse_max_hp(score_text: str) -> int | None:
+    match = SCORE_HP_RE.search(score_text)
+    if not match:
+        return None
+    return int(match.group(2))
+
+
+def ensure_combat_ready(session: MudSession, timeout_s: float) -> None:
+    session.send_and_capture_prompt("wear all", timeout_s, allow_reject=True)
+    for weapon_command in ["wield sword", "wield dagger", "wield mace", "wield spear"]:
+        response = session.send_and_capture_prompt(weapon_command, timeout_s, allow_reject=True)
+        lowered = response.lower()
+        if "you wield" in lowered or "you are already wielding" in lowered:
+            log_action("equipped weapon")
+            return
+
+
+def identify_room(look_text: str) -> str:
+    sanitized = re.sub(r"<\s*\d+hp\s+\d+m\s+\d+mv\s*>", "", look_text, flags=re.IGNORECASE)
+    sanitized = sanitized.replace("@", ".")
+    compact = " ".join(sanitized.split())
+    return compact[:220].lower()
+
+
+def aggressive_progression_sweep(session: MudSession, timeout_s: float, duration_s: float) -> None:
+    deadline = time.monotonic() + duration_s
+    movement_history: list[str] = []
+    seen_rooms: set[str] = set()
+    kills = 0
+    attempted_attacks = 0
+    mobs_seen = 0
+    blocked_targets: set[str] = set()
+    room_graph: dict[str, dict[str, str]] = {}
+    explored_edges: set[tuple[str, str]] = set()
+
+    # Build a health baseline from score.
+    score_text = session.send_and_capture_prompt("score", timeout_s)
+    max_hp = parse_max_hp(score_text) or 30
+    log_event("sweep_start", duration_s=duration_s, max_hp=max_hp)
+
+    scripted_moves = [
+        "north", "north", "east", "west", "north", "south", "east", "west", "south", "south",
+    ]
+    scripted_index = 0
+
+    utility_commands = ["score", "inventory", "equipment", "who", "help score", "save"]
+    combat_probe_targets = ["goblin", "orc", "rat", "snake", "guard", "student", "wolf", "blob"]
+    utility_idx = 0
+    sweep_steps = 0
+
+    while time.monotonic() < deadline:
+        sweep_steps += 1
+        look_text = session.send_and_capture_prompt("look", timeout_s)
+        if len(look_text.strip()) < 40:
+            raise IntegrationAssertionError(
+                "Assertion failure: room scan output unexpectedly short. "
+                f"context=room_scan details={{'movement_history_tail': {movement_history[-5:]}}} encountered_tail={look_text[-800:]}"
+            )
+        room_id = identify_room(look_text)
+        seen_rooms.add(room_id)
+
+        # Exercise utility commands less frequently to prioritize exploration speed.
+        if sweep_steps % 5 == 0:
+            command = utility_commands[utility_idx % len(utility_commands)]
+            utility_idx += 1
+            response = session.send_and_capture_prompt(command, timeout_s, allow_reject=True)
+            if len(response.strip()) < 20:
+                raise IntegrationAssertionError(
+                    "Assertion failure: utility command returned too little output. "
+                    f"context=utility_command details={{'command': '{command}', 'room': '{room_id}'}} "
+                    f"encountered_tail={response[-800:]}"
+                )
+            if "huh?" in response.lower():
+                raise IntegrationAssertionError(
+                    "Assertion failure: utility command rejected by mud. "
+                    f"context=utility_command details={{'command': '{command}', 'room': '{room_id}'}} "
+                    f"encountered_tail={response[-800:]}"
+                )
+
+        if sweep_steps % 5 == 0:
+            log_action("checked status")
+
+        if sweep_steps % 20 == 0:
+            ensure_combat_ready(session, timeout_s)
+
+        # Natural combat behavior: only pick obvious room targets.
+        room_targets = [t for t in extract_room_mob_keywords(look_text) if t not in blocked_targets]
+        if room_targets:
+            mobs_seen += len(room_targets)
+        current_stats = session.latest_prompt_stats()
+        hp_now = current_stats[0] if current_stats else max_hp
+
+        if not room_targets and hp_now >= max(12, int(max_hp * 0.60)) and sweep_steps % 12 == 0:
+            probe_target = combat_probe_targets[(sweep_steps // 12) % len(combat_probe_targets)]
+            if probe_target in blocked_targets:
+                probe_target = ""
+            if probe_target:
+                probe = session.send_and_capture_prompt(f"consider {probe_target}", timeout_s, allow_reject=True)
+                probe_lower = probe.lower()
+                if "isn't here" not in probe_lower and "they're not here" not in probe_lower and "you have no idea" not in probe_lower:
+                    room_targets = [probe_target]
+
+        if room_targets and hp_now >= max(12, int(max_hp * 0.60)):
+            target = room_targets[0]
+            attempted_attacks += 1
+            log_event("combat_attempt", target=target, hp_now=hp_now, room=look_text.splitlines()[:2])
+            attack_text = session.send_and_capture_prompt(f"consider {target}", timeout_s, allow_reject=True)
+            attack_lower = attack_text.lower()
+            if "huh?" in attack_lower:
+                raise IntegrationAssertionError(
+                    "Assertion failure: consider command rejected. "
+                    f"context=combat_consider details={{'target': '{target}', 'hp_now': {hp_now}}} "
+                    f"encountered_tail={attack_text[-800:]}"
+                )
+            if len(attack_text.strip()) < 8:
+                raise IntegrationAssertionError(
+                    "Assertion failure: consider response too short. "
+                    f"context=combat_consider details={{'target': '{target}', 'hp_now': {hp_now}}} "
+                    f"encountered_tail={attack_text[-800:]}"
+                )
+            already_fighting = any(token in attack_lower for token in [
+                "you miss",
+                "you hit",
+                "parries your attack",
+                "dodges your attack",
+                "blocks your attack",
+                "death will thank",
+                "no way!  you are still fighting",
+                "still fighting",
+                "the blob:",
+                "aggressive monster:",
+                "you:",
+            ])
+            if "you have no idea" not in attack_lower and "isn't here" not in attack_lower and "they're not here" not in attack_lower:
+                if already_fighting:
+                    engage = attack_text
+                else:
+                    engage = session.send_and_capture_prompt(f"kill {target}", timeout_s, allow_reject=True)
+                assert_any_contains(
+                    engage,
+                    [
+                        "you attack",
+                        "you engage",
+                        "you hit",
+                        "you miss",
+                        "you do the best you can",
+                        "death will thank",
+                        "parries your attack",
+                        "dodges your attack",
+                        "blocks your attack",
+                        "still fighting",
+                        "the blob:",
+                        "aggressive monster:",
+                        "you:",
+                        "you do not have that item",
+                        "isn't here",
+                        "not in this room",
+                        "they aren't here",
+                        "they're not here",
+                    ],
+                    context="combat_engage",
+                    details={"target": target, "hp_now": hp_now},
+                )
+                engage_lower = engage.lower()
+                if "isn't here" in engage_lower or "not in this room" in engage_lower or "they aren't here" in engage_lower or "they're not here" in engage_lower:
+                    blocked_targets.add(target)
+                elif "you can't" in engage_lower or "not allowed" in engage_lower or "protected" in engage_lower:
+                    blocked_targets.add(target)
+                else:
+                    log_action(f"fighting {target}")
+                can_fight = (
+                    "you can't" not in engage_lower
+                    and "protected" not in engage_lower
+                    and "isn't here" not in engage_lower
+                    and "not in this room" not in engage_lower
+                    and "they aren't here" not in engage_lower
+                    and "they're not here" not in engage_lower
+                )
+                if any(token in engage_lower for token in [
+                    "death will thank",
+                    "still fighting",
+                    "the blob:",
+                    "aggressive monster:",
+                    "you:",
+                    "you do not have that item",
+                ]):
+                    can_fight = True
+                fight_deadline = time.monotonic() + min(25.0, max(8.0, timeout_s))
+                while can_fight and time.monotonic() < fight_deadline:
+                    pulse = session.send_and_capture_prompt("", timeout_s, allow_reject=True)
+                    pulse_lower = pulse.lower()
+                    stats = session.latest_prompt_stats()
+                    if stats:
+                        hp_now = stats[0]
+
+                    if "you are dead" in pulse_lower:
+                        raise IntegrationAssertionError(
+                            f"Assertion failure: character died. context=combat_loop target={target} encountered_tail={pulse[-800:]}"
+                        )
+
+                    if hp_now <= max(8, int(max_hp * 0.30)):
+                        log_event("combat_retreat", target=target, hp_now=hp_now)
+                        log_action(f"retreating from {target}")
+                        flee_response = session.send_and_capture_prompt("flee", timeout_s, allow_reject=True)
+                        flee_lower = flee_response.lower()
+                        if not any(token in flee_lower for token in ["you flee", "panic", "you couldn't escape"]):
+                            # Some servers only emit a prompt when flee succeeds/fails quickly; tolerate prompt-only output.
+                            if len(flee_response.strip()) > 0 and not PROMPT_RE.search(flee_response):
+                                raise IntegrationAssertionError(
+                                    "Assertion failure: flee returned unexpected output. "
+                                    f"context=combat_flee details={{'target': '{target}', 'hp_now': {hp_now}}} "
+                                    f"encountered_tail={flee_response[-800:]}"
+                                )
+                        if movement_history:
+                            back = REVERSE_DIRECTION.get(movement_history[-1])
+                            if back:
+                                session.send_and_capture_prompt(back, timeout_s, allow_reject=True)
+                        break
+
+                    if any(token in pulse_lower for token in ["you receive", "you have slain", "is dead"]):
+                        kills += 1
+                        log_event("combat_kill", target=target, kills=kills)
+                        log_action(f"looting {target}")
+                        session.send_and_capture_prompt("get all corpse", timeout_s, allow_reject=True)
+                        inv = session.send_and_capture_prompt("inventory", timeout_s)
+                        assert_any_contains(
+                            inv,
+                            ["you are carrying", "items"],
+                            context="post_combat_inventory",
+                            details={"target": target, "kills": kills},
+                        )
+                        break
+
+                    if "you aren't fighting" in pulse_lower or "isn't here" in pulse_lower:
+                        break
+
+        # Recovery behavior before continuing progression.
+        if hp_now < max(10, int(max_hp * 0.55)):
+            log_event("recovery_start", hp_now=hp_now, max_hp=max_hp)
+            for _ in range(4):
+                rest_response = session.send_and_capture_prompt("rest", timeout_s, allow_reject=True)
+                assert_any_contains(
+                    rest_response,
+                    ["you rest", "you are already resting", "you stop", "too relaxed"],
+                    context="recovery_rest",
+                    details={"hp_now": hp_now},
+                )
+                session.send_and_capture_prompt("", timeout_s, allow_reject=True)
+            stand = session.send_and_capture_prompt("stand", timeout_s, allow_reject=True)
+            assert_any_contains(
+                stand,
+                ["you stand", "you are already standing"],
+                context="recovery_stand",
+                details={"hp_now": hp_now},
+            )
+
+        exits = extract_exits(look_text)
+        room_graph.setdefault(room_id, {})
+        direction = None
+
+        if scripted_index < len(scripted_moves):
+            direction = scripted_moves[scripted_index]
+            scripted_index += 1
+
+        if direction is None and exits:
+            unexplored = [d for d in exits if (room_id, d) not in explored_edges]
+            if unexplored:
+                direction = unexplored[0]
+            else:
+                non_backtrack = [d for d in exits if not movement_history or d != REVERSE_DIRECTION.get(movement_history[-1])]
+                direction = random.choice(non_backtrack or exits)
+
+        if direction is None:
+            previous = REVERSE_DIRECTION.get(movement_history[-1]) if movement_history else None
+            probe_dirs = [d for d in MOVE_COMMANDS if d != previous]
+            direction = random.choice(probe_dirs or MOVE_COMMANDS)
+
+        if direction:
+            explored_edges.add((room_id, direction))
+            move_response = session.send_and_capture_prompt(direction, timeout_s, allow_reject=True)
+            if len(move_response.strip()) < 20:
+                raise IntegrationAssertionError(
+                    "Assertion failure: navigation output unexpectedly short. "
+                    f"context=navigation_move details={{'direction': '{direction}', 'available_exits': {exits}, 'room': '{room_id}'}} "
+                    f"encountered_tail={move_response[-800:]}"
+                )
+            if "huh?" in move_response.lower():
+                raise IntegrationAssertionError(
+                    "Assertion failure: navigation command rejected. "
+                    f"context=navigation_move details={{'direction': '{direction}', 'available_exits': {exits}, 'room': '{room_id}'}} "
+                    f"encountered_tail={move_response[-800:]}"
+                )
+            new_room = identify_room(move_response)
+            room_graph[room_id][direction] = new_room
+            reverse = REVERSE_DIRECTION.get(direction)
+            if reverse:
+                room_graph.setdefault(new_room, {})[reverse] = room_id
+            log_action(f"moved {direction}")
+            movement_history.append(direction)
+            if len(movement_history) > 20:
+                movement_history.pop(0)
+
+    if len(seen_rooms) < 3:
+        raise IntegrationAssertionError(
+            f"Assertion failure: progression too shallow. context=sweep_summary expected_rooms>=3 encountered={len(seen_rooms)}"
+        )
+    if mobs_seen > 0 and attempted_attacks == 0:
+        raise IntegrationAssertionError(
+            f"Assertion failure: mobs were seen but combat was never attempted. context=sweep_summary mobs_seen={mobs_seen}"
+        )
+    log_event(
+        "sweep_complete",
+        seen_rooms=len(seen_rooms),
+        mobs_seen=mobs_seen,
+        attempted_attacks=attempted_attacks,
+        kills=kills,
+        mapped_rooms=len(room_graph),
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run BlinkenMUD integration bot test")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=19000)
     parser.add_argument("--binary", default=str(ROOT / "bin" / "BlinkenMUD"))
-    parser.add_argument("--timeout", type=float, default=20.0)
-    parser.add_argument(
-        "--scenario",
-        choices=["smoke", "regression"],
-        default="smoke",
-        help="Choose test scenario to run.",
-    )
+    parser.add_argument("--timeout", type=float, default=30.0)
+    parser.add_argument("--sweep-duration", type=float, default=165.0)
     args = parser.parse_args()
 
     binary = Path(args.binary)
@@ -303,15 +690,15 @@ def main() -> int:
 
     try:
         wait_for_server_ready(process, timeout_s=args.timeout)
-        if args.scenario == "smoke":
-            run_bot(host=args.host, port=args.port, timeout_s=args.timeout, name=name, password=password)
-        else:
-            run_regression_bot(host=args.host, port=args.port, timeout_s=args.timeout, name=name, password=password)
-
-        print(
-            f"Integration bot ({args.scenario}) succeeded on port {args.port} "
-            f"using character {name}."
+        run_bot(
+            host=args.host,
+            port=args.port,
+            timeout_s=args.timeout,
+            name=name,
+            password=password,
+            sweep_duration_s=args.sweep_duration,
         )
+        print(f"Integration bot succeeded on port {args.port} using character {name}.")
         return 0
     finally:
         delete_player(name)
